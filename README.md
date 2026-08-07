@@ -134,7 +134,7 @@ icons/          app icons
 store/          Play listing assets and copy
 server/         optional push scheduler
 DESIGN.md       the design constraint set
-RELEASE.md      shipping to Google Play
+store/          Play listing assets and copy
 ```
 
 To run it locally:
