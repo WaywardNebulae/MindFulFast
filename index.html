@@ -1,0 +1,2661 @@
+<meta charset="UTF-8">
+<title>MindfulFast</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0E1116">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="fonts.css">
+<style>
+/* ============================================================
+   MindfulFast: instrument panel
+   See DESIGN.md. Dark ground is a deliberate, stated choice.
+   One ground. Separators are rules and space, never frames.
+   ============================================================ */
+:root {
+  color-scheme: dark;
+
+  --ground:      #0E1116;
+  --lift:        #191E26;   /* transient overlays only, never layout */
+
+  /* Measured against --ground. A three-step ladder with real gaps between
+     the steps: 16.1 / 10.1 / 6.7. The old ink-3 sat at 4.7 and carried most
+     of the secondary text at 12 to 14px, which read as faint rather than
+     quiet. */
+  --ink:         #EAEDF2;   /* 16.1:1 */
+  --ink-2:       #B6BEC9;   /* 10.1:1  prose, secondary */
+  --ink-3:       #939BA7;   /*  6.7:1  smallest text allowed */
+  --grad:        #555F6D;   /* dial graduations, non-text only */
+
+  --rule:        #363E4A;   /* item separators */
+  --rule-strong: #49525F;   /* region boundaries */
+
+  --accent:      #5AA894;   /* 6.5:1, the only brand hue */
+  --accent-hi:   #7CC4B0;
+  --accent-dim:  rgba(90,168,148,0.28);
+
+  --crit:        #E0736B;   /* semantic only: avoid / gave in */
+
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --gutter: 24px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: var(--sans);
+  background: var(--ground);
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+button, input { font: inherit; color: inherit; background: none; border: none; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+/* ---------- header: instrument label, not an app-store banner ---------- */
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 14px var(--gutter) 12px;
+  padding-top: max(14px, env(safe-area-inset-top));
+  border-bottom: 1px solid var(--rule-strong);
+  flex-shrink: 0;
+}
+.head-name { font-size: 15px; font-weight: 600; letter-spacing: -0.2px; }
+.head-clock {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
+}
+
+.screen {
+  display: none;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 112px;
+  -webkit-overflow-scrolling: touch;
+}
+.screen.active { display: block; }
+.screen::-webkit-scrollbar { width: 0; }
+
+/* Rhythm carries the difference between sections, not frames. Dense numeric
+   readouts sit tight; controls and prose get room. Four sections in a row at
+   identical padding is what made this read as one repeated template. */
+.band { padding: 26px var(--gutter); border-bottom: 1px solid var(--rule-strong); }
+.band.tight { padding: 18px var(--gutter) 20px; }
+.band.airy  { padding: 36px var(--gutter); }
+.band.airy .band-label { margin-bottom: 20px; }
+.band:last-child { border-bottom: none; }
+.band-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-3);
+  margin-bottom: 14px;
+}
+.prose { font-size: 16px; line-height: 1.6; color: var(--ink-2); }
+
+/* ============================ DIAL ============================ */
+.dial-band { padding: 20px var(--gutter) 18px; }
+.dial-wrap {
+  position: relative;
+  width: 100%; max-width: 300px;
+  margin: 0 auto;
+  aspect-ratio: 1;
+}
+.dial { width: 100%; height: 100%; display: block; }
+
+.tick { stroke: var(--grad); stroke-width: 1; }
+.tick.major { stroke: var(--ink-3); stroke-width: 1.5; }
+.dial-lab {
+  fill: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 9px;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+/* the ring reads as two segments: fast vs eat, elapsed vs remaining */
+.arc { fill: none; stroke-width: 6; stroke-linecap: butt; }
+.arc-fast-dim  { stroke: var(--accent-dim); }
+.arc-fast-live { stroke: var(--accent); }
+.arc-eat-dim   { stroke: var(--rule-strong); }
+.arc-eat-live  { stroke: var(--ink-3); }
+
+.hand { stroke: var(--ink); stroke-width: 2.5; stroke-linecap: butt; }
+
+.dial-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+}
+.dial-state {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+  margin-bottom: 10px;
+}
+.dial-state.live { color: var(--accent); }
+.dial-digits {
+  font-family: var(--mono);
+  font-size: clamp(30px, 9.8vw, 38px);
+  font-weight: 500;
+  letter-spacing: -1.5px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--ink);
+}
+.dial-digits.idle { color: var(--ink-3); }
+.dial-sub { font-size: 14px; color: var(--ink-3); margin-top: 10px; }
+
+/* protocol: text only. active = accent + rule. */
+.protocols {
+  display: flex;
+  justify-content: center;
+  gap: 26px;
+  margin-top: 22px;
+}
+.proto {
+  font-family: var(--mono);
+  font-size: 15px;
+  color: var(--ink-3);
+  cursor: pointer;
+  padding: 6px 2px;
+  border-bottom: 2px solid transparent;
+}
+.proto.active { color: var(--accent); border-bottom-color: var(--accent); }
+.protocols.locked .proto { opacity: 0.35; cursor: default; }
+.protocols.locked .proto.active { opacity: 1; }
+
+/* primary action: text, not a block. Only accent in its region. */
+/* The live control. Still text, no fill, but it borrows the accent underline
+   that marks every other active thing in the app, so it reads as decisively
+   tappable instead of merely coloured. */
+.act {
+  display: block;
+  width: 100%;
+  padding: 24px var(--gutter);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--accent);
+  text-align: center;
+  cursor: pointer;
+  border-top: 1px solid var(--rule-strong);
+  border-bottom: 1px solid var(--rule-strong);
+}
+.act > span {
+  display: inline-block;
+  padding-bottom: 7px;
+  border-bottom: 2px solid currentColor;
+}
+.act:active > span { opacity: 0.65; }
+.act.stop { color: var(--crit); }
+
+/* ---------- cortisol readout strip: dense, one line ---------- */
+.readout {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px var(--gutter);
+}
+.readout-key { font-size: 13px; color: var(--ink-3); flex-shrink: 0; }
+.readout-spark { flex: 1; height: 24px; display: block; }
+.spark-line { fill: none; stroke: var(--accent); stroke-opacity: 0.55; stroke-width: 1.25; }
+.spark-now { fill: var(--accent); }
+.readout-val {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.advice {
+  padding: 0 var(--gutter) 20px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  border-bottom: 1px solid var(--rule-strong);
+}
+
+/* ---------- tabular data rows ---------- */
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 9px 0;
+}
+.row + .row { border-top: 1px solid var(--rule); }
+.row-key { font-size: 15px; color: var(--ink-2); }
+.row-val {
+  font-family: var(--mono);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  text-align: right;
+}
+.row-val.none { color: var(--ink-3); }
+
+/* ---------- alarms: roomier, with controls ---------- */
+.alarm-status {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-3);
+  padding-bottom: 14px;
+}
+.alarm-status.warn { color: var(--crit); }
+.alarm-status > div + div { margin-top: 6px; }
+.alarm-server {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent);
+  overflow-wrap: anywhere;
+}
+.alarm-status button {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+  padding: 12px;
+  margin: 2px -12px 0;
+}
+.alarm-status button:hover { text-decoration: underline; text-underline-offset: 6px; }
+
+.ctl { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 14px 0; }
+.ctl + .ctl { border-top: 1px solid var(--rule); }
+.ctl-name { font-size: 16px; }
+.ctl-note { font-size: 14px; color: var(--ink-3); margin-top: 2px; }
+.sw {
+  width: 46px; height: 26px; border-radius: 13px;
+  border: 1px solid var(--ink-3);
+  position: relative; cursor: pointer; flex-shrink: 0;
+  transition: border-color .18s, background-color .18s;
+}
+.sw-knob {
+  position: absolute; top: 3px; left: 3px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--ink-3);
+  transition: transform .18s, background-color .18s;
+}
+.sw.on { border-color: var(--accent); background: var(--accent-dim); }
+.sw.on .sw-knob { transform: translateX(20px); background: var(--accent); }
+
+/* ============================ CORTISOL ============================ */
+.gauge-band { padding: 30px var(--gutter) 26px; border-bottom: 1px solid var(--rule-strong); }
+.gauge-val {
+  font-size: 30px; font-weight: 600; letter-spacing: -0.5px;
+  color: var(--accent); line-height: 1;
+}
+.gauge-ctx { font-size: 14px; color: var(--ink-2); margin-top: 8px; }
+.gauge { margin-top: 22px; }
+.gauge-svg { width: 100%; height: 26px; display: block; }
+.gauge-track { stroke: var(--rule-strong); stroke-width: 1.5; }
+.gauge-grad { stroke: var(--grad); stroke-width: 1; }
+.gauge-mark { stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round; }
+.gauge-ends {
+  display: flex; justify-content: space-between;
+  font-size: 12px; color: var(--ink-3); margin-top: 2px;
+}
+.gauge-note {
+  font-size: 14px; line-height: 1.5; color: var(--ink-3); margin-top: 20px;
+}
+
+.curve-wrap { width: 100%; height: 172px; }
+.curve-wrap canvas { width: 100%; height: 100%; display: block; }
+
+.tip { padding: 14px 0; }
+.tip + .tip { border-top: 1px solid var(--rule); }
+.tip-h { font-size: 16px; font-weight: 600; margin-bottom: 3px; }
+.tip-p { font-size: 16px; line-height: 1.55; color: var(--ink-2); }
+
+.meal { display: flex; gap: 14px; padding: 11px 0; align-items: flex-start; }
+.meal + .meal { border-top: 1px solid var(--rule); }
+.meal-bar { width: 2px; align-self: stretch; min-height: 30px; flex-shrink: 0; }
+.meal-bar.optimal { background: var(--accent); }
+.meal-bar.acceptable { background: var(--accent-dim); }
+.meal-bar.avoid { background: var(--crit); }
+.meal-t {
+  font-family: var(--mono); font-size: 14px; font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.meal-d { font-size: 15px; color: var(--ink-2); margin-top: 2px; }
+
+/* ============================ URGE ============================ */
+.urge-band {
+  padding: 34px var(--gutter) 30px;
+  border-bottom: 1px solid var(--rule-strong);
+  text-align: center;
+}
+.urge-lead {
+  font-size: 16px; line-height: 1.55; color: var(--ink-2);
+  max-width: 30ch; margin: 0 auto 30px;
+}
+.urge-btn {
+  width: 168px; height: 168px; border-radius: 50%;
+  border: 1px solid var(--rule-strong);
+  margin: 0 auto;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 6px;
+  cursor: pointer;
+  transition: border-color .18s;
+}
+.urge-btn:hover, .urge-btn:active { border-color: var(--accent); }
+.urge-btn-l { font-size: 19px; font-weight: 600; line-height: 1.25; }
+.urge-btn-s { font-size: 12px; color: var(--accent); }
+
+.iv { padding: 13px 0; cursor: pointer; }
+.iv + .iv { border-top: 1px solid var(--rule); }
+.iv-h { font-size: 16px; font-weight: 600; margin-bottom: 2px; }
+.iv-p { font-size: 15px; color: var(--ink-2); line-height: 1.5; }
+.iv:hover .iv-h { color: var(--accent); }
+
+.log { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; padding: 10px 0; }
+.log + .log { border-top: 1px solid var(--rule); }
+.log-t { font-size: 14px; }
+.log-when {
+  font-family: var(--mono); font-size: 12px;
+  font-variant-numeric: tabular-nums; color: var(--ink-3); margin-top: 2px;
+}
+.log-r { font-size: 13px; font-weight: 500; flex-shrink: 0; }
+.log-r.kept { color: var(--accent); }
+.log-r.broke { color: var(--crit); }
+.empty { font-size: 14px; color: var(--ink-3); padding: 6px 0; }
+
+/* ============================ PROGRESS ============================ */
+.streak {
+  display: flex; align-items: baseline; gap: 14px;
+  padding: 26px var(--gutter) 20px;
+}
+/* counts, not clock values. mono is reserved for time. */
+.streak-n {
+  font-size: 54px; font-weight: 600;
+  letter-spacing: -2px; line-height: 0.9;
+  font-variant-numeric: tabular-nums;
+}
+.streak-l { font-size: 15px; color: var(--ink-2); }
+.pair {
+  display: flex;
+  padding: 0 var(--gutter) 22px;
+  border-bottom: 1px solid var(--rule-strong);
+}
+.pair-i { flex: 1; }
+.pair-i + .pair-i { border-left: 1px solid var(--rule); padding-left: 18px; }
+.pair-n {
+  font-size: 22px; font-weight: 600;
+  font-variant-numeric: tabular-nums; line-height: 1;
+}
+.pair-l { font-size: 12px; color: var(--ink-3); margin-top: 5px; }
+
+.cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.cal-h {
+  font-size: 11px; color: var(--ink-3);
+  text-align: center; padding-bottom: 8px;
+}
+.cal-d {
+  aspect-ratio: 1;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
+  border-bottom: 2px solid transparent;
+}
+.cal-d.fasted { color: var(--accent); font-weight: 600; border-bottom-color: var(--accent); }
+.cal-d.today { border: 1px solid var(--ink-3); border-radius: 2px; color: var(--ink); }
+.cal-d.today.fasted { border-color: var(--accent); }
+
+.wt { display: flex; align-items: center; gap: 16px; }
+.wt-in {
+  flex: 1;
+  padding: 0 0 9px;
+  border-bottom: 2px solid var(--ink-3);
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  outline: none;
+}
+.wt-in:focus { border-bottom-color: var(--accent); }
+.wt-in::placeholder { color: var(--ink-3); font-family: var(--sans); }
+.wt-go {
+  font-size: 16px; font-weight: 600; color: var(--accent);
+  cursor: pointer; padding: 12px; margin: 0 -12px;
+}
+.wt-go:hover { text-decoration: underline; text-underline-offset: 6px; }
+.wt-chart { width: 100%; height: 112px; margin-top: 20px; }
+.wt-chart canvas { width: 100%; height: 100%; display: block; }
+
+/* ============================ REGULAR EATING ============================ */
+.slot { display: flex; align-items: baseline; gap: 14px; padding: 11px 0; cursor: pointer; }
+.slot + .slot { border-top: 1px solid var(--rule); }
+.slot-t {
+  font-family: var(--mono); font-size: 14px; font-variant-numeric: tabular-nums;
+  color: var(--ink); width: 74px; flex-shrink: 0;
+}
+.slot-n { flex: 1; font-size: 16px; color: var(--ink-2); }
+.slot-s { font-size: 13px; color: var(--ink-3); flex-shrink: 0; }
+.slot.done .slot-t, .slot.done .slot-n { color: var(--ink-3); }
+.slot.done .slot-s { color: var(--accent); }
+.slot.next .slot-n { color: var(--ink); }
+.slot.next .slot-s { color: var(--accent); }
+.eat-note { font-size: 14px; line-height: 1.5; color: var(--ink-3); padding-bottom: 14px; }
+.eat-note.clash { color: var(--crit); }
+
+/* ============================ INTRO ============================ */
+.intro {
+  position: fixed; inset: 0; z-index: 130;
+  background: var(--ground);
+  display: none; flex-direction: column;
+}
+.intro.on { display: flex; }
+.intro-body {
+  flex: 1; overflow-y: auto;
+  padding: 40px var(--gutter) 28px;
+  padding-top: max(40px, env(safe-area-inset-top));
+}
+.intro-body::-webkit-scrollbar { width: 0; }
+.intro-h { font-size: 26px; font-weight: 600; letter-spacing: -0.5px; margin-bottom: 22px; }
+.intro-p { font-size: 16px; line-height: 1.6; color: var(--ink-2); }
+.intro-p + .intro-p { margin-top: 18px; }
+.intro-p b { color: var(--ink); font-weight: 600; }
+.intro-fine { color: var(--ink-3); font-size: 15px; }
+.intro-go { flex-shrink: 0; padding-bottom: max(24px, env(safe-area-inset-bottom)); }
+
+/* ============================ URGE FLOW ============================ */
+.flow {
+  position: fixed; inset: 0; z-index: 110;
+  background: var(--ground);
+  display: none; flex-direction: column;
+}
+.flow.on { display: flex; }
+.flow-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px var(--gutter);
+  padding-top: max(14px, env(safe-area-inset-top));
+  border-bottom: 1px solid var(--rule-strong);
+  flex-shrink: 0;
+}
+.flow-step {
+  font-family: var(--mono); font-size: 12px;
+  color: var(--ink-3); font-variant-numeric: tabular-nums;
+}
+.flow-x { font-size: 14px; color: var(--ink-3); cursor: pointer; padding: 8px; margin: -8px -8px -8px 0; }
+.flow-body {
+  flex: 1; overflow-y: auto;
+  padding: 26px var(--gutter) 24px;
+}
+.flow-body::-webkit-scrollbar { width: 0; }
+.flow-lead { font-size: 15px; line-height: 1.55; color: var(--accent); margin-bottom: 20px; }
+.flow-q { font-size: 22px; font-weight: 600; line-height: 1.3; margin-bottom: 6px; }
+.flow-hint { font-size: 15px; color: var(--ink-3); margin-bottom: 20px; }
+.flow-sub { font-size: 13px; color: var(--ink-3); margin: 26px 0 10px; }
+
+/* text options, never filled */
+.opts { display: flex; flex-wrap: wrap; gap: 10px 22px; }
+.opts.col { flex-direction: column; gap: 0; }
+.opt {
+  font-size: 16px; color: var(--ink-2); cursor: pointer;
+  padding: 8px 0; border-bottom: 2px solid transparent; text-align: left;
+}
+.opt.on { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.opts.col .opt { font-size: 17px; padding: 15px 0; border-bottom: 1px solid var(--rule); width: 100%; }
+.opts.col .opt + .opt { }
+.opts.col .opt.on { border-bottom-color: var(--accent); }
+.opt-d { display: block; font-size: 14px; color: var(--ink-3); margin-top: 3px; font-weight: 400; }
+
+/* 0 to 10 graduated scale, read like an instrument */
+.scale { display: flex; width: 100%; }
+.scale-i {
+  flex: 1; padding: 10px 0 8px; cursor: pointer;
+  font-family: var(--mono); font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-3); text-align: center;
+  border-top: 2px solid var(--rule);
+}
+.scale-i.on { color: var(--accent); border-top-color: var(--accent); font-weight: 600; }
+.scale-ends {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: var(--ink-3); margin-top: 2px;
+}
+
+.flow-in {
+  width: 100%; padding: 0 0 9px; margin-top: 4px;
+  border-bottom: 2px solid var(--ink-3);
+  font-size: 16px; outline: none;
+}
+.flow-in:focus { border-bottom-color: var(--accent); }
+.flow-in::placeholder { color: var(--ink-3); }
+
+.flow-foot {
+  flex-shrink: 0;
+  border-top: 1px solid var(--rule-strong);
+  padding-bottom: env(safe-area-inset-bottom);
+  display: flex; align-items: stretch;
+}
+.flow-back {
+  font-size: 15px; color: var(--ink-3); cursor: pointer;
+  padding: 18px var(--gutter);
+}
+.flow-next {
+  flex: 1; text-align: right;
+  font-size: 17px; font-weight: 600; color: var(--accent);
+  cursor: pointer; padding: 18px var(--gutter);
+}
+.flow-next[disabled] { color: var(--ink-3); cursor: default; }
+
+/* countdown while an intervention runs */
+.hold { text-align: center; padding: 30px 0 10px; }
+.hold-n {
+  font-family: var(--mono); font-size: 52px; font-weight: 500;
+  font-variant-numeric: tabular-nums; letter-spacing: -2px; line-height: 1;
+}
+.hold-l { font-size: 14px; color: var(--ink-3); margin-top: 12px; }
+.hold-do { font-size: 22px; font-weight: 600; margin-top: 26px; line-height: 1.3; }
+.hold-tip { font-size: 16px; color: var(--ink-2); line-height: 1.55; margin-top: 8px; }
+
+.delta {
+  font-family: var(--mono); font-size: 14px;
+  color: var(--accent); margin-top: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================ LOG ============================ */
+.ep { padding: 14px 0; }
+.ep + .ep { border-top: 1px solid var(--rule); }
+.ep-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.ep-when {
+  font-family: var(--mono); font-size: 12px; color: var(--ink-3);
+  font-variant-numeric: tabular-nums; flex-shrink: 0;
+}
+.ep-out { font-size: 13px; font-weight: 500; flex-shrink: 0; }
+.ep-out.rode { color: var(--accent); }
+.ep-out.planned { color: var(--ink-2); }
+.ep-out.lapse { color: var(--crit); }
+.ep-what { font-size: 16px; margin-top: 5px; }
+.ep-meta { font-size: 14px; color: var(--ink-3); margin-top: 3px; }
+.ep-arc {
+  font-family: var(--mono); font-size: 13px; color: var(--ink-2);
+  margin-top: 6px; font-variant-numeric: tabular-nums;
+}
+.ep-set { font-size: 13px; color: var(--ink-2); margin-top: 8px; line-height: 1.5; }
+.ep-set b { color: var(--ink-3); font-weight: 500; }
+.disclaimer {
+  font-size: 14px; line-height: 1.55; color: var(--ink-3);
+}
+
+/* ============================ PATTERNS ============================ */
+.hours { display: flex; align-items: flex-end; gap: 2px; height: 78px; margin-top: 4px; }
+.hour-b { flex: 1; background: var(--accent-dim); min-height: 1px; }
+.hour-b.hot { background: var(--accent); }
+.hours-ax {
+  display: flex; justify-content: space-between;
+  font-family: var(--mono); font-size: 10px; color: var(--ink-3); margin-top: 6px;
+}
+.rank { display: flex; align-items: baseline; gap: 12px; padding: 9px 0; }
+.rank + .rank { border-top: 1px solid var(--rule); }
+.rank-n { flex: 1; font-size: 15px; color: var(--ink-2); }
+.rank-v {
+  font-family: var(--mono); font-size: 14px; color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.insight {
+  font-size: 15px; line-height: 1.55; color: var(--ink-2);
+}
+.insight + .insight { margin-top: 14px; }
+.insight.flag { color: var(--crit); }
+
+/* ============================ NAV ============================ */
+.nav {
+  position: fixed; bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 100%; max-width: 480px;
+  display: flex;
+  background: var(--ground);
+  border-top: 1px solid var(--rule-strong);
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 50;
+}
+.nav-i {
+  flex: 1;
+  padding: 15px 0 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-3);
+  cursor: pointer;
+  border-top: 2px solid transparent;
+  margin-top: -1px;
+}
+.nav-i.active { color: var(--ink); border-top-color: var(--accent); }
+
+/* ---------- overlays (mutually exclusive surfaces) ---------- */
+.breathe {
+  position: fixed; inset: 0; z-index: 100;
+  background: var(--ground);
+  display: none;
+  flex-direction: column; align-items: center; justify-content: center;
+}
+.breathe.on { display: flex; }
+.breathe-ring {
+  width: 150px; height: 150px; border-radius: 50%;
+  border: 1px solid var(--accent);
+  transition: width .35s ease, height .35s ease, border-color .35s ease;
+}
+.breathe-ring.wide { width: 232px; height: 232px; border-color: var(--accent-hi); }
+.breathe-cue { font-size: 19px; font-weight: 500; margin-top: 34px; }
+.breathe-n {
+  font-family: var(--mono); font-size: 44px; font-weight: 500;
+  font-variant-numeric: tabular-nums; margin-top: 6px;
+}
+.breathe-r { font-size: 13px; color: var(--ink-3); margin-top: 26px; }
+.breathe-x {
+  position: absolute; top: env(safe-area-inset-top, 16px); right: 8px;
+  padding: 16px; font-size: 15px; color: var(--ink-3); cursor: pointer;
+}
+
+.toast {
+  position: fixed;
+  left: 50%; bottom: 82px;
+  transform: translateX(-50%) translateY(24px);
+  width: calc(100% - 32px); max-width: 448px;
+  background: var(--lift);
+  border-left: 2px solid var(--accent);
+  padding: 13px 16px;
+  font-size: 14px;
+  line-height: 1.45;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .22s ease, transform .22s ease;
+  z-index: 200;
+}
+.toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: .01ms !important; }
+}
+</style>
+
+<div id="app">
+  <header class="head">
+    <div class="head-name">MindfulFast</div>
+    <div class="head-clock" id="wallClock">--:--</div>
+  </header>
+
+  <!-- ======================= TIMER ======================= -->
+  <main class="screen active" id="screenTimer">
+    <div class="dial-band">
+      <div class="dial-wrap">
+        <svg class="dial" viewBox="0 0 300 300" aria-hidden="true">
+          <g id="dialTicks"></g>
+          <g id="dialLabels"></g>
+          <path class="arc arc-eat-dim"   id="arcEatDim"   d=""/>
+          <path class="arc arc-eat-live"  id="arcEatLive"  d=""/>
+          <path class="arc arc-fast-dim"  id="arcFastDim"  d=""/>
+          <path class="arc arc-fast-live" id="arcFastLive" d=""/>
+          <line class="hand" id="dialHand" x1="150" y1="150" x2="150" y2="150"/>
+        </svg>
+        <div class="dial-face">
+          <div class="dial-state" id="dialState">Not fasting</div>
+          <div class="dial-digits idle" id="dialDigits">16:00:00</div>
+          <div class="dial-sub" id="dialSub">16-hour fast</div>
+        </div>
+      </div>
+
+      <div class="protocols" id="protocols">
+        <button class="proto active" data-p="16:8">16:8</button>
+        <button class="proto" data-p="18:6">18:6</button>
+        <button class="proto" data-p="20:4">20:4</button>
+        <button class="proto" data-p="23:1">omad</button>
+      </div>
+    </div>
+
+    <button class="act" id="actBtn" onclick="toggleFast()"><span>Start fast</span></button>
+
+    <div class="readout">
+      <span class="readout-key">cortisol</span>
+      <svg class="readout-spark" id="spark" viewBox="0 0 120 24" preserveAspectRatio="none" aria-hidden="true">
+        <polyline class="spark-line" id="sparkLine" points=""/>
+        <circle class="spark-now" id="sparkNow" r="2.5" cx="0" cy="0"/>
+      </svg>
+      <span class="readout-val" id="readoutVal">...</span>
+    </div>
+    <p class="advice" id="advice">Estimating your circadian cortisol rhythm.</p>
+
+    <section class="band tight">
+      <div class="band-label">Today's schedule</div>
+      <div class="row"><span class="row-key">Fasting window</span><span class="row-val none" id="schedFast">not started</span></div>
+      <div class="row"><span class="row-key">Eating window</span><span class="row-val none" id="schedEat">not started</span></div>
+      <div class="row"><span class="row-key">Next alarm</span><span class="row-val none" id="schedAlarm">none set</span></div>
+    </section>
+
+    <section class="band airy">
+      <div class="band-label">Regular eating</div>
+      <div class="eat-note" id="eatNote"></div>
+      <div class="ctl">
+        <div>
+          <div class="ctl-name">Eat at set times</div>
+          <div class="ctl-note">Every few hours, whether or not you feel hungry</div>
+        </div>
+        <button class="sw" id="eatSwitch" onclick="toggleRegularEating()" aria-label="Regular eating"><span class="sw-knob"></span></button>
+      </div>
+      <div id="eatPlan"></div>
+    </section>
+
+    <section class="band airy">
+      <div class="band-label">Alarms</div>
+      <div class="alarm-status" id="alarmStatus"></div>
+      <div class="ctl">
+        <div>
+          <div class="ctl-name">Eating window opens</div>
+          <div class="ctl-note">When the fast completes</div>
+        </div>
+        <button class="sw on" id="alarmOpen" onclick="toggleAlarm('open')" aria-label="Eating window alarm"><span class="sw-knob"></span></button>
+      </div>
+      <div class="ctl">
+        <div>
+          <div class="ctl-name">Eating window closes</div>
+          <div class="ctl-note">When the next fast begins</div>
+        </div>
+        <button class="sw on" id="alarmClose" onclick="toggleAlarm('close')" aria-label="Fast start alarm"><span class="sw-knob"></span></button>
+      </div>
+      <div class="ctl">
+        <div>
+          <div class="ctl-name">Hourly check-in</div>
+          <div class="ctl-note">Quiet reminder while fasting</div>
+        </div>
+        <button class="sw" id="alarmHourly" onclick="toggleAlarm('hourly')" aria-label="Hourly check-in"><span class="sw-knob"></span></button>
+      </div>
+    </section>
+  </main>
+
+  <!-- ======================= CORTISOL ======================= -->
+  <main class="screen" id="screenCortisol">
+    <div class="gauge-band">
+      <div class="gauge-val" id="cortVal">Moderate</div>
+      <div class="gauge-ctx" id="cortCtx">Based on your circadian rhythm</div>
+      <div class="gauge">
+        <svg class="gauge-svg" id="gaugeSvg" viewBox="0 0 300 26" preserveAspectRatio="none" aria-hidden="true">
+          <line class="gauge-track" x1="1" y1="18" x2="299" y2="18"/>
+          <g id="gaugeGrads"></g>
+          <line class="gauge-mark" id="gaugeMark" x1="150" y1="6" x2="150" y2="24"/>
+        </svg>
+        <div class="gauge-ends"><span>Low</span><span>Peak</span></div>
+      </div>
+      <p class="gauge-note">Estimated from the time of day using a population
+        model of the daily rhythm. Nothing is measured from your body.</p>
+    </div>
+
+    <section class="band">
+      <div class="band-label">24-hour curve</div>
+      <div class="curve-wrap"><canvas id="curveCanvas"></canvas></div>
+    </section>
+
+    <section class="band airy">
+      <div class="band-label">Right now</div>
+      <div id="tips"></div>
+    </section>
+
+    <section class="band tight">
+      <div class="band-label">Meal timing</div>
+      <div id="meals"></div>
+    </section>
+
+    <section class="band airy">
+      <div class="band-label">Why this matters</div>
+      <p class="prose">Chronically elevated cortisol is associated with visceral fat storage, higher ghrelin, and reduced insulin sensitivity. Aligning your eating window with the natural cortisol decline may help, though the effect varies between people and this is a general pattern rather than a measurement of you.</p>
+    </section>
+  </main>
+
+  <!-- ======================= URGE ======================= -->
+  <main class="screen" id="screenUrge">
+    <div class="urge-band">
+      <p class="urge-lead">Urges peak in 15 to 20 minutes, then pass. Work out what is driving this one first.</p>
+      <button class="urge-btn" onclick="startUrgeFlow()">
+        <span class="urge-btn-l">I have<br>an urge</span>
+        <span class="urge-btn-s">Start here</span>
+      </button>
+    </div>
+
+    <section class="band">
+      <div class="band-label">Straight to a tool</div>
+      <div class="iv" onclick="quickTool('breathe')">
+        <div class="iv-h">Slow the breath down</div>
+        <div class="iv-p">Longer out than in, about 90 seconds. The exhale is what settles you.</div>
+      </div>
+      <div class="iv" onclick="quickTool('walk')">
+        <div class="iv-h">Walk it off</div>
+        <div class="iv-p">Five to ten minutes, brisk. Moves the stress through instead of around.</div>
+      </div>
+      <div class="iv" onclick="quickTool('leave')">
+        <div class="iv-h">Leave the room</div>
+        <div class="iv-p">Change what you can see. Distance from the kitchen does most of the work.</div>
+      </div>
+      <div class="iv" onclick="quickTool('delay')">
+        <div class="iv-h">Buy ten minutes</div>
+        <div class="iv-p">Not a refusal. A pause, then decide with a clearer head.</div>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="band-label">Today</div>
+      <div id="urgeToday"></div>
+    </section>
+  </main>
+
+  <!-- ======================= LOG ======================= -->
+  <main class="screen" id="screenLog">
+    <div class="streak">
+      <span class="streak-n" id="logCount">0</span>
+      <span class="streak-l">episodes logged</span>
+    </div>
+    <button class="act" onclick="startUrgeFlow(true)"><span>Log an episode</span></button>
+
+    <section class="band">
+      <div class="band-label">History</div>
+      <div id="episodeList"><div class="empty">Nothing logged yet.</div></div>
+    </section>
+
+    <section class="band">
+      <div class="band-label">A note on this log</div>
+      <p class="disclaimer">This is a self-help record, not treatment. If loss-of-control eating is frequent or distressing, someone trained in CBT-E can help more than any app can.</p>
+    </section>
+  </main>
+
+  <!-- ======================= PATTERNS ======================= -->
+  <main class="screen" id="screenPatterns">
+    <section class="band airy">
+      <div class="band-label">What the log shows</div>
+      <div id="insights"><p class="insight">Log a few episodes and patterns will show up here.</p></div>
+    </section>
+
+    <section class="band">
+      <div class="band-label">When urges happen</div>
+      <div class="hours" id="hourBars"></div>
+      <div class="hours-ax"><span>12a</span><span>6a</span><span>12p</span><span>6p</span><span>12a</span></div>
+    </section>
+
+    <section class="band">
+      <div class="band-label">Most common triggers</div>
+      <div id="rankSituation"><div class="empty">Nothing logged yet.</div></div>
+    </section>
+
+    <section class="band">
+      <div class="band-label">Mood at the time</div>
+      <div id="rankMood"><div class="empty">Nothing logged yet.</div></div>
+    </section>
+
+    <section class="band">
+      <div class="band-label">What actually helped</div>
+      <div id="rankAction"><div class="empty">Nothing logged yet.</div></div>
+    </section>
+
+    <div class="streak">
+      <span class="streak-n" id="statStreak">0</span>
+      <span class="streak-l">day streak</span>
+    </div>
+    <div class="pair">
+      <div class="pair-i">
+        <div class="pair-n" id="statFasts">0</div>
+        <div class="pair-l">fasts completed</div>
+      </div>
+      <div class="pair-i">
+        <div class="pair-n" id="statUrges">0</div>
+        <div class="pair-l">urges ridden out</div>
+      </div>
+    </div>
+
+    <section class="band">
+      <div class="band-label" id="calLabel">Fasting calendar</div>
+      <div class="cal" id="cal"></div>
+    </section>
+
+    <section class="band">
+      <div class="band-label">Weight</div>
+      <div class="wt">
+        <input class="wt-in" id="wtIn" type="number" step="0.1" inputmode="decimal" placeholder="Weight in lbs">
+        <button class="wt-go" onclick="logWeight()">Log</button>
+      </div>
+      <div class="wt-chart"><canvas id="wtCanvas"></canvas></div>
+    </section>
+  </main>
+
+  <!-- shown once, before anything else. Play treats a health app without a
+       clear scope-and-limits notice as a policy problem, and it is the
+       honest thing to lead with anyway. -->
+  <div class="intro" id="intro">
+    <div class="intro-body">
+      <h1 class="intro-h">Before you start</h1>
+      <p class="intro-p">MindfulFast is a self-help tool. It is not medical
+        advice, diagnosis, or treatment, and it does not replace a clinician.</p>
+      <p class="intro-p">The cortisol readings are an <b>estimate from a
+        population model of the daily rhythm</b>, calculated from the time of
+        day. Nothing is measured from your body.</p>
+      <p class="intro-p">Fasting does not suit everyone. Talk to a doctor first
+        if you are pregnant or breastfeeding, under 18, diabetic, taking
+        medication with food, or have a history of disordered eating.</p>
+      <p class="intro-p">If eating feels out of control, or thoughts about food
+        and weight are taking over, that is worth telling someone. A clinician
+        trained in CBT-E can help more than any app.</p>
+      <p class="intro-p intro-fine">Everything you log stays on this device. No
+        account, no servers, nothing collected.</p>
+    </div>
+    <button class="act intro-go" onclick="dismissIntro()"><span>I understand</span></button>
+  </div>
+
+  <!-- guided urge flow, a screen-level surface of its own -->
+  <div class="flow" id="flow">
+    <div class="flow-head">
+      <span class="flow-step" id="flowStep"></span>
+      <button class="flow-x" onclick="abandonFlow()">Close</button>
+    </div>
+    <div class="flow-body" id="flowBody"></div>
+    <div class="flow-foot">
+      <button class="flow-back" id="flowBack" onclick="flowPrev()">Back</button>
+      <button class="flow-next" id="flowNext" onclick="flowNext()">Next</button>
+    </div>
+  </div>
+
+  <div class="breathe" id="breathe">
+    <button class="breathe-x" onclick="stopBreathing()">Close</button>
+    <div class="breathe-ring" id="breatheRing"></div>
+    <div class="breathe-cue" id="breatheCue">Breathe in</div>
+    <div class="breathe-n" id="breatheN">4</div>
+    <div class="breathe-r" id="breatheR">Round 1 of 4</div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <nav class="nav">
+    <button class="nav-i active" onclick="go('Timer')">Timer</button>
+    <button class="nav-i" onclick="go('Cortisol')">Cortisol</button>
+    <button class="nav-i" onclick="go('Urge')">Urge</button>
+    <button class="nav-i" onclick="go('Log')">Log</button>
+    <button class="nav-i" onclick="go('Patterns')">Patterns</button>
+  </nav>
+</div>
+
+<script>
+const PROTOCOLS = { '16:8': [16,8], '18:6': [18,6], '20:4': [20,4], '23:1': [23,1] };
+const SCREENS = ['Timer','Cortisol','Urge','Log','Patterns'];
+
+let state = {
+  protocol: '16:8',
+  phase: 'idle',            // idle | fasting | eating
+  fastStart: null, fastEnd: null, eatEnd: null,
+  completedFasts: [], urgeLog: [], weightLog: [],
+  episodes: [],
+  eating: { on: false, first: '08:00', gapH: 3.5, count: 5 },
+  eaten: {},                              // { 'YYYY-MM-DD': [slotIndex, ...] }
+  alarms: { open: true, close: true, hourly: false }
+};
+
+/* Older builds stored a thin urgeLog. Keep those rows rather than drop them. */
+function migrate() {
+  if (state.episodes.length || !state.urgeLog.length) return;
+  state.episodes = state.urgeLog.map((u, i) => ({
+    id: 'legacy-' + i,
+    at: new Date(u.time).getTime(),
+    endedAt: new Date(u.time).getTime(),
+    situation: (u.triggers && u.triggers.length)
+      ? u.triggers.map(t => t[0].toUpperCase() + t.slice(1)).join(', ') : '',
+    where: '', mood: '',
+    urge0: null, urge1: null, control: null,
+    stress: null, action: '', bucket: '',
+    outcome: u.resisted ? 'rode' : 'lapse',
+    next: '', setback: null
+  }));
+  state.urgeLog = [];
+  saveState();
+}
+
+/* ---------------- persistence ---------------- */
+function loadState() {
+  try {
+    const raw = localStorage.getItem('mindfulfast');
+    if (!raw) return;
+    const p = JSON.parse(raw);
+    state = { ...state, ...p };
+    ['fastStart','fastEnd','eatEnd'].forEach(k => { if (state[k]) state[k] = new Date(state[k]); });
+  } catch (e) {}
+}
+function saveState() {
+  try { localStorage.setItem('mindfulfast', JSON.stringify(state)); } catch (e) {}
+}
+
+/* ---------------- time helpers ---------------- */
+function hoursOfDay(d) { return d.getHours() + d.getMinutes()/60 + d.getSeconds()/3600; }
+function hm(ms) {
+  const m = Math.max(0, Math.floor(ms/60000));
+  return String(Math.floor(m/60)).padStart(2,'0') + ':' + String(m%60).padStart(2,'0');
+}
+function clock(d) {
+  if (!d) return '--:--';
+  const h = d.getHours();
+  return (h % 12 || 12) + ':' + String(d.getMinutes()).padStart(2,'0') + (h >= 12 ? ' pm' : ' am');
+}
+
+/* ---------------- cortisol model ---------------- */
+/* Piecewise circadian model. Each branch must meet its neighbour at the
+   boundary, or a discontinuity shows up as a spike in the curve. */
+function cortisolAt(hour) {
+  if (hour < 4)  return 2 + Math.sin((hour/4) * Math.PI) * 1;   // 2 -> 2
+  if (hour < 8)  return 2 + ((hour-4)/4) * 18;                  // 2 -> 20 (waking response)
+  if (hour < 12) return 20 - ((hour-8)/4) * 8;                  // 20 -> 12
+  if (hour < 14) return 12 + ((hour-12)/2) * 2;                 // 12 -> 14 (post-meal bump)
+  if (hour < 20) return 14 - ((hour-14)/6) * 10;                // 14 -> 4
+  return 4 - ((hour-20)/4) * 2;                                 // 4 -> 2
+}
+const CORT_MAX = 20;
+function cortisolBand(v) { return v > 14 ? 'high' : v > 8 ? 'moderate' : 'low'; }
+
+/* ---------------- dial geometry ---------------- */
+const CX = 150, CY = 150;
+const R_ARC = 130;                              // the window ring
+const R_HAND_IN = 121, R_HAND_OUT = 139;        // cursor crosses the ring
+const R_TICK_OUT = 114, R_TICK_MIN = 108, R_TICK_MAJ = 104;
+const R_LABEL = 96;
+
+function polar(r, h) {
+  const a = (h/24) * Math.PI*2 - Math.PI/2;
+  return [CX + r*Math.cos(a), CY + r*Math.sin(a)];
+}
+function fmt(p) { return p[0].toFixed(2) + ' ' + p[1].toFixed(2); }
+function arcPath(r, h0, h1) {
+  let span = h1 - h0;
+  if (span <= 0.002) return '';
+  if (span > 23.99) span = 23.99;
+  return 'M' + fmt(polar(r, h0)) + 'A' + r + ' ' + r + ' 0 ' +
+         (span > 12 ? 1 : 0) + ' 1 ' + fmt(polar(r, h0 + span));
+}
+
+function buildDialStatic() {
+  // graduations every 2h, longer at the quarters: a scale, not a texture
+  let ticks = '';
+  for (let i = 0; i < 24; i += 2) {
+    const major = i % 6 === 0;
+    const a = polar(major ? R_TICK_MAJ : R_TICK_MIN, i);
+    const b = polar(R_TICK_OUT, i);
+    ticks += '<line class="tick' + (major ? ' major' : '') + '" x1="' + a[0].toFixed(2) +
+             '" y1="' + a[1].toFixed(2) + '" x2="' + b[0].toFixed(2) + '" y2="' + b[1].toFixed(2) + '"/>';
+  }
+  document.getElementById('dialTicks').innerHTML = ticks;
+
+  document.getElementById('dialLabels').innerHTML =
+    [[0,'12a'],[6,'6a'],[12,'12p'],[18,'6p']].map(([h, t]) => {
+      const p = polar(R_LABEL, h);
+      return '<text class="dial-lab" x="' + p[0].toFixed(1) + '" y="' + p[1].toFixed(1) + '">' + t + '</text>';
+    }).join('');
+
+  // cortisol sparkline for the readout strip
+  const sp = [];
+  for (let i = 0; i <= 72; i++) {
+    const h = i/72 * 24;
+    sp.push((i/72*120).toFixed(2) + ',' + (22 - (cortisolAt(h)/CORT_MAX) * 19).toFixed(2));
+  }
+  document.getElementById('sparkLine').setAttribute('points', sp.join(' '));
+
+  let grads = '';
+  for (let i = 0; i <= 4; i++) {
+    const x = 1 + (298 * i/4);
+    grads += '<line class="gauge-grad" x1="' + x + '" y1="13" x2="' + x + '" y2="18"/>';
+  }
+  document.getElementById('gaugeGrads').innerHTML = grads;
+}
+
+function renderDial() {
+  const now = new Date();
+  const nowH = hoursOfDay(now);
+  const [fastH, eatH] = PROTOCOLS[state.protocol];
+
+  let s0, s1, s2, liveFast = '', liveEat = '';
+  if (state.phase === 'idle') {
+    s0 = nowH; s1 = nowH + fastH; s2 = nowH + fastH + eatH;
+  } else {
+    s0 = hoursOfDay(state.fastStart);
+    s1 = s0 + (state.fastEnd - state.fastStart) / 3600000;
+    s2 = s0 + (state.eatEnd  - state.fastStart) / 3600000;
+    const elapsed = (now - state.fastStart) / 3600000;
+    if (state.phase === 'fasting') {
+      liveFast = arcPath(R_ARC, s0, Math.min(s0 + elapsed, s1));
+    } else {
+      liveFast = arcPath(R_ARC, s0, s1);
+      liveEat  = arcPath(R_ARC, s1, Math.min(s0 + elapsed, s2));
+    }
+  }
+
+  document.getElementById('arcFastDim').setAttribute('d', arcPath(R_ARC, s0, s1));
+  document.getElementById('arcEatDim').setAttribute('d', arcPath(R_ARC, s1, s2));
+  document.getElementById('arcFastLive').setAttribute('d', liveFast);
+  document.getElementById('arcEatLive').setAttribute('d', liveEat);
+
+  const hand = document.getElementById('dialHand');
+  const hi = polar(R_HAND_IN, nowH), ho = polar(R_HAND_OUT, nowH);
+  hand.setAttribute('x1', hi[0].toFixed(2)); hand.setAttribute('y1', hi[1].toFixed(2));
+  hand.setAttribute('x2', ho[0].toFixed(2)); hand.setAttribute('y2', ho[1].toFixed(2));
+}
+
+/* ---------------- timer face ---------------- */
+function renderFace() {
+  const digits = document.getElementById('dialDigits');
+  const st = document.getElementById('dialState');
+  const sub = document.getElementById('dialSub');
+  const now = Date.now();
+
+  if (state.phase === 'idle') {
+    const [fastH] = PROTOCOLS[state.protocol];
+    const ends = new Date(now + fastH * 3600000);
+    digits.textContent = String(fastH).padStart(2,'0') + ':00';
+    digits.classList.add('idle');
+    st.textContent = 'Not fasting';
+    st.classList.remove('live');
+    sub.textContent = 'ends ' + clock(ends) + ' if you start now';
+    return;
+  }
+  digits.classList.remove('idle');
+  st.classList.add('live');
+
+  if (state.phase === 'fasting') {
+    const left = state.fastEnd.getTime() - now;
+    digits.textContent = hm(left);
+    st.textContent = 'Fasting';
+    sub.textContent = 'until ' + clock(state.fastEnd);
+    if (left <= 0) toEating();
+  } else {
+    const left = state.eatEnd.getTime() - now;
+    digits.textContent = hm(left);
+    st.textContent = 'Eating window';
+    sub.textContent = 'closes ' + clock(state.eatEnd);
+    if (left <= 0) toComplete();
+  }
+}
+
+function renderSchedule() {
+  const f = document.getElementById('schedFast');
+  const e = document.getElementById('schedEat');
+  const a = document.getElementById('schedAlarm');
+  if (state.phase === 'idle') {
+    f.textContent = 'not started'; f.classList.add('none');
+    e.textContent = 'not started'; e.classList.add('none');
+    a.textContent = 'none set';    a.classList.add('none');
+    return;
+  }
+  f.textContent = clock(state.fastStart) + ' – ' + clock(state.fastEnd); f.classList.remove('none');
+  e.textContent = clock(state.fastEnd) + ' – ' + clock(state.eatEnd);    e.classList.remove('none');
+  a.textContent = clock(state.phase === 'fasting' ? state.fastEnd : state.eatEnd); a.classList.remove('none');
+}
+
+function renderActionBtn() {
+  const b = document.getElementById('actBtn');
+  const idle = state.phase === 'idle';
+  b.innerHTML = '<span>' + (idle ? 'Start fast' : 'End fast') + '</span>';
+  b.classList.toggle('stop', !idle);
+  document.getElementById('protocols').classList.toggle('locked', !idle);
+}
+
+/* ---------------- fast lifecycle ---------------- */
+function selectProtocol(p) {
+  if (state.phase !== 'idle') return;
+  state.protocol = p;
+  document.querySelectorAll('.proto').forEach(c => c.classList.toggle('active', c.dataset.p === p));
+  saveState(); renderFace(); renderDial();
+}
+document.querySelectorAll('.proto').forEach(c =>
+  c.addEventListener('click', () => selectProtocol(c.dataset.p)));
+
+function toggleFast() { state.phase === 'idle' ? startFast() : endFast(); }
+
+function startFast() {
+  const [fastH, eatH] = PROTOCOLS[state.protocol];
+  const now = new Date();
+  state.phase = 'fasting';
+  state.fastStart = now;
+  state.fastEnd = new Date(now.getTime() + fastH * 3600000);
+  state.eatEnd  = new Date(now.getTime() + (fastH + eatH) * 3600000);
+  saveState();
+  scheduleAlarms(); requestNotifications();
+  refreshTimer();
+  showToast('Fast started. Eating window opens ' + clock(state.fastEnd) + '.');
+}
+
+function endFast() {
+  if (state.phase === 'fasting') {
+    const elapsed = Date.now() - state.fastStart.getTime();
+    const [fastH] = PROTOCOLS[state.protocol];
+    state.completedFasts.push({
+      date: new Date().toISOString(), protocol: state.protocol,
+      duration: elapsed, completed: elapsed >= fastH * 3600000 * 0.8
+    });
+  }
+  resetFast();
+  showToast('Fast ended.');
+}
+
+function resetFast() {
+  state.phase = 'idle';
+  state.fastStart = state.fastEnd = state.eatEnd = null;
+  saveState(); clearAlarms(); refreshTimer(); updateStats();
+}
+
+function toEating() {
+  state.phase = 'eating';
+  saveState(); renderActionBtn();
+  if (state.alarms.open) notify('Eating window open', 'Break your fast deliberately.');
+}
+
+function toComplete() {
+  state.completedFasts.push({
+    date: new Date().toISOString(), protocol: state.protocol,
+    duration: state.eatEnd - state.fastStart, completed: true
+  });
+  if (state.alarms.close) notify('Eating window closed', 'Next fast begins now.');
+  resetFast();
+}
+
+function refreshTimer() { renderFace(); renderDial(); renderSchedule(); renderActionBtn(); }
+
+/* ---------------- alarms ---------------- */
+/* ---------------- alarms ----------------
+   Two layers. In-page timeouts fire on the exact second while the app is
+   open. The same schedule is mirrored into IndexedDB so the service worker
+   can deliver it after the page is gone. See sw.js for the mechanisms and
+   their limits. */
+
+const ALARM_DB = 'mindfulfast-alarms', ALARM_STORE = 'alarms', SYNC_TAG = 'mindfulfast-alarms';
+
+function openAlarmDb() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(ALARM_DB, 1);
+    req.onupgradeneeded = () => {
+      if (!req.result.objectStoreNames.contains(ALARM_STORE)) {
+        req.result.createObjectStore(ALARM_STORE, { keyPath: 'id' });
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+/* The schedule the worker should own once this page closes. */
+function buildAlarmList() {
+  const out = [], now = Date.now();
+
+  // Meal prompts run whether or not a fast is going, since the whole point of
+  // regular eating is that it does not bend around the fasting window.
+  if (state.eating.on) {
+    const done = state.eaten[dateKey(new Date())] || [];
+    eatingSlots().forEach(s => {
+      if (s.at.getTime() <= now || done.includes(s.i)) return;
+      out.push({ id: 'meal-' + s.i, at: s.at.getTime(),
+                 title: s.label, body: 'Planned eating time. Sit down for it.' });
+    });
+  }
+
+  if (state.phase === 'idle') return out;
+
+  if (state.alarms.open && state.fastEnd && state.fastEnd.getTime() > now) {
+    out.push({ id: 'open', at: state.fastEnd.getTime(),
+               title: 'Eating window open', body: 'Break your fast deliberately.' });
+  }
+  if (state.alarms.close && state.eatEnd && state.eatEnd.getTime() > now) {
+    out.push({ id: 'close', at: state.eatEnd.getTime(),
+               title: 'Eating window closed', body: 'Next fast begins now.' });
+  }
+  if (state.alarms.hourly && state.phase === 'fasting' && state.fastEnd) {
+    let i = 1;
+    for (let t = now + 3600000; t < state.fastEnd.getTime(); t += 3600000, i++) {
+      out.push({ id: 'hourly-' + i, at: t,
+                 title: 'Fasting check-in', body: 'Still going. Stay hydrated.' });
+    }
+  }
+  return out;
+}
+
+async function persistAlarms(list) {
+  try {
+    const db = await openAlarmDb();
+    await new Promise(resolve => {
+      const tx = db.transaction(ALARM_STORE, 'readwrite');
+      const store = tx.objectStore(ALARM_STORE);
+      store.clear();
+      list.forEach(a => store.put(a));
+      tx.oncomplete = tx.onerror = () => resolve();
+    });
+  } catch (e) {}
+  await pingWorker();
+  syncToPushServer(list);
+}
+
+/* ---------- push scheduler (optional) ----------
+   Point this at a running server/ instance and alarms are delivered at the
+   exact minute even with the app closed, because a push always wakes the
+   service worker. Without it the app still works, just less punctually. */
+
+function pushServerUrl() {
+  return (localStorage.getItem('mindfulfast-push-url') || '').replace(/\/+$/, '');
+}
+
+function b64ToU8(base64) {
+  const pad = '='.repeat((4 - base64.length % 4) % 4);
+  const raw = atob((base64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+}
+
+let pushSub = null;
+
+async function connectPushServer(url) {
+  const base = url.replace(/\/+$/, '');
+  const reg = await swReady();
+  if (!reg) throw new Error('Service worker unavailable.');
+  if (!('pushManager' in reg)) throw new Error('This browser has no push support.');
+  if (Notification.permission !== 'granted') {
+    const p = await Notification.requestPermission();
+    if (p !== 'granted') throw new Error('Notifications must be allowed first.');
+  }
+
+  const res = await fetch(base + '/vapid', { cache: 'no-store' });
+  if (!res.ok) throw new Error('Server did not respond at ' + base);
+  const { publicKey } = await res.json();
+  if (!publicKey) throw new Error('Server returned no VAPID key.');
+
+  let sub = await reg.pushManager.getSubscription();
+  if (sub) {
+    const current = new Uint8Array(sub.options.applicationServerKey || new ArrayBuffer(0));
+    const wanted = b64ToU8(publicKey);
+    const same = current.length === wanted.length && current.every((v, i) => v === wanted[i]);
+    if (!same) { await sub.unsubscribe(); sub = null; }
+  }
+  if (!sub) {
+    sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: b64ToU8(publicKey)
+    });
+  }
+
+  pushSub = sub;
+  localStorage.setItem('mindfulfast-push-url', base);
+  await syncToPushServer(buildAlarmList());
+  renderAlarmStatus();
+  return base;
+}
+
+async function syncToPushServer(list) {
+  const base = pushServerUrl();
+  if (!base) return;
+  try {
+    if (!pushSub) {
+      const reg = await swReady();
+      pushSub = reg && await reg.pushManager.getSubscription();
+    }
+    if (!pushSub) return;
+    await fetch(base + '/schedule', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ subscription: pushSub, alarms: list })
+    });
+  } catch (e) {}
+}
+
+async function disconnectPushServer() {
+  const base = pushServerUrl();
+  try {
+    const reg = await swReady();
+    const sub = reg && await reg.pushManager.getSubscription();
+    if (sub) {
+      if (base) {
+        await fetch(base + '/unsubscribe', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ endpoint: sub.endpoint })
+        }).catch(() => {});
+      }
+      await sub.unsubscribe();
+    }
+  } catch (e) {}
+  pushSub = null;
+  localStorage.removeItem('mindfulfast-push-url');
+  renderAlarmStatus();
+}
+
+/* navigator.serviceWorker.ready never settles when registration failed or is
+   blocked, so every await of it is bounded. */
+function swReady(ms = 3000) {
+  if (!('serviceWorker' in navigator)) return Promise.resolve(null);
+  return Promise.race([
+    navigator.serviceWorker.ready.catch(() => null),
+    new Promise(resolve => setTimeout(() => resolve(null), ms))
+  ]);
+}
+
+async function pingWorker() {
+  const reg = await swReady();
+  if (!reg) return;
+  try {
+    (reg.active || navigator.serviceWorker.controller)?.postMessage({ type: 'alarms-changed' });
+    if ('sync' in reg) { try { await reg.sync.register(SYNC_TAG); } catch (e) {} }
+  } catch (e) {}
+}
+
+let alarmTimers = [];
+function clearTimers() { alarmTimers.forEach(clearTimeout); alarmTimers = []; }
+
+function clearAlarms() {
+  clearTimers();
+  persistAlarms([]);
+}
+
+function scheduleAlarms() {
+  clearTimers();
+  const list = buildAlarmList();
+  const now = Date.now();
+
+  // precise delivery while the page is alive
+  list.forEach(a => {
+    const delay = a.at - now;
+    if (delay <= 0 || delay > 2147483647) return;
+    alarmTimers.push(setTimeout(() => {
+      notify(a.title, a.body);
+      if (a.id !== 'hourly') chime();
+      dropAlarmRecord(a.id);
+    }, delay));
+  });
+
+  // and hand the same schedule to the worker for when it is not
+  persistAlarms(list);
+}
+
+async function dropAlarmRecord(id) {
+  try {
+    const db = await openAlarmDb();
+    const tx = db.transaction(ALARM_STORE, 'readwrite');
+    tx.objectStore(ALARM_STORE).delete(id);
+  } catch (e) {}
+}
+
+function toggleAlarm(kind) {
+  state.alarms[kind] = !state.alarms[kind];
+  document.getElementById('alarm' + kind[0].toUpperCase() + kind.slice(1))
+          .classList.toggle('on', state.alarms[kind]);
+  saveState();
+  if (state.phase !== 'idle') scheduleAlarms();
+  renderAlarmStatus();
+}
+function chime() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [523.25, 659.25, 783.99].forEach((f, i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.12, ctx.currentTime + i*0.25);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i*0.25 + 0.5);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(ctx.currentTime + i*0.25); o.stop(ctx.currentTime + i*0.25 + 0.5);
+    });
+  } catch (e) {}
+}
+async function requestNotifications() {
+  if (!('Notification' in window)) return 'unsupported';
+  let perm = Notification.permission;
+  if (perm === 'default') {
+    try { perm = await Notification.requestPermission(); } catch (e) {}
+  }
+  if (perm === 'granted') await enableBackgroundDelivery();
+  renderAlarmStatus();
+  return perm;
+}
+
+/* Ask for the periodic wake-up that lets the worker flush alarms while the
+   app is closed. The browser decides the real interval and throttles it. */
+async function enableBackgroundDelivery() {
+  const reg = await swReady();
+  if (!reg) return;
+  try {
+    if ('periodicSync' in reg) {
+      let ok = true;
+      try {
+        const st = await navigator.permissions.query({ name: 'periodic-background-sync' });
+        ok = st.state === 'granted';
+      } catch (e) {}
+      if (ok) {
+        try { await reg.periodicSync.register(SYNC_TAG, { minInterval: 15 * 60 * 1000 }); } catch (e) {}
+      }
+    }
+  } catch (e) {}
+}
+
+/* Notifications must be raised through the registration. On Android Chrome
+   the `new Notification()` constructor throws outright. */
+async function notify(title, body) {
+  showToast(title + '. ' + body);
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const reg = await swReady();
+  if (reg) {
+    try {
+      await reg.showNotification(title, {
+        body, tag: title, renotify: true, requireInteraction: true, vibrate: [220, 120, 220]
+      });
+      return;
+    } catch (e) {}
+  }
+  try { new Notification(title, { body }); } catch (e) {}      // desktop fallback
+}
+
+/* ---------------- cortisol UI ---------------- */
+function renderCortisol() {
+  const now = new Date();
+  const h = hoursOfDay(now);
+  const v = cortisolAt(h);
+  const band = cortisolBand(v);
+  const word = band[0].toUpperCase() + band.slice(1);
+  const pct = Math.max(0, Math.min(1, v / CORT_MAX));
+
+  // timer-screen readout
+  document.getElementById('readoutVal').textContent = word.toLowerCase();
+  const sn = document.getElementById('sparkNow');
+  sn.setAttribute('cx', (h/24 * 120).toFixed(2));
+  sn.setAttribute('cy', (22 - pct * 19).toFixed(2));
+  document.getElementById('advice').textContent = ADVICE[band];
+
+  // cortisol screen
+  document.getElementById('cortVal').textContent = word;
+  document.getElementById('cortCtx').textContent = phaseLabel(now.getHours());
+  const mx = 1 + 298 * pct;
+  const mk = document.getElementById('gaugeMark');
+  mk.setAttribute('x1', mx.toFixed(1)); mk.setAttribute('x2', mx.toFixed(1));
+
+  document.getElementById('tips').innerHTML = tipsFor(h).map(t =>
+    '<div class="tip"><div class="tip-h">' + t.h + '</div><div class="tip-p">' + t.p + '</div></div>').join('');
+
+  renderMeals();
+}
+
+const ADVICE = {
+  high: 'Cortisol is near its peak. Eating now drives a larger insulin response. Hold off if you can, and skip the coffee.',
+  moderate: 'Cortisol is mid-range and falling. This is the most forgiving part of the day to eat.',
+  low: 'Cortisol is at its floor. Your body is in recovery. Eating now competes with sleep hormones.'
+};
+
+function phaseLabel(h) {
+  if (h >= 5 && h < 9)  return 'Cortisol awakening response';
+  if (h >= 9 && h < 12) return 'Mid-morning decline';
+  if (h >= 12 && h < 14) return 'Midday plateau';
+  if (h >= 14 && h < 18) return 'Afternoon decline';
+  if (h >= 18 && h < 21) return 'Evening wind-down';
+  return 'Nighttime nadir';
+}
+
+function tipsFor(h) {
+  if (h >= 5 && h < 9) return [
+    { h: 'Delay breakfast', p: 'Cortisol is already high. Eating on top of it spikes insulin harder. Wait one to two hours after waking.' },
+    { h: 'Hold the coffee', p: 'Caffeine amplifies a peak that is already happening. It works better around 9 or 10am.' },
+    { h: 'Get outside', p: 'Ten minutes of direct daylight calibrates the whole day’s rhythm.' }
+  ];
+  if (h >= 9 && h < 12) return [
+    { h: 'Good window to eat', p: 'Cortisol is coming down off its peak and insulin sensitivity is high. The best time to break a fast.' },
+    { h: 'Protein first', p: 'A protein-led first meal steadies blood sugar and cuts afternoon cravings.' }
+  ];
+  if (h >= 12 && h < 16) return [
+    { h: 'Train now if you train', p: 'Mid-range cortisol supports output, and training here steepens the evening decline.' },
+    { h: 'Stress-eating window', p: 'Afternoon pressure spikes cortisol. If an urge shows up, go to the Urge tab before the kitchen.' }
+  ];
+  if (h >= 16 && h < 20) return [
+    { h: 'Close the window', p: 'Finishing by early evening protects the cortisol nadir and your sleep quality.' },
+    { h: 'Cravings incoming', p: 'Willpower tracks cortisol down. This is peak impulsive-eating time. Decide now, not later.' }
+  ];
+  return [
+    { h: 'Recovery mode', p: 'Cortisol should be at its lowest. Eating now disrupts sleep hormones and favours fat storage.' },
+    { h: 'Wind down', p: 'Dim the lights and drop the screens. Tonight’s sleep sets tomorrow’s rhythm.' }
+  ];
+}
+
+function renderMeals() {
+  let slots;
+  if (state.phase !== 'eating' || !state.fastEnd) {
+    slots = [
+      { t: '10:00 – 11:00 am', d: 'Optimal first meal, cortisol falling and insulin sensitivity high', s: 'optimal' },
+      { t: '1:00 – 2:00 pm',   d: 'Second meal, cortisol stable', s: 'optimal' },
+      { t: '5:00 – 6:00 pm',   d: 'Last meal, before the nadir begins', s: 'acceptable' },
+      { t: 'after 8:00 pm',    d: 'Avoid. Disrupts sleep hormones and the overnight reset', s: 'avoid' }
+    ];
+  } else {
+    const mid = new Date(state.fastEnd.getTime() + (state.eatEnd - state.fastEnd) / 2);
+    slots = [
+      { t: clock(state.fastEnd) + ' – ' + clock(new Date(state.fastEnd.getTime() + 3600000)),
+        d: 'Break the fast here', s: 'optimal' },
+      { t: clock(mid), d: 'Mid-window meal', s: 'acceptable' },
+      { t: clock(new Date(state.eatEnd.getTime() - 1800000)) + ' onward',
+        d: 'Close to the window edge, keep it light', s: 'avoid' }
+    ];
+  }
+  document.getElementById('meals').innerHTML = slots.map(s =>
+    '<div class="meal"><div class="meal-bar ' + s.s + '"></div>' +
+    '<div><div class="meal-t">' + s.t + '</div><div class="meal-d">' + s.d + '</div></div></div>').join('');
+}
+
+/* ---------------- canvas charts ---------------- */
+function css(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+function setupCanvas(canvas) {
+  const wrap = canvas.parentElement;
+  const dpr = window.devicePixelRatio || 1;
+  const w = wrap.clientWidth, h = wrap.clientHeight;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+  return { ctx, w, h };
+}
+
+function drawCurve() {
+  const canvas = document.getElementById('curveCanvas');
+  if (!canvas.parentElement.clientWidth) return;
+  const { ctx, w, h } = setupCanvas(canvas);
+  const pad = { l: 20, r: 20, t: 10, b: 22 };   // room for the edge axis labels
+  const cw = w - pad.l - pad.r, ch = h - pad.t - pad.b;
+
+  // hour graduations, taller every 6h
+  ctx.strokeStyle = css('--grad'); ctx.lineWidth = 1;
+  for (let i = 0; i <= 24; i++) {
+    const x = pad.l + (i/24) * cw, maj = i % 6 === 0;
+    ctx.beginPath();
+    ctx.moveTo(x, pad.t + ch);
+    ctx.lineTo(x, pad.t + ch + (maj ? 7 : 3.5));
+    ctx.stroke();
+  }
+  ctx.fillStyle = css('--ink-3');
+  ctx.font = '10px "IBM Plex Mono", monospace';
+  ctx.textAlign = 'center';
+  ['12a','6a','12p','6p',''].forEach((l, i) => {
+    if (l) ctx.fillText(l, pad.l + (i/4) * cw, h - 3);
+  });
+
+  const pts = [];
+  for (let i = 0; i <= 240; i++) {
+    const hr = (i/240) * 24;
+    pts.push([pad.l + (i/240) * cw, pad.t + ch - (cortisolAt(hr)/CORT_MAX) * ch]);
+  }
+
+  ctx.beginPath();
+  ctx.moveTo(pts[0][0], pad.t + ch);
+  pts.forEach(p => ctx.lineTo(p[0], p[1]));
+  ctx.lineTo(pts[pts.length-1][0], pad.t + ch);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(90,168,148,0.09)';
+  ctx.fill();
+
+  ctx.beginPath();
+  pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
+  ctx.strokeStyle = css('--accent'); ctx.lineWidth = 1.5; ctx.lineJoin = 'round';
+  ctx.stroke();
+
+  const now = new Date(), nh = hoursOfDay(now);
+  const nx = pad.l + (nh/24) * cw;
+  const ny = pad.t + ch - (cortisolAt(nh)/CORT_MAX) * ch;
+  ctx.strokeStyle = css('--rule-strong'); ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(nx, pad.t); ctx.lineTo(nx, pad.t + ch); ctx.stroke();
+  ctx.beginPath(); ctx.arc(nx, ny, 3.5, 0, Math.PI*2);
+  ctx.fillStyle = css('--accent'); ctx.fill();
+}
+
+function drawWeight() {
+  const canvas = document.getElementById('wtCanvas');
+  if (!canvas.parentElement.clientWidth) return;
+  const { ctx, w, h } = setupCanvas(canvas);
+
+  if (state.weightLog.length < 2) {
+    ctx.fillStyle = css('--ink-3');
+    ctx.font = '14px "IBM Plex Sans", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Two entries needed for a trend', w/2, h/2);
+    return;
+  }
+  const rows = state.weightLog.slice(-30);
+  const vals = rows.map(r => r.weight);
+  const lo = Math.min(...vals) - 1.5, hi = Math.max(...vals) + 1.5;
+  const pad = { l: 36, r: 6, t: 10, b: 14 };
+  const cw = w - pad.l - pad.r, ch = h - pad.t - pad.b;
+
+  ctx.strokeStyle = css('--rule'); ctx.lineWidth = 1;
+  ctx.fillStyle = css('--ink-3');
+  ctx.font = '10px "IBM Plex Mono", monospace';
+  ctx.textAlign = 'right';
+  for (let i = 0; i <= 2; i++) {
+    const y = pad.t + (ch/2) * i;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(w - pad.r, y); ctx.stroke();
+    ctx.fillText((hi - (hi-lo) * (i/2)).toFixed(0), pad.l - 8, y + 3.5);
+  }
+
+  const pts = rows.map((r, i) => [
+    pad.l + (i/(rows.length-1)) * cw,
+    pad.t + ch - ((r.weight - lo)/(hi - lo)) * ch
+  ]);
+  ctx.beginPath();
+  pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
+  ctx.strokeStyle = css('--accent'); ctx.lineWidth = 1.5; ctx.lineJoin = 'round';
+  ctx.stroke();
+
+  const last = pts[pts.length-1];
+  ctx.beginPath(); ctx.arc(last[0], last[1], 3, 0, Math.PI*2);
+  ctx.fillStyle = css('--accent'); ctx.fill();
+}
+
+/* ---------------- breathing ---------------- */
+let breatheTimer = null, breathe = { phase: 0, n: 4, round: 1, rounds: 4 };
+const CUES = ['Breathe in', 'Hold', 'Breathe out, slowly', 'Hold'];
+const PHASE_SECS = [4, 4, 6, 2];
+
+/* Longer out than in. The exhale is the part that lowers arousal, so this is
+   4-4-6-2 rather than an even box. */
+function startBreathing(fromFlow) {
+  document.getElementById('breathe').classList.add('on');
+  breathe = { phase: 0, n: PHASE_SECS[0], round: 1, rounds: 4, fromFlow: !!fromFlow };
+  runBreathe();
+}
+function runBreathe() {
+  const ring = document.getElementById('breatheRing');
+  document.getElementById('breatheCue').textContent = CUES[breathe.phase];
+  document.getElementById('breatheR').textContent = 'Round ' + breathe.round + ' of ' + breathe.rounds;
+  if (breathe.phase === 0) ring.classList.add('wide');
+  else if (breathe.phase === 2) ring.classList.remove('wide');
+  breathe.n = PHASE_SECS[breathe.phase];
+  document.getElementById('breatheN').textContent = breathe.n;
+  clearInterval(breatheTimer);
+  breatheTimer = setInterval(() => {
+    breathe.n--;
+    if (breathe.n > 0) { document.getElementById('breatheN').textContent = breathe.n; return; }
+    breathe.phase++;
+    if (breathe.phase > 3) {
+      breathe.phase = 0;
+      if (++breathe.round > breathe.rounds) {
+        const inFlow = breathe.fromFlow;
+        stopBreathing();
+        if (!inFlow) showToast('Done. Check in with yourself before deciding.');
+        return;
+      }
+    }
+    runBreathe();
+  }, 1000);
+}
+function stopBreathing() {
+  document.getElementById('breathe').classList.remove('on');
+  document.getElementById('breatheRing').classList.remove('wide');
+  clearInterval(breatheTimer); breatheTimer = null;
+}
+
+/* ---------------- urges ---------------- */
+/* ---------------- regular eating ----------------
+   CBT-E puts regular eating early because going long stretches without food
+   is itself a driver of loss-of-control episodes. So these slots are not
+   subordinate to the fasting window: when the two disagree, this wins and
+   the app says so. */
+
+function eatingSlots() {
+  const [h, m] = state.eating.first.split(':').map(Number);
+  const out = [];
+  for (let i = 0; i < state.eating.count; i++) {
+    const mins = h * 60 + m + Math.round(i * state.eating.gapH * 60);
+    const d = new Date();
+    d.setHours(0, mins, 0, 0);
+    out.push({
+      i,
+      at: d,
+      label: i === 0 ? 'Breakfast'
+           : i === state.eating.count - 1 ? 'Evening snack'
+           : i % 2 === 1 ? 'Snack' : 'Meal'
+    });
+  }
+  return out;
+}
+
+function toggleRegularEating() {
+  state.eating.on = !state.eating.on;
+  document.getElementById('eatSwitch').classList.toggle('on', state.eating.on);
+  saveState();
+  renderEatingPlan();
+  if (state.phase !== 'idle') scheduleAlarms();
+}
+
+function markEaten(i) {
+  const key = dateKey(new Date());
+  const list = state.eaten[key] || (state.eaten[key] = []);
+  const at = list.indexOf(i);
+  at >= 0 ? list.splice(at, 1) : list.push(i);
+  saveState();
+  renderEatingPlan();
+}
+
+function renderEatingPlan() {
+  const wrap = document.getElementById('eatPlan');
+  const note = document.getElementById('eatNote');
+  document.getElementById('eatSwitch').classList.toggle('on', state.eating.on);
+
+  if (!state.eating.on) {
+    wrap.innerHTML = '';
+    note.className = 'eat-note';
+    note.textContent = 'Long gaps between meals make loss-of-control eating more likely, not less. If that is a pattern for you, eating on a schedule usually settles it before anything else does.';
+    return;
+  }
+
+  const slots = eatingSlots();
+  const done = state.eaten[dateKey(new Date())] || [];
+  const now = Date.now();
+  const nextIdx = slots.findIndex(s => s.at.getTime() > now && !done.includes(s.i));
+
+  wrap.innerHTML = slots.map(s => {
+    const isDone = done.includes(s.i);
+    const cls = 'slot' + (isDone ? ' done' : '') + (s.i === nextIdx ? ' next' : '');
+    const status = isDone ? 'eaten' : s.at.getTime() < now ? 'missed' : s.i === nextIdx ? 'next' : '';
+    return '<div class="' + cls + '" onclick="markEaten(' + s.i + ')">' +
+      '<span class="slot-t">' + clock(s.at) + '</span>' +
+      '<span class="slot-n">' + s.label + '</span>' +
+      '<span class="slot-s">' + status + '</span></div>';
+  }).join('');
+
+  // Say it plainly when the fast is scheduled over a planned meal.
+  let clash = null;
+  if (state.phase === 'fasting' && state.fastEnd) {
+    const inside = slots.filter(s => s.at.getTime() > now && s.at < state.fastEnd);
+    if (inside.length) clash = inside[0];
+  }
+  if (clash) {
+    note.className = 'eat-note clash';
+    note.textContent = 'Your fast runs past ' + clock(clash.at) + ', so it is scheduled over a planned '
+      + clash.label.toLowerCase() + '. If urges are the thing you are trying to fix, eat the meal and shorten the fast.';
+  } else {
+    note.className = 'eat-note';
+    note.textContent = 'Eating every ' + state.eating.gapH + ' hours, whether or not hunger shows up. Tap a slot when you have eaten it.';
+  }
+}
+
+/* ================= guided urge flow =================
+   Routes on what is driving the urge rather than handing over a flat list of
+   distractions. Stress goes to a stress protocol; everything else goes to a
+   hunger reality check first. */
+
+const MOODS = ['Stressed','Anxious','Angry','Bored','Sad','Lonely','Tired','Flat','Restless'];
+const PLACES = ['Kitchen','Living room','Bedroom','Desk','Work','Car','Out'];
+const SITUATIONS = ['Work pressure','Argument','Bad news','Alone in the evening','Scrolling',
+                    'Passed the kitchen','Skipped a meal','After a long fast','Tired out','Nothing obvious'];
+
+const BUCKETS = {
+  calm: {
+    name: 'Calm my body',
+    why: 'Bring the system down before deciding anything.',
+    actions: [
+      { id: 'breathe', name: 'Slow breathing', mins: 2,  tip: 'In for four, out for six. The long exhale is the part that works.' },
+      { id: 'relax',   name: 'Release your shoulders', mins: 3, tip: 'Tense a muscle group hard for five seconds, then let go. Jaw, shoulders, hands, on down.' },
+      { id: 'sit',     name: 'Sit still and count exhales', mins: 5, tip: 'Count ten breaths out. Lost count is normal, start again at one.' }
+    ]
+  },
+  move: {
+    name: 'Move the stress out',
+    why: 'Give the stress response somewhere to go.',
+    actions: [
+      { id: 'walk',    name: 'Brisk walk', mins: 10, tip: 'Outside if you can. Pace matters more than distance.' },
+      { id: 'stretch', name: 'Stretch it out', mins: 5, tip: 'Neck, shoulders, hips, hamstrings. Slow, nothing forced.' },
+      { id: 'song',    name: 'Move for one song', mins: 4, tip: 'Pick something fast. Whatever you like, as long as you move.' }
+    ]
+  },
+  context: {
+    name: 'Change where you are',
+    why: 'Most of the pull is the room, not the hunger.',
+    actions: [
+      { id: 'leave',   name: 'Leave the kitchen', mins: 10, tip: 'Different room, door shut. Take your phone so you stay put.' },
+      { id: 'outside', name: 'Step outside', mins: 5,  tip: 'Front step counts. Daylight and cooler air both help.' },
+      { id: 'shower',  name: 'Shower or wash your face', mins: 8, tip: 'Physical state change, and it puts a wall between you and the kitchen.' }
+    ]
+  },
+  soothe: {
+    name: 'Soothe without food',
+    why: 'The need underneath is usually real. Food is just the fastest answer to hand.',
+    actions: [
+      { id: 'drink',   name: 'Make a warm drink', mins: 6,  tip: 'Tea, decaf, hot water. The ritual is doing as much as the drink.' },
+      { id: 'write',   name: 'Write down what happened', mins: 5, tip: 'One prompt: what stressed me just now? Nobody else reads it.' },
+      { id: 'reach',   name: 'Text or call someone', mins: 8, tip: 'You do not have to mention food. Contact is the point.' },
+      { id: 'audio',   name: 'Put on something calming', mins: 10, tip: 'Music, a podcast, anything that occupies the part of you that is spinning.' }
+    ]
+  }
+};
+
+let flow = null;
+
+function startUrgeFlow(manual) {
+  flow = {
+    step: 0,
+    manual: !!manual,
+    draft: {
+      id: 'e' + Date.now(),
+      at: Date.now(), endedAt: null,
+      where: '', situation: '', mood: '',
+      urge0: null, urge1: null, control: null,
+      stress: null, keyedUp: null,
+      bucket: '', action: '', actionName: '',
+      outcome: '', next: '', setback: null
+    },
+    holdUntil: null, holdTimer: null
+  };
+  document.getElementById('flow').classList.add('on');
+  renderFlow();
+}
+
+/* Jump straight to an action, for when there is no patience for questions.
+   Everything still gets logged; the questions just come after. */
+function quickTool(id) {
+  startUrgeFlow();
+  const a = ALL_ACTIONS[id];
+  if (!a) return;
+  const owner = Object.entries(BUCKETS).find(([, b]) => b.actions.some(x => x.id === id));
+  flow.draft.bucket = owner ? owner[0] : 'context';
+  pickAction(a);
+}
+
+function abandonFlow() {
+  if (flow && flow.holdTimer) clearInterval(flow.holdTimer);
+  // Anything past the opening questions is worth keeping even if abandoned.
+  if (flow && flow.draft.urge0 !== null && !flow.draft.outcome) {
+    flow.draft.outcome = 'unknown';
+    flow.draft.endedAt = Date.now();
+    state.episodes.push(flow.draft);
+    saveState();
+    renderEpisodes(); renderPatterns(); renderUrgeToday(); updateStats();
+  }
+  document.getElementById('flow').classList.remove('on');
+  flow = null;
+}
+
+/* --- step definitions --- */
+const STEPS = ['situation', 'feeling', 'intensity', 'route', 'action', 'hold', 'recheck', 'outcome', 'setback'];
+
+function visibleSteps() {
+  const s = ['situation', 'feeling', 'intensity', 'route', 'action', 'hold', 'recheck', 'outcome'];
+  if (flow.draft.outcome === 'lapse') s.push('setback');
+  return s;
+}
+
+function renderFlow() {
+  const steps = visibleSteps();
+  const name = steps[flow.step];
+  const body = document.getElementById('flowBody');
+  document.getElementById('flowStep').textContent =
+    String(flow.step + 1).padStart(2, '0') + ' / ' + String(steps.length).padStart(2, '0');
+  document.getElementById('flowBack').style.visibility = flow.step === 0 ? 'hidden' : 'visible';
+
+  const next = document.getElementById('flowNext');
+  next.textContent = flow.step === steps.length - 1 ? 'Save' : 'Next';
+  next.removeAttribute('disabled');
+
+  body.scrollTop = 0;
+  body.innerHTML = FLOW_VIEWS[name]();
+  if (name === 'hold') startHold();
+  syncNextEnabled();
+}
+
+const FLOW_VIEWS = {
+  situation: () => `
+    <div class="flow-q">What just happened?</div>
+    <div class="flow-hint">Right before the urge showed up.</div>
+    <div class="opts" id="optSituation">
+      ${SITUATIONS.map(s => opt('situation', s)).join('')}
+    </div>
+    <div class="flow-sub">Or put it in your own words</div>
+    <input class="flow-in" id="inSituation" placeholder="What was going on"
+           value="${esc(SITUATIONS.includes(flow.draft.situation) ? '' : flow.draft.situation)}"
+           oninput="setField('situation', this.value, true)">
+    <div class="flow-sub">Where are you?</div>
+    <div class="opts" id="optWhere">${PLACES.map(p => opt('where', p)).join('')}</div>`,
+
+  feeling: () => `
+    <div class="flow-q">How does it feel in your body?</div>
+    <div class="flow-hint">Stress-driven urges and hunger feel different once you look.</div>
+    <div class="flow-sub">Did something stressful happen?</div>
+    <div class="opts">
+      ${boolOpt('stress', true, 'Yes')}
+      ${boolOpt('stress', false, 'No')}
+    </div>
+    <div class="flow-sub">Do you feel keyed up, tense, or wired?</div>
+    <div class="opts">
+      ${boolOpt('keyedUp', true, 'Yes')}
+      ${boolOpt('keyedUp', false, 'No')}
+    </div>
+    <div class="flow-sub">Closest mood</div>
+    <div class="opts">${MOODS.map(m => opt('mood', m)).join('')}</div>`,
+
+  intensity: () => `
+    <div class="flow-q">How strong is it?</div>
+    <div class="flow-hint">No wrong answer. This is what tells you later whether anything helped.</div>
+    <div class="flow-sub">Urge right now</div>
+    ${scale('urge0')}
+    <div class="scale-ends"><span>barely there</span><span>overwhelming</span></div>
+    <div class="flow-sub">How in control do you feel?</div>
+    ${scale('control')}
+    <div class="scale-ends"><span>fully in control</span><span>none at all</span></div>`,
+
+  route: () => {
+    const stressed = flow.draft.stress === true || flow.draft.keyedUp === true;
+    return `
+    ${stressed
+      ? `<div class="flow-lead">Your stress may be driving this urge. Bring your system down first, then decide whether you are physically hungry.</div>`
+      : `<div class="flow-lead">No obvious stress behind it. Worth checking whether this is actual hunger before anything else.</div>`}
+    <div class="flow-q">${stressed ? 'What do you want to try?' : 'Are you physically hungry?'}</div>
+    <div class="flow-hint">${stressed
+      ? 'Any of these buys you the fifteen minutes the urge needs to pass.'
+      : 'Empty stomach, low energy, been a while since you ate. Not just wanting something.'}</div>
+    <div class="opts col">
+      ${stressed ? '' :
+        `<button class="opt${flow.draft.bucket === 'hungry' ? ' on' : ''}" data-set="bucket" data-val="hungry">
+           Yes, I think I am hungry<span class="opt-d">Eat a planned meal or snack, sitting down.</span></button>`}
+      ${Object.entries(BUCKETS).map(([k, b]) =>
+        `<button class="opt${flow.draft.bucket === k ? ' on' : ''}" data-set="bucket" data-val="${k}">
+           ${esc(b.name)}<span class="opt-d">${esc(b.why)}</span></button>`).join('')}
+    </div>`;
+  },
+
+  action: () => {
+    if (flow.draft.bucket === 'hungry') {
+      return `
+        <div class="flow-lead">Then eat, properly.</div>
+        <div class="flow-q">Portion it before you start</div>
+        <div class="flow-hint">On a plate, sitting down, not out of the packet. Eating a planned amount deliberately is the opposite of a lapse, not a smaller version of one.</div>
+        <div class="flow-sub">Give yourself a moment first</div>
+        <div class="opts col">
+          <button class="opt${flow.draft.action === 'pause' ? ' on' : ''}" data-act="pause">
+            Pause two minutes, then eat<span class="opt-d">Long enough to portion it and sit down.</span></button>
+          <button class="opt${flow.draft.action === 'eat-now' ? ' on' : ''}" data-act="eat-now">
+            Eat now<span class="opt-d">Skip the timer.</span></button>
+        </div>`;
+    }
+    const b = BUCKETS[flow.draft.bucket];
+    if (!b) return `<div class="flow-q">Pick a direction first</div>
+                    <div class="flow-hint">Go back a step and choose one.</div>`;
+    return `
+      <div class="flow-lead">${esc(b.why)}</div>
+      <div class="flow-q">${esc(b.name)}</div>
+      <div class="flow-hint">Pick one. The timer runs while you do it.</div>
+      <div class="opts col">
+        ${b.actions.map(a =>
+          `<button class="opt${flow.draft.action === a.id ? ' on' : ''}" data-act="${a.id}">
+             ${esc(a.name)}<span class="opt-d">${a.mins} min. ${esc(a.tip)}</span></button>`).join('')}
+      </div>`;
+  },
+
+  hold: () => `
+    <div class="hold">
+      <div class="hold-n" id="holdN">00:00</div>
+      <div class="hold-l">left</div>
+      <div class="hold-do">${esc(flow.draft.actionName || 'Give it a few minutes')}</div>
+      <div class="hold-tip">${esc(flow.draft.actionTip || '')}</div>
+    </div>
+    <div class="flow-sub">You can move on whenever you are ready.</div>`,
+
+  recheck: () => `
+    <div class="flow-q">How is it now?</div>
+    <div class="flow-hint">Compared with before. Urges drop in waves, not straight lines.</div>
+    <div class="flow-sub">Urge right now</div>
+    ${scale('urge1')}
+    <div class="scale-ends"><span>barely there</span><span>overwhelming</span></div>
+    ${flow.draft.urge1 !== null && flow.draft.urge0 !== null ? deltaLine() : ''}`,
+
+  outcome: () => `
+    <div class="flow-q">What happened?</div>
+    <div class="flow-hint">Straight answer, no scoring. This is the part that makes the log worth keeping.</div>
+    <div class="opts col">
+      <button class="opt${flow.draft.outcome === 'rode' ? ' on' : ''}" onclick="setField('outcome','rode')">
+        It passed<span class="opt-d">Rode it out without eating.</span></button>
+      <button class="opt${flow.draft.outcome === 'planned' ? ' on' : ''}" onclick="setField('outcome','planned')">
+        I ate, on purpose<span class="opt-d">A planned amount, deliberately. This counts as a win.</span></button>
+      <button class="opt${flow.draft.outcome === 'lapse' ? ' on' : ''}" onclick="setField('outcome','lapse')">
+        It got away from me<span class="opt-d">More than planned, or felt out of control.</span></button>
+    </div>
+    <div class="flow-sub">Anything worth remembering?</div>
+    <input class="flow-in" id="inNext" placeholder="What happened next"
+           value="${esc(flow.draft.next)}" oninput="setField('next', this.value, true)">`,
+
+  setback: () => `
+    <div class="flow-lead">A lapse is information, not a verdict. The point is what it tells you.</div>
+    <div class="flow-q">Setback review</div>
+    <div class="flow-sub">What came before it?</div>
+    <input class="flow-in" id="sbBefore" placeholder="The hours leading up to it"
+           value="${esc(flow.draft.setback?.before || '')}" oninput="setSetback('before', this.value)">
+    <div class="flow-sub">What kept it going?</div>
+    <input class="flow-in" id="sbKept" placeholder="Once it started"
+           value="${esc(flow.draft.setback?.kept || '')}" oninput="setSetback('kept', this.value)">
+    <div class="flow-sub">What would you try next time?</div>
+    <input class="flow-in" id="sbNext" placeholder="One thing, small enough to actually do"
+           value="${esc(flow.draft.setback?.next || '')}" oninput="setSetback('next', this.value)">`
+};
+
+/* --- view helpers ---
+   Selections carry their value in data attributes and are handled by one
+   delegated listener. Interpolating values into inline onclick breaks the
+   moment a label contains a quote or apostrophe. */
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function opt(field, value) {
+  return `<button class="opt${flow.draft[field] === value ? ' on' : ''}"
+           data-set="${field}" data-val="${esc(value)}">${esc(value)}</button>`;
+}
+function boolOpt(field, value, label) {
+  return `<button class="opt${flow.draft[field] === value ? ' on' : ''}"
+           data-set="${field}" data-val="${value}" data-type="bool">${label}</button>`;
+}
+function scale(field) {
+  let out = '<div class="scale">';
+  for (let i = 0; i <= 10; i++) {
+    out += `<button class="scale-i${flow.draft[field] === i ? ' on' : ''}"
+              data-set="${field}" data-val="${i}" data-type="num">${i}</button>`;
+  }
+  return out + '</div>';
+}
+
+/* Every action reachable by id, so the views only ever emit an id. */
+const ALL_ACTIONS = {};
+Object.values(BUCKETS).forEach(b => b.actions.forEach(a => { ALL_ACTIONS[a.id] = a; }));
+Object.assign(ALL_ACTIONS, {
+  pause:     { id: 'pause',   name: 'Two minute pause, then eat', mins: 2,
+               tip: 'Portion it out, sit down, then start.' },
+  'eat-now': { id: 'eat-now', name: 'Eat now', mins: 0, tip: '' },
+  delay:     { id: 'delay',   name: 'Ten minute pause', mins: 10,
+               tip: 'Not a no. Just later, once the spike has passed.' }
+});
+
+document.getElementById('flowBody').addEventListener('click', e => {
+  const el = e.target.closest('[data-set],[data-act]');
+  if (!el || !flow) return;
+  if (el.dataset.act) {
+    const a = ALL_ACTIONS[el.dataset.act];
+    if (a) pickAction(a);
+    return;
+  }
+  let v = el.dataset.val;
+  if (el.dataset.type === 'bool') v = v === 'true';
+  else if (el.dataset.type === 'num') v = Number(v);
+  setField(el.dataset.set, v);
+});
+function deltaLine() {
+  const d = flow.draft.urge0 - flow.draft.urge1;
+  const txt = d > 0 ? `down ${d} from ${flow.draft.urge0}`
+            : d === 0 ? `unchanged at ${flow.draft.urge0}`
+            : `up ${-d} from ${flow.draft.urge0}`;
+  return `<div class="delta">${txt}</div>`;
+}
+
+function setField(field, value, quiet) {
+  flow.draft[field] = value;
+  if (field === 'situation' && quiet) { syncNextEnabled(); return; }
+  if (quiet) return;
+  // Choosing a direction is a decision, not a selection. Do not make someone
+  // mid-urge hunt for Next afterwards.
+  if (field === 'bucket') {
+    flow.draft.action = ''; flow.draft.actionName = '';
+    flow.step = visibleSteps().indexOf('action');
+  }
+  renderFlow();
+}
+function setSetback(key, value) {
+  flow.draft.setback = flow.draft.setback || { before: '', kept: '', next: '' };
+  flow.draft.setback[key] = value;
+}
+function pickAction(a) {
+  flow.draft.action = a.id;
+  flow.draft.actionName = a.name;
+  flow.draft.actionTip = a.tip;
+  flow.draft.actionMins = a.mins;
+  flow.step = visibleSteps().indexOf('hold');
+  renderFlow();
+}
+
+/* Requirements are deliberately light. A half-filled entry beats none. */
+function syncNextEnabled() {
+  const steps = visibleSteps();
+  const name = steps[flow.step];
+  const next = document.getElementById('flowNext');
+  const needed = {
+    intensity: () => flow.draft.urge0 !== null,
+    route:     () => !!flow.draft.bucket,
+    action:    () => !!flow.draft.action,
+    recheck:   () => flow.draft.urge1 !== null,
+    outcome:   () => !!flow.draft.outcome
+  }[name];
+  if (needed && !needed()) next.setAttribute('disabled', '');
+  else next.removeAttribute('disabled');
+}
+
+function startHold() {
+  const mins = flow.draft.actionMins || 0;
+  if (flow.holdTimer) clearInterval(flow.holdTimer);
+  if (!mins) { flow.holdUntil = Date.now(); paintHold(); return; }
+  flow.holdUntil = Date.now() + mins * 60000;
+  paintHold();
+  flow.holdTimer = setInterval(() => {
+    if (!flow || visibleSteps()[flow.step] !== 'hold') { clearInterval(flow?.holdTimer); return; }
+    paintHold();
+  }, 1000);
+  if (flow.draft.action === 'breathe') startBreathing(true);
+}
+function paintHold() {
+  const el = document.getElementById('holdN');
+  if (!el) return;
+  const left = Math.max(0, flow.holdUntil - Date.now());
+  el.textContent = hm(left + 59000).replace(/^00:/, '') || '00';
+  const s = Math.ceil(left / 1000);
+  el.textContent = String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+  if (left <= 0 && flow.holdTimer) {
+    clearInterval(flow.holdTimer); flow.holdTimer = null;
+    chime();
+    showToast('Time is up. Check in with yourself.');
+  }
+}
+
+function flowPrev() {
+  if (flow.holdTimer) { clearInterval(flow.holdTimer); flow.holdTimer = null; }
+  if (flow.step > 0) flow.step--;
+  renderFlow();
+}
+function flowNext() {
+  const steps = visibleSteps();
+  if (document.getElementById('flowNext').hasAttribute('disabled')) return;
+  if (flow.holdTimer) { clearInterval(flow.holdTimer); flow.holdTimer = null; }
+
+  if (flow.step === steps.length - 1) return saveEpisode();
+  flow.step++;
+  renderFlow();
+}
+
+function saveEpisode() {
+  flow.draft.endedAt = Date.now();
+  delete flow.draft.actionTip;
+  delete flow.draft.actionMins;
+  state.episodes.push(flow.draft);
+  saveState();
+  document.getElementById('flow').classList.remove('on');
+  const d = flow.draft;
+  flow = null;
+  renderEpisodes(); renderPatterns(); renderUrgeToday(); updateStats();
+  showToast(d.outcome === 'lapse'
+    ? 'Logged. That is useful information, not a failure.'
+    : d.urge1 !== null && d.urge1 < d.urge0
+      ? 'Logged. Urge went from ' + d.urge0 + ' to ' + d.urge1 + '.'
+      : 'Logged.');
+}
+
+/* ---------------- log ---------------- */
+const OUTCOME_LABEL = { rode: 'Passed', planned: 'Ate, planned', lapse: 'Got away', unknown: 'Unfinished' };
+const OUTCOME_CLASS  = { rode: 'rode', planned: 'planned', lapse: 'lapse', unknown: 'planned' };
+
+function renderEpisodes() {
+  const el = document.getElementById('episodeList');
+  document.getElementById('logCount').textContent = state.episodes.length;
+  if (!state.episodes.length) {
+    el.innerHTML = '<div class="empty">Nothing logged yet.</div>';
+    return;
+  }
+  el.innerHTML = [...state.episodes].reverse().slice(0, 40).map(e => {
+    const d = new Date(e.at);
+    const meta = [e.where, e.mood].filter(Boolean).join(' · ');
+    const arc = (e.urge0 !== null && e.urge0 !== undefined)
+      ? 'urge ' + e.urge0 + (e.urge1 !== null && e.urge1 !== undefined ? ' to ' + e.urge1 : '') +
+        (e.control !== null && e.control !== undefined ? '   control ' + e.control : '')
+      : '';
+    const sb = e.setback && (e.setback.before || e.setback.kept || e.setback.next)
+      ? '<div class="ep-set">' +
+        (e.setback.before ? '<b>Before:</b> ' + esc(e.setback.before) + '<br>' : '') +
+        (e.setback.kept   ? '<b>Kept it going:</b> ' + esc(e.setback.kept) + '<br>' : '') +
+        (e.setback.next   ? '<b>Next time:</b> ' + esc(e.setback.next) : '') + '</div>'
+      : '';
+    return '<div class="ep">' +
+      '<div class="ep-top"><span class="ep-when">' +
+        d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' + clock(d) +
+      '</span><span class="ep-out ' + (OUTCOME_CLASS[e.outcome] || 'planned') + '">' +
+        (OUTCOME_LABEL[e.outcome] || '') + '</span></div>' +
+      (e.situation ? '<div class="ep-what">' + esc(e.situation) + '</div>' : '') +
+      (meta ? '<div class="ep-meta">' + esc(meta) + (e.actionName ? ' · tried ' + esc(e.actionName) : '') + '</div>' : '') +
+      (arc ? '<div class="ep-arc">' + arc + '</div>' : '') +
+      (e.next ? '<div class="ep-set">' + esc(e.next) + '</div>' : '') +
+      sb + '</div>';
+  }).join('');
+}
+
+function renderUrgeToday() {
+  const el = document.getElementById('urgeToday');
+  if (!el) return;
+  const key = dateKey(new Date());
+  const today = state.episodes.filter(e => dateKey(new Date(e.at)) === key);
+  if (!today.length) {
+    el.innerHTML = '<div class="empty">No urges logged today.</div>';
+    return;
+  }
+  const rode = today.filter(e => e.outcome === 'rode').length;
+  el.innerHTML = today.reverse().map(e =>
+    '<div class="log"><div><div class="log-t">' + esc(e.situation || 'Urge') + '</div>' +
+    '<div class="log-when">' + clock(new Date(e.at)) +
+    (e.urge0 !== null && e.urge1 !== null && e.urge1 !== undefined ? '  urge ' + e.urge0 + ' to ' + e.urge1 : '') +
+    '</div></div><span class="log-r ' + (e.outcome === 'lapse' ? 'broke' : 'kept') + '">' +
+    (OUTCOME_LABEL[e.outcome] || '') + '</span></div>').join('') +
+    '<div class="ep-meta" style="margin-top:12px">' + today.length + ' logged, ' + rode + ' passed on their own.</div>';
+}
+
+/* ---------------- patterns ---------------- */
+function tally(list) {
+  const m = new Map();
+  list.filter(Boolean).forEach(v => m.set(v, (m.get(v) || 0) + 1));
+  return [...m.entries()].sort((a, b) => b[1] - a[1]);
+}
+
+function renderRank(id, rows, unit) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (!rows.length) { el.innerHTML = '<div class="empty">Not enough logged yet.</div>'; return; }
+  el.innerHTML = rows.slice(0, 6).map(([name, v]) =>
+    '<div class="rank"><span class="rank-n">' + esc(name) + '</span>' +
+    '<span class="rank-v">' + v + (unit || '') + '</span></div>').join('');
+}
+
+function renderPatterns() {
+  const eps = state.episodes;
+
+  // urges by hour of day
+  const byHour = new Array(24).fill(0);
+  eps.forEach(e => byHour[new Date(e.at).getHours()]++);
+  const peak = Math.max(1, ...byHour);
+  const bars = document.getElementById('hourBars');
+  if (bars) {
+    bars.innerHTML = byHour.map(n =>
+      '<div class="hour-b' + (n === peak && n > 0 ? ' hot' : '') +
+      '" style="height:' + (n ? Math.max(4, (n / peak) * 100) : 1) + '%"></div>').join('');
+  }
+
+  renderRank('rankSituation', tally(eps.map(e => e.situation)));
+  renderRank('rankMood', tally(eps.map(e => e.mood)));
+
+  // rank interventions by how much the urge actually dropped
+  const byAction = new Map();
+  eps.forEach(e => {
+    if (!e.actionName || e.urge0 == null || e.urge1 == null) return;
+    const cur = byAction.get(e.actionName) || { drop: 0, n: 0 };
+    cur.drop += e.urge0 - e.urge1; cur.n++;
+    byAction.set(e.actionName, cur);
+  });
+  const actionRows = [...byAction.entries()]
+    .map(([name, v]) => [name + ' (' + v.n + ')', (v.drop / v.n).toFixed(1)])
+    .sort((a, b) => Number(b[1]) - Number(a[1]));
+  renderRank('rankAction', actionRows, ' avg drop');
+
+  renderInsights(eps, byHour);
+}
+
+function renderInsights(eps, byHour) {
+  const el = document.getElementById('insights');
+  if (!el) return;
+  if (eps.length < 3) {
+    el.innerHTML = '<p class="insight">Log a few episodes and patterns will show up here.</p>';
+    return;
+  }
+  const out = [];
+
+  const peakHour = byHour.indexOf(Math.max(...byHour));
+  const h12 = (peakHour % 12) || 12;
+  out.push('Urges cluster around ' + h12 + (peakHour >= 12 ? 'pm' : 'am') +
+           '. Worth having a plan in place before then rather than during.');
+
+  const rated = eps.filter(e => e.urge0 != null && e.urge1 != null);
+  if (rated.length >= 3) {
+    const avg = rated.reduce((s, e) => s + (e.urge0 - e.urge1), 0) / rated.length;
+    out.push(avg > 0
+      ? 'Urges drop by about ' + avg.toFixed(1) + ' points once you do something. They pass on their own more often than they feel like they will.'
+      : 'Urges are not dropping much yet. Try giving the timer longer, or a different bucket.');
+  }
+
+  // The signal that matters most in a fasting app: urges concentrating late
+  // in the fast means restraint is feeding them.
+  const duringFast = eps.filter(e => e.situation === 'After a long fast' || e.situation === 'Skipped a meal').length;
+  if (duringFast >= 2 && duringFast / eps.length > 0.25) {
+    out.push({ flag: true, text: 'A good share of these follow a long gap without food. Restriction drives loss-of-control eating, so shortening the fast or turning on regular eating will do more here than any urge tool.' });
+  }
+
+  const lapses = eps.filter(e => e.outcome === 'lapse').length;
+  if (lapses) {
+    out.push(Math.round((1 - lapses / eps.length) * 100) + ' percent of logged urges did not end in a lapse.');
+  }
+
+  el.innerHTML = out.map(o => typeof o === 'string'
+    ? '<p class="insight">' + o + '</p>'
+    : '<p class="insight flag">' + o.text + '</p>').join('');
+}
+
+/* ---------------- progress ---------------- */
+function updateStats() {
+  const done = state.completedFasts.filter(f => f.completed);
+  document.getElementById('statFasts').textContent = done.length;
+  document.getElementById('statUrges').textContent =
+    state.episodes.filter(e => e.outcome === 'rode').length;
+
+  let streak = 0;
+  const today = new Date(); today.setHours(0,0,0,0);
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(today); d.setDate(d.getDate() - i);
+    const key = dateKey(d);
+    if (done.some(f => f.date.split('T')[0] === key) || (i === 0 && state.phase !== 'idle')) streak++;
+    else break;
+  }
+  document.getElementById('statStreak').textContent = streak;
+}
+
+function dateKey(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function renderCalendar() {
+  const today = new Date();
+  const y = today.getFullYear(), m = today.getMonth();
+  const first = new Date(y, m, 1).getDay();
+  const days = new Date(y, m+1, 0).getDate();
+  const done = state.completedFasts.filter(f => f.completed);
+
+  document.getElementById('calLabel').textContent =
+    today.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+  let html = ['S','M','T','W','T','F','S'].map(d => '<div class="cal-h">' + d + '</div>').join('');
+  for (let i = 0; i < first; i++) html += '<div class="cal-d"></div>';
+  for (let d = 1; d <= days; d++) {
+    const key = y + '-' + String(m+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    let cls = 'cal-d';
+    if (done.some(f => f.date.split('T')[0] === key)) cls += ' fasted';
+    if (d === today.getDate()) cls += ' today';
+    html += '<div class="' + cls + '">' + d + '</div>';
+  }
+  document.getElementById('cal').innerHTML = html;
+}
+
+function logWeight() {
+  const input = document.getElementById('wtIn');
+  const v = parseFloat(input.value);
+  if (isNaN(v) || v < 50 || v > 999) { showToast('Enter a weight between 50 and 999 lbs.'); return; }
+  state.weightLog.push({ date: new Date().toISOString(), weight: v });
+  saveState(); input.value = ''; drawWeight();
+  showToast('Logged ' + v + ' lbs.');
+}
+
+/* ---------------- shell ---------------- */
+function go(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen' + name).classList.add('active');
+  document.querySelectorAll('.nav-i').forEach((n, i) =>
+    n.classList.toggle('active', i === SCREENS.indexOf(name)));
+  if (name === 'Cortisol') drawCurve();
+  if (name === 'Urge') renderUrgeToday();
+  if (name === 'Log') renderEpisodes();
+  if (name === 'Patterns') { renderPatterns(); renderCalendar(); drawWeight(); }
+}
+
+/* Say plainly what delivery this device is actually getting. */
+function renderAlarmStatus() {
+  const el = document.getElementById('alarmStatus');
+  if (!el) return;
+  el.className = 'alarm-status';
+  el.textContent = '';
+
+  const line = t => { const d = document.createElement('div'); d.textContent = t; el.appendChild(d); return d; };
+  const action = (label, fn) => {
+    const b = document.createElement('button');
+    b.textContent = label;
+    b.onclick = fn;
+    el.appendChild(b);
+    return b;
+  };
+
+  if (!('Notification' in window)) {
+    line('This browser cannot show notifications. Alarms appear only while the app is open.');
+    return;
+  }
+  if (Notification.permission === 'denied') {
+    el.className = 'alarm-status warn';
+    line('Notifications are blocked. Alarms appear only while the app is open. Re-enable them in your browser settings for this site.');
+    return;
+  }
+  if (Notification.permission !== 'granted') {
+    line('Alarms currently appear only while the app is open.');
+    action('Turn on notifications', requestNotifications);
+    return;
+  }
+
+  const server = pushServerUrl();
+  if (server) {
+    line('Exact delivery on. A push server fires each alarm at its minute, whether or not the app is open.');
+    const host = document.createElement('div');
+    host.className = 'alarm-server';
+    host.textContent = server;
+    el.appendChild(host);
+    action('Disconnect push server', disconnectPushServer);
+    return;
+  }
+
+  if ('showTrigger' in Notification.prototype) {
+    line('Alarms fire at the exact time, even with the app closed.');
+    return;
+  }
+
+  line('Alarms fire on time while the app is open. With it closed your browser decides when it wakes this app, so an alarm can arrive late and will say how late it was.');
+  action('Connect a push server for exact timing', promptPushServer);
+}
+
+async function promptPushServer() {
+  const url = window.prompt(
+    'Push server address\n\nRun the server in this repo, then paste its https address here.',
+    pushServerUrl() || 'https://'
+  );
+  if (!url || url.trim() === 'https://') return;
+  showToast('Connecting...');
+  try {
+    const base = await connectPushServer(url.trim());
+    showToast('Connected. Alarms will now fire exactly, app open or closed.');
+    return base;
+  } catch (e) {
+    showToast('Could not connect: ' + (e.message || 'unknown error'));
+    renderAlarmStatus();
+  }
+}
+
+let toastTimer = null;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('on'), 3600);
+}
+
+function tick() {
+  document.getElementById('wallClock').textContent = clock(new Date());
+  renderFace();
+  renderDial();
+  renderCortisol();
+  if (document.getElementById('screenCortisol').classList.contains('active')) drawCurve();
+}
+
+/* ---------------- intro ---------------- */
+function dismissIntro() {
+  try { localStorage.setItem('mindfulfast-intro', '2'); } catch (e) {}
+  document.getElementById('intro').classList.remove('on');
+}
+function maybeShowIntro() {
+  let seen = null;
+  try { seen = localStorage.getItem('mindfulfast-intro'); } catch (e) {}
+  if (seen !== '2') document.getElementById('intro').classList.add('on');
+}
+
+/* ---------------- init ---------------- */
+loadState();
+migrate();
+maybeShowIntro();
+buildDialStatic();
+document.querySelectorAll('.proto').forEach(c => c.classList.toggle('active', c.dataset.p === state.protocol));
+['open','close','hourly'].forEach(k =>
+  document.getElementById('alarm' + k[0].toUpperCase() + k.slice(1)).classList.toggle('on', state.alarms[k]));
+if (state.phase !== 'idle') scheduleAlarms();
+refreshTimer();
+renderCortisol();
+renderEatingPlan();
+renderEpisodes();
+renderUrgeToday();
+renderPatterns();
+updateStats();
+renderAlarmStatus();
+tick();
+setInterval(tick, 1000);
+
+// launcher shortcut: ?go=urge opens straight into the protocol
+try {
+  const target = new URLSearchParams(location.search).get('go');
+  if (target === 'urge') go('Urge');
+} catch (e) {}
+
+/* Returning to the app: the timer state is derived from wall-clock time so it
+   self-heals, but re-arm the in-page timers and let the worker flush anything
+   that came due while we were gone. */
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  refreshTimer();
+  if (state.phase !== 'idle') scheduleAlarms(); else pingWorker();
+  renderAlarmStatus();
+});
+
+window.addEventListener('resize', () => {
+  if (document.getElementById('screenCortisol').classList.contains('active')) drawCurve();
+  if (document.getElementById('screenPatterns').classList.contains('active')) drawWeight();
+});
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      await navigator.serviceWorker.register('sw.js');
+      await navigator.serviceWorker.ready;
+      if (Notification.permission === 'granted') await enableBackgroundDelivery();
+      if (state.phase !== 'idle') scheduleAlarms();   // hand the worker the current schedule
+      await pingWorker();
+      renderAlarmStatus();
+    } catch (e) {}
+  });
+}
+</script>
