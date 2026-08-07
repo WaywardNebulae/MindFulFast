@@ -105,16 +105,21 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 /* ---------- header: instrument label, not an app-store banner ---------- */
 .head {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  padding: 14px var(--gutter) 12px;
-  padding-top: max(14px, env(safe-area-inset-top));
+  align-items: center;
+  gap: 12px;
+  padding: 12px var(--gutter) 16px;
+  padding-top: max(12px, env(safe-area-inset-top));
   flex-shrink: 0;
 }
-.head-name { font-family: var(--serif); font-size: 17px; font-weight: 500; letter-spacing: -0.2px; }
+.head-mark { flex: 0 0 56px; }
+.head-mark svg { width: 34px; height: 34px; fill: none; stroke: var(--ink-2); stroke-width: 1.2; }
+.head-mid { flex: 1; text-align: center; }
+.head-name { font-family: var(--serif); font-size: 25px; font-weight: 500; letter-spacing: -0.2px; }
 .head-clock {
+  flex: 0 0 56px; text-align: right;
+  white-space: nowrap;
   font-family: var(--sans);
-  font-size: 13px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   color: var(--ink-3);
 }
@@ -156,24 +161,26 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 }
 .dial { width: 100%; height: 100%; display: block; }
 
-.tick { stroke: var(--ink-3); stroke-opacity: 0.45; stroke-width: 1; }
-.tick.major { stroke: var(--ink-3); stroke-opacity: 0.8; stroke-width: 1.25; }
+.tick { stroke: var(--ink-3); stroke-opacity: 0.34; stroke-width: 1; }
+.tick.major { stroke: var(--ink-2); stroke-opacity: 0.95; stroke-width: 1.6; }
 .dial-lab {
-  fill: var(--ink-3);
+  fill: var(--ink-2);
   font-family: var(--sans);
-  font-size: 9px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
   text-anchor: middle;
   dominant-baseline: central;
 }
 
 /* the ring reads as two segments: fast vs eat, elapsed vs remaining */
-.arc { fill: none; stroke-width: 5; stroke-linecap: butt; }
+.arc { fill: none; stroke-width: 8; stroke-linecap: round; }
 .arc-fast-dim  { stroke: var(--accent-soft); }
 .arc-fast-live { stroke: var(--accent); }
-.arc-eat-dim   { stroke: var(--ink-3); stroke-opacity: 0.38; stroke-width: 3; }
-.arc-eat-live  { stroke: var(--ink-3); stroke-opacity: 0.75; stroke-width: 3; }
+.arc-eat-dim   { stroke: var(--ink-3); stroke-opacity: 0.30; stroke-width: 8; }
+.arc-eat-live  { stroke: var(--ink-3); stroke-opacity: 0.62; stroke-width: 8; }
 
 .hand { stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
+.lead { fill: var(--accent); }
 
 /* the scrub handle: only present while idle, when the start time is still
    yours to choose */
@@ -195,7 +202,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 .dial.grabbing { cursor: grabbing; }
 
 .dial-hint {
-  font-size: 13px; color: var(--ink-2); margin-top: 8px;
+  font-size: 14px; color: var(--ink-2); margin-top: 8px;
   opacity: 0; transition: opacity .3s var(--ease);
 }
 .dial-hint.on { opacity: 1; }
@@ -215,15 +222,13 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
   pointer-events: none;
 }
 .dial-state {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--ink-2);
-  margin-bottom: 10px;
+  font-size: 14px; font-weight: 500; letter-spacing: 0.1px;
+  color: var(--ink-2); margin-bottom: 12px;
 }
 .dial-state.live { color: var(--accent); }
 .dial-digits {
   font-family: var(--serif);
-  font-size: clamp(30px, 9.8vw, 38px);
+  font-size: clamp(30px, 11vw, 44px);
   font-weight: 500;
   letter-spacing: -1px;
   font-variant-numeric: tabular-nums;
@@ -231,26 +236,32 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
   color: var(--ink);
 }
 .dial-digits.idle { color: var(--ink-3); }
-.dial-sub { font-size: 14px; color: var(--ink-3); margin-top: 10px; }
+.dial-sub {
+  font-size: 14px; letter-spacing: 0.1px;
+  color: var(--ink-3); margin-top: 12px;
+}
 
 /* protocol: text only. active = accent + rule. */
 .protocols {
   display: flex;
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
   margin-top: 22px;
 }
+/* Text, not chips. The active one is marked by the same accent rule that
+   marks every other active thing, so nothing here is a filled block. */
 .proto {
   font-family: var(--sans);
   font-size: 15px;
   color: var(--ink-2);
   cursor: pointer;
-  padding: 9px 18px;
-  border-radius: 999px;
-  border: 1px solid transparent;
-  transition: color .25s var(--ease), background-color .25s var(--ease), border-color .25s var(--ease);
+  background: none;
+  padding: 8px 16px 9px;
+  border: 0;
+  border-bottom: 1.5px solid transparent;
+  transition: color .25s var(--ease), border-color .25s var(--ease);
 }
-.proto.active { color: var(--accent); background: var(--wash); border-color: var(--wash); font-weight: 600; }
+.proto.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
 .protocols.locked .proto { opacity: 0.35; cursor: default; }
 .protocols.locked .proto.active { opacity: 1; }
 
@@ -258,21 +269,19 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 /* The live control. Still text, no fill, but it borrows the accent underline
    that marks every other active thing in the app, so it reads as decisively
    tappable instead of merely coloured. */
+.act-wrap { padding: 4px 0 22px; text-align: center; }
 .act {
-  display: block;
-  width: 100%;
-  padding: 26px var(--gutter);
-  font-size: 19px;
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 12px var(--gutter);
+  font-size: 21px;
   font-weight: 600;
   color: var(--accent);
   text-align: center;
   cursor: pointer;
 }
-.act > span {
-  display: inline-block;
-  padding-bottom: 7px;
-  border-bottom: 2px solid currentColor;
-}
+.act > span:first-child { display: inline-block; }
+.act-arrow { font-size: 20px; opacity: 0.85; transition: transform .3s var(--ease); }
+.act:active .act-arrow { transform: translateX(4px); }
 .act { transition: transform .18s var(--ease); }
 .act:active { transform: scale(0.97); }
 .act:active > span { color: var(--accent-press); }
@@ -652,23 +661,21 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 /* ---------- the one insight card. Surface is used here and on sheets,
      nowhere else, so depth stays meaningful rather than decorative. ---------- */
 .rightnow {
-  display: block; width: calc(100% - var(--gutter) * 2);
-  margin: 4px var(--gutter) 8px;
-  padding: 22px 22px 20px;
-  background: var(--surface);
-  border-radius: var(--r);
-  box-shadow: var(--shadow);
+  display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center;
+  width: 100%; padding: 24px var(--gutter);
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
   text-align: left; cursor: pointer;
-  transition: transform .2s var(--ease), background-color .2s var(--ease);
+  transition: background-color .25s var(--ease);
 }
-.rightnow:active { transform: scale(0.985); background: var(--raised); }
+.rightnow:active { background: var(--wash); }
+.rightnow-left { min-width: 0; }
 .rightnow-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-.rightnow-eyebrow { font-size: 13px; font-weight: 500; color: var(--ink-2); }
+.rightnow-eyebrow { font-size: 13px; font-weight: 500; color: var(--ink-3); }
 .rightnow-val { font-size: 15px; font-weight: 600; color: var(--accent); }
-.rightnow-title { font-family: var(--serif); font-size: 20px; font-weight: 500; margin-top: 10px; }
+.rightnow-title { font-family: var(--serif); font-size: 21px; font-weight: 500; margin-top: 8px; }
 .rightnow-body { font-size: 15px; line-height: 1.55; color: var(--ink-2); margin-top: 6px; }
-.rightnow-spark { width: 100%; height: 34px; display: block; margin-top: 16px; }
-.rightnow-more { display: inline-block; font-size: 14px; font-weight: 500; color: var(--accent); margin-top: 14px; }
+.rightnow-spark { width: 120px; height: 46px; display: block; }
+.rightnow-more { display: block; font-size: 13px; color: var(--ink-3); margin-top: 6px; text-align: center; }
 
 /* ---------- today, as a timeline ---------- */
 .tl { list-style: none; margin: 0; padding: 0; }
@@ -685,17 +692,18 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 .tl-i:last-child::before { display: none; }
 .tl-dot {
   position: relative; z-index: 1; flex-shrink: 0;
-  width: 19px; height: 19px; margin-top: 4px; border-radius: 50%;
+  width: 18px; height: 18px; margin-top: 4px; border-radius: 50%;
   border: 1.5px solid var(--line-strong); background: var(--ground);
-  transition: border-color .3s var(--ease), background-color .3s var(--ease);
+  transition: border-color .3s var(--ease);
 }
-.tl-i.done .tl-dot { border-color: var(--success); background: var(--success); }
+/* Done is a ring with a tick drawn inside it, not a filled badge. */
+.tl-i.done .tl-dot { border-color: var(--success); }
 .tl-i.done .tl-dot::after {
-  content: ''; position: absolute; left: 5px; top: 4.5px;
-  width: 5px; height: 8px; border: solid var(--ground);
+  content: ''; position: absolute; left: 5px; top: 3px;
+  width: 4px; height: 8px; border: solid var(--success);
   border-width: 0 1.5px 1.5px 0; transform: rotate(45deg);
 }
-.tl-i.now .tl-dot { border-color: var(--accent); box-shadow: 0 0 0 4px var(--wash); }
+.tl-i.now .tl-dot { border-color: var(--accent); border-width: 2px; }
 .tl-body { flex: 1; min-width: 0; }
 .tl-time { font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
 .tl-name { font-size: 17px; margin-top: 1px; }
@@ -798,7 +806,10 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
   transform: translateX(-50%) translateY(24px);
   width: calc(100% - 32px); max-width: 448px;
   background: var(--lift);
+  border: 1px solid var(--line);
   border-left: 2px solid var(--accent);
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.10);
   padding: 13px 16px;
   font-size: 14px;
   line-height: 1.45;
@@ -816,8 +827,16 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 
 <div id="app">
   <header class="head">
-    <div class="head-name">MindfulFast</div>
-    <div class="head-clock" id="wallClock">--:--</div>
+    <span class="head-mark" aria-hidden="true">
+      <svg viewBox="0 0 34 34"><circle cx="17" cy="17" r="15.5"/>
+        <path d="M17 24c0-4 2.2-7 5.6-8.2C22.6 20 20.4 23 17 24z"/>
+        <path d="M17 24c0-4-2.2-7-5.6-8.2C11.4 20 13.6 23 17 24z"/>
+        <path d="M17 24v-6"/></svg>
+    </span>
+    <div class="head-mid">
+      <h1 class="head-name">MindfulFast</h1>
+    </div>
+    <span class="head-clock" id="wallClock">--:--</span>
   </header>
 
   <!-- ======================= TIMER ======================= -->
@@ -831,6 +850,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
           <path class="arc arc-eat-live"  id="arcEatLive"  d=""/>
           <path class="arc arc-fast-dim"  id="arcFastDim"  d=""/>
           <path class="arc arc-fast-live" id="arcFastLive" d=""/>
+          <circle class="lead" id="dialLead" r="5" cx="150" cy="150" opacity="0"/>
           <line class="hand" id="dialHand" x1="150" y1="150" x2="150" y2="150"/>
           <g id="dialHandle" class="handle-g">
             <circle class="handle-halo" id="handleHalo" r="18"/>
@@ -839,9 +859,8 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
         </svg>
         <div class="dial-face">
           <div class="dial-state" id="dialState">Not fasting</div>
-          <div class="dial-digits idle" id="dialDigits">16:00:00</div>
+          <div class="dial-digits idle" id="dialDigits">16:00</div>
           <div class="dial-sub" id="dialSub">16-hour fast</div>
-          <div class="dial-hint" id="dialHint"></div>
         </div>
       </div>
 
@@ -849,24 +868,28 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
         <button class="proto active" data-p="16:8">16:8</button>
         <button class="proto" data-p="18:6">18:6</button>
         <button class="proto" data-p="20:4">20:4</button>
-        <button class="proto" data-p="23:1">omad</button>
+        <button class="proto" data-p="23:1">OMAD</button>
       </div>
     </div>
 
-    <button class="act" id="actBtn" onclick="toggleFast()"><span>Start fast</span></button>
+    <div class="act-wrap">
+      <button class="act" id="actBtn" onclick="toggleFast()"><span>Start fast</span><span class="act-arrow" aria-hidden="true">&#8594;</span></button>
+      <div class="dial-hint" id="dialHint"></div>
+    </div>
 
     <button class="rightnow" onclick="openInsight()">
-      <div class="rightnow-top">
+      <div class="rightnow-left">
         <span class="rightnow-eyebrow">Right now</span>
-        <span class="rightnow-val" id="readoutVal">...</span>
+        <div class="rightnow-title" id="insightTitle">Cortisol</div>
+        <p class="rightnow-body" id="advice">Estimating your circadian rhythm.</p>
       </div>
-      <div class="rightnow-title" id="insightTitle">Cortisol</div>
-      <p class="rightnow-body" id="advice">Estimating your circadian rhythm.</p>
-      <svg class="rightnow-spark" id="spark" viewBox="0 0 120 34" preserveAspectRatio="none" aria-hidden="true">
-        <polyline class="spark-line" id="sparkLine" points=""/>
-        <circle class="spark-now" id="sparkNow" r="2.8" cx="0" cy="0"/>
-      </svg>
-      <span class="rightnow-more">Why this matters now</span>
+      <div>
+        <svg class="rightnow-spark" id="spark" viewBox="0 0 120 34" preserveAspectRatio="none" aria-hidden="true">
+          <polyline class="spark-line" id="sparkLine" points=""/>
+          <circle class="spark-now" id="sparkNow" r="2.8" cx="0" cy="0"/>
+        </svg>
+        <span class="rightnow-more" id="readoutVal">...</span>
+      </div>
     </button>
 
     <section class="band">
@@ -1205,10 +1228,10 @@ function cortisolBand(v) { return v > 14 ? 'high' : v > 8 ? 'moderate' : 'low'; 
 
 /* ---------------- dial geometry ---------------- */
 const CX = 150, CY = 150;
-const R_ARC = 130;                              // the window ring
-const R_HAND_IN = 121, R_HAND_OUT = 139;        // cursor crosses the ring
-const R_TICK_OUT = 114, R_TICK_MIN = 108, R_TICK_MAJ = 104;
-const R_LABEL = 96;
+const R_ARC = 108;                              // the window ring
+const R_HAND_IN = 99, R_HAND_OUT = 117;        // cursor crosses the ring
+const R_TICK_OUT = 143, R_TICK_MIN = 136, R_TICK_MAJ = 128;
+const R_LABEL = 118;
 
 function polar(r, h) {
   const a = (h/24) * Math.PI*2 - Math.PI/2;
@@ -1226,8 +1249,10 @@ function arcPath(r, h0, h1) {
 function buildDialStatic() {
   // graduations every 2h, longer at the quarters: a scale, not a texture
   let ticks = '';
-  for (let i = 0; i < 24; i += 2) {
-    const major = i % 6 === 0;
+  for (let q = 0; q < 96; q++) {
+    const i = q / 4;
+    const major = q % 24 === 0;
+    if (!major && q % 2) continue;
     const a = polar(major ? R_TICK_MAJ : R_TICK_MIN, i);
     const b = polar(R_TICK_OUT, i);
     ticks += '<line class="tick' + (major ? ' major' : '') + '" x1="' + a[0].toFixed(2) +
@@ -1282,6 +1307,18 @@ function renderDial() {
   document.getElementById('arcEatDim').setAttribute('d', arcPath(R_ARC, s1, s2));
   document.getElementById('arcFastLive').setAttribute('d', liveFast);
   document.getElementById('arcEatLive').setAttribute('d', liveEat);
+
+  const lead = document.getElementById('dialLead');
+  if (lead) {
+    const liveEnd = state.phase === 'idle' ? null
+      : s0 + Math.min((now - state.fastStart) / 3600000, s2 - s0);
+    if (liveEnd === null) lead.setAttribute('opacity', '0');
+    else {
+      const [lx, ly] = polar(R_ARC, liveEnd);
+      lead.setAttribute('cx', lx.toFixed(2)); lead.setAttribute('cy', ly.toFixed(2));
+      lead.setAttribute('opacity', '1');
+    }
+  }
 
   renderHandle(state.phase === 'idle', s0);
 
@@ -1427,7 +1464,8 @@ function renderFace() {
 function renderActionBtn() {
   const b = document.getElementById('actBtn');
   const idle = state.phase === 'idle';
-  b.innerHTML = '<span>' + (idle ? 'Start fast' : 'End fast') + '</span>';
+  b.innerHTML = '<span>' + (idle ? 'Start fast' : 'End fast') +
+    '</span><span class="act-arrow" aria-hidden="true">&#8594;</span>';
   b.classList.toggle('stop', !idle);
   document.getElementById('protocols').classList.toggle('locked', !idle);
 }
@@ -1791,7 +1829,7 @@ function renderCortisol() {
   const pct = Math.max(0, Math.min(1, v / CORT_MAX));
 
   // timer-screen readout
-  document.getElementById('readoutVal').textContent = word.toLowerCase();
+  document.getElementById('readoutVal').textContent = word;
   const sn = document.getElementById('sparkNow');
   sn.setAttribute('cx', (h/24 * 120).toFixed(2));
   sn.setAttribute('cy', (31 - pct * 27).toFixed(2));
