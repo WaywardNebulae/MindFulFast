@@ -16,17 +16,17 @@
    The schedule lives in IndexedDB because it must outlive the page.
    ============================================================ */
 
-const CACHE_NAME = 'mindfulfast-v3';
+const CACHE_NAME = 'mindfulfast-v4';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './fonts.css',
-  './fonts/ibm-plex-sans-400.woff2',
-  './fonts/ibm-plex-sans-500.woff2',
-  './fonts/ibm-plex-sans-600.woff2',
-  './fonts/ibm-plex-mono-400.woff2',
-  './fonts/ibm-plex-mono-500.woff2'
+  './fonts/figtree-400.woff2',
+  './fonts/figtree-500.woff2',
+  './fonts/figtree-600.woff2',
+  './fonts/literata-400.woff2',
+  './fonts/literata-500.woff2'
 ];
 
 const DB_NAME = 'mindfulfast-alarms';

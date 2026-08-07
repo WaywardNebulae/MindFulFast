@@ -1,60 +1,60 @@
 # MindfulFast, Design System
 
-**Direction: instrument panel.** A chronometer for a physiological process.
-Not a dashboard, not a wellness app, not a landing page. The screen is a
-calibrated face you read, and the controls sit quietly around it.
+**Direction: quiet daylight.** A calm health tool. Air, soft contrast between
+surfaces, and type that reads like a book rather than a readout.
 
 This file is the constraint set. Check work against it before calling a
-screen done. Three earlier passes failed by re-skinning the same skeleton
-with a new palette, the palette was never the problem. **The structure is
-the design.**
+screen done. **The structure is the design**, not the palette.
 
 ---
 
-## What failed before, so it does not come back
+## What failed before
 
-| Attempt | Palette | Why it read as generic |
-|---------|---------|------------------------|
-| 1 | cream / sage / amber | Exactly the documented AI-design tell |
-| 2 | blue / gray | Relocated to a different safe palette, identical structure |
-| 3 | monochrome + semantic | Absence of a direction is not a direction |
+| Attempt | Why it read wrong |
+|---------|-------------------|
+| 1 | cream / sage / amber, the documented AI-design tell |
+| 2 | blue / gray, a different safe palette, identical structure |
+| 3 | monochrome, absence of a direction is not a direction |
+| 4 | dark instrument panel, precise but cold and clinical |
 
-All three shared: centred ring widget, chip row, full-width filled button,
-a stack of visually identical `label + content` sections, 4-tab Lucide icon
-nav. **That skeleton is the slop.** Changing hexes never touched it.
+Attempts 1 to 3 all shared one skeleton: centred ring widget, chip row,
+full-width filled button, identical stacked sections, icon tab bar. Changing
+hexes never touched it.
+
+Attempt 4 fixed the structure and was genuinely coherent, but the mood was
+wrong for the job. Monospace everywhere, tight rhythm and a cold blue-black
+ground read as a machine readout. This app is used by someone trying to
+settle, so it should feel settled.
+
+**Mono is gone entirely.** It was the single biggest thing making the app feel
+clinical, and removing it did more for calm than any palette change.
 
 ---
 
 ## Palette
 
-Dark ground is a deliberate, stated choice (requested), not a reflex.
-There is no light theme, committing fully beats supporting both badly.
+Light is the primary, deliberate choice. Dark is paired rather than reflexive:
+the hardest moments this app exists for happen in the evening.
 
-| Token | Value | Role |
-|-------|-------|------|
-| `--ground` | `#0E1116` | The one and only surface |
-| `--lift` | `#191E26` | Transient overlays only. Never layout. |
-| `--ink` | `#EAEDF2` | Primary text |
-| `--ink-2` | `#B6BEC9` | Body prose, secondary. 10.1:1 |
-| `--ink-3` | `#939BA7` | Smallest text allowed. 6.7:1 |
-| `--grad` | `#555F6D` | Dial graduations. Non-text only. |
-| `--rule` | `#363E4A` | Item separators (~1.8:1) |
-| `--rule-strong` | `#49525F` | Region boundaries (~2.4:1) |
-| `--accent` | `#5AA894` | The only brand hue. 6.5:1. |
-| `--accent-dim` | `rgba(90,168,148,.28)` | Unelapsed fast window |
-| `--crit` | `#E0736B` | Semantic only: avoid / gave in / end fast |
+| Token | Light | Dark | Role |
+|-------|-------|------|------|
+| `--ground` | `#F4F6F5` | `#141A19` | The one and only surface |
+| `--ink` | `#16211F` | `#E8EDEB` | Primary text |
+| `--ink-2` | `#4E5C59` | `#AFBAB7` | Prose |
+| `--ink-3` | `#5F6D6A` | `#8B9794` | Smallest text allowed |
+| `--line` | `#DDE2E0` | `#242D2B` | Item separators |
+| `--line-strong` | `#C3CCC9` | `#37423F` | Region boundaries |
+| `--accent` | `#2F6B5F` | `#6FBBA8` | The one brand hue |
+| `--accent-soft` | 34% accent | 30% accent | Unelapsed fast window |
+| `--crit` | `#A8443C` | `#E08C84` | Semantic only |
 
-Three active hues: ground (dominant), ink scale (neutral), accent (~10%
-coverage). `--crit` is semantic and kept out of the brand system.
+Ground is a pale cool paper with no yellow cast, so it is not the cream tell.
+Ink is a deep pine rather than pure black. One accent, a deep teal-green,
+sitting at roughly 10% coverage.
 
-**Rejected on purpose:** brass/gold (the brief names near-black-and-gold as
-a relocation trap), sage (same), Tailwind blue (attempt 2), any purple.
-The accent is a desaturated medical teal, a monitor trace, tied to the
-content rather than picked for taste.
-
-**No semantic traffic light.** Cortisol is a *magnitude*, so it is encoded
-by position on a graduated scale and by the word itself, not by green /
-amber / red. That removed two hues from the system.
+Contrast is measured, not eyeballed. Light: 15.2 / 6.5 / 4.9 against the
+ground. Dark: 14.9 / 8.8 / 5.8. An earlier pass shipped an `--ink-3` at 4.0:1
+that read as faint, so check a render rather than trusting a token name.
 
 ---
 
@@ -62,21 +62,16 @@ amber / red. That removed two hues from the system.
 
 Real pairing, shipped as local woff2 (OFL, cached by the service worker):
 
-- **IBM Plex Sans** 400/500/600, all prose, labels, headings, nav, counts
-- **IBM Plex Mono** 400/500, time, clock values, protocol names, axis labels
+- **Literata** 400/500, display: headings, the timer, large numerals
+- **Figtree** 400/500/600, everything else: UI, labels, prose, data
 
-The split is a rule, not a mood: **mono means a time or a measured value.**
-Counts (streak, totals) are sans, they are not clock values.
+Literata is a screen reading face, warm and sturdy without display drama. No
+italic serif tricks, no tracked-out caps. Figtree carries the interface and
+handles all numerics with `font-variant-numeric: tabular-nums`.
 
-- Body prose ≥ 16px. Smallest text 13px, `--ink-3` only.
-- **The ink ladder is measured, not eyeballed: 16.1 / 10.1 / 6.7 against the
-  ground.** An earlier pass had `--ink-3` at 4.7:1 carrying nearly all the
-  secondary text at 12 to 14px. It cleared AA on paper and still read as
-  faint. Keep real gaps between the three steps, and check a render rather
-  than trusting the token name.
-- Hierarchy from size and weight. Never italic display, never tracked-out
-  caps, never all-caps micro-labels.
-- Section labels: 13px / 500 / `--ink-3` / sentence case / no tracking.
+- Body prose ≥ 16px, line-height 1.6. Smallest text 14px.
+- Hierarchy from size, weight and space. Never from novelty.
+- Section labels: 14px / 500 / `--ink-3` / sentence case / no tracking.
 
 ---
 
@@ -123,8 +118,9 @@ windows are arcs at their **actual clock positions**, so the ring is always
 complete and splits into two visibly different segments, you read your
 16:8 as a proportion of the real day.
 
-- Ring `r=130` stroke 6. Fast = accent (elapsed) over `--accent-dim`
-  (remaining). Eat = `--ink-3` over `--rule-strong`.
+- Ring `r=130` stroke 5, **butt caps**. Round caps leave a visible dot at
+  every arc end and read as debris. Fast = accent (elapsed) over `--accent-soft`
+  (remaining). Eat sits at stroke 3 so it is clearly subordinate.
 - Cursor crosses the ring (`r` 121→139) so it reads as a marker on a scale,
   never a hand floating outside it.
 - Graduations every 2h, longer at the quarters, with `12a / 6a / 12p / 6p`.

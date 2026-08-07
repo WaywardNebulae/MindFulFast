@@ -1,45 +1,62 @@
 <meta charset="UTF-8">
 <title>MindfulFast</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#0E1116">
+<meta name="theme-color" content="#F4F6F5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141A19" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="fonts.css">
 <style>
 /* ============================================================
-   MindfulFast: instrument panel
-   See DESIGN.md. Dark ground is a deliberate, stated choice.
-   One ground. Separators are rules and space, never frames.
+   MindfulFast, direction: quiet daylight.
+
+   A calm health tool, not an instrument panel. The previous pass was
+   cold and technical: blue-black ground, monospace everywhere, tight
+   rhythm. Calm comes from air, soft contrast between surfaces, and
+   type that reads like a book rather than a readout.
+
+   Mono is gone entirely. It was the single biggest thing making this
+   feel clinical.
+
+   Light is the primary, deliberate choice. Dark is paired rather than
+   reflexive, because the hardest moments this app is built for happen
+   in the evening.
    ============================================================ */
 :root {
-  color-scheme: dark;
+  color-scheme: light dark;
 
-  --ground:      #0E1116;
-  --lift:        #191E26;   /* transient overlays only, never layout */
+  --ground:      #F4F6F5;   /* pale cool paper, no yellow cast */
+  --ink:         #16211F;   /* 15.2:1  deep pine, never pure black */
+  --ink-2:       #4E5C59;   /*  6.5:1  prose */
+  --ink-3:       #5F6D6A;   /*  4.9:1  smallest text allowed */
+  --line:        #DDE2E0;   /* hairline separators */
+  --line-strong: #C3CCC9;   /* region boundaries, dial track */
+  --accent:      #2F6B5F;   /*  5.7:1  the one brand hue */
+  --accent-soft: rgba(47,107,95,0.34);
+  --crit:        #A8443C;   /*  5.4:1  semantic only */
+  --lift:        #FFFFFF;   /* transient overlays only */
 
-  /* Measured against --ground. A three-step ladder with real gaps between
-     the steps: 16.1 / 10.1 / 6.7. The old ink-3 sat at 4.7 and carried most
-     of the secondary text at 12 to 14px, which read as faint rather than
-     quiet. */
-  --ink:         #EAEDF2;   /* 16.1:1 */
-  --ink-2:       #B6BEC9;   /* 10.1:1  prose, secondary */
-  --ink-3:       #939BA7;   /*  6.7:1  smallest text allowed */
-  --grad:        #555F6D;   /* dial graduations, non-text only */
-
-  --rule:        #363E4A;   /* item separators */
-  --rule-strong: #49525F;   /* region boundaries */
-
-  --accent:      #5AA894;   /* 6.5:1, the only brand hue */
-  --accent-hi:   #7CC4B0;
-  --accent-dim:  rgba(90,168,148,0.28);
-
-  --crit:        #E0736B;   /* semantic only: avoid / gave in */
-
-  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
-  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sans:  "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --serif: "Literata", Georgia, serif;
 
   --gutter: 24px;
+  --ease: cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ground:      #141A19;
+    --ink:         #E8EDEB;
+    --ink-2:       #AFBAB7;
+    --ink-3:       #8B9794;
+    --line:        #242D2B;
+    --line-strong: #37423F;
+    --accent:      #6FBBA8;
+    --accent-soft: rgba(111,187,168,0.30);
+    --crit:        #E08C84;
+    --lift:        #1D2523;
+  }
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -50,7 +67,7 @@ body {
   background: var(--ground);
   color: var(--ink);
   font-size: 16px;
-  line-height: 1.5;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
@@ -75,12 +92,12 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
   justify-content: space-between;
   padding: 14px var(--gutter) 12px;
   padding-top: max(14px, env(safe-area-inset-top));
-  border-bottom: 1px solid var(--rule-strong);
+  border-bottom: 1px solid var(--line-strong);
   flex-shrink: 0;
 }
-.head-name { font-size: 15px; font-weight: 600; letter-spacing: -0.2px; }
+.head-name { font-family: var(--serif); font-size: 17px; font-weight: 500; letter-spacing: -0.2px; }
 .head-clock {
-  font-family: var(--mono);
+  font-family: var(--sans);
   font-size: 13px;
   font-variant-numeric: tabular-nums;
   color: var(--ink-3);
@@ -100,16 +117,16 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 /* Rhythm carries the difference between sections, not frames. Dense numeric
    readouts sit tight; controls and prose get room. Four sections in a row at
    identical padding is what made this read as one repeated template. */
-.band { padding: 26px var(--gutter); border-bottom: 1px solid var(--rule-strong); }
-.band.tight { padding: 18px var(--gutter) 20px; }
-.band.airy  { padding: 36px var(--gutter); }
+.band { padding: 34px var(--gutter); border-bottom: 1px solid var(--line-strong); }
+.band.tight { padding: 24px var(--gutter) 26px; }
+.band.airy  { padding: 46px var(--gutter); }
 .band.airy .band-label { margin-bottom: 20px; }
 .band:last-child { border-bottom: none; }
 .band-label {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--ink-3);
-  margin-bottom: 14px;
+  margin-bottom: 18px;
 }
 .prose { font-size: 16px; line-height: 1.6; color: var(--ink-2); }
 
@@ -123,24 +140,24 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 }
 .dial { width: 100%; height: 100%; display: block; }
 
-.tick { stroke: var(--grad); stroke-width: 1; }
-.tick.major { stroke: var(--ink-3); stroke-width: 1.5; }
+.tick { stroke: var(--ink-3); stroke-opacity: 0.45; stroke-width: 1; }
+.tick.major { stroke: var(--ink-3); stroke-opacity: 0.8; stroke-width: 1.25; }
 .dial-lab {
   fill: var(--ink-3);
-  font-family: var(--mono);
+  font-family: var(--sans);
   font-size: 9px;
   text-anchor: middle;
   dominant-baseline: central;
 }
 
 /* the ring reads as two segments: fast vs eat, elapsed vs remaining */
-.arc { fill: none; stroke-width: 6; stroke-linecap: butt; }
-.arc-fast-dim  { stroke: var(--accent-dim); }
+.arc { fill: none; stroke-width: 5; stroke-linecap: butt; }
+.arc-fast-dim  { stroke: var(--accent-soft); }
 .arc-fast-live { stroke: var(--accent); }
-.arc-eat-dim   { stroke: var(--rule-strong); }
-.arc-eat-live  { stroke: var(--ink-3); }
+.arc-eat-dim   { stroke: var(--line-strong); stroke-width: 3; }
+.arc-eat-live  { stroke: var(--ink-3); stroke-width: 3; }
 
-.hand { stroke: var(--ink); stroke-width: 2.5; stroke-linecap: butt; }
+.hand { stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
 
 .dial-face {
   position: absolute;
@@ -160,10 +177,10 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 }
 .dial-state.live { color: var(--accent); }
 .dial-digits {
-  font-family: var(--mono);
+  font-family: var(--serif);
   font-size: clamp(30px, 9.8vw, 38px);
   font-weight: 500;
-  letter-spacing: -1.5px;
+  letter-spacing: -1px;
   font-variant-numeric: tabular-nums;
   line-height: 1;
   color: var(--ink);
@@ -179,7 +196,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
   margin-top: 22px;
 }
 .proto {
-  font-family: var(--mono);
+  font-family: var(--sans);
   font-size: 15px;
   color: var(--ink-3);
   cursor: pointer;
@@ -197,14 +214,14 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 .act {
   display: block;
   width: 100%;
-  padding: 24px var(--gutter);
-  font-size: 20px;
+  padding: 26px var(--gutter);
+  font-size: 19px;
   font-weight: 600;
   color: var(--accent);
   text-align: center;
   cursor: pointer;
-  border-top: 1px solid var(--rule-strong);
-  border-bottom: 1px solid var(--rule-strong);
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
 }
 .act > span {
   display: inline-block;
@@ -226,7 +243,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 .spark-line { fill: none; stroke: var(--accent); stroke-opacity: 0.55; stroke-width: 1.25; }
 .spark-now { fill: var(--accent); }
 .readout-val {
-  font-family: var(--mono);
+  font-family: var(--sans);
   font-size: 14px;
   font-weight: 500;
   color: var(--accent);
@@ -237,7 +254,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
   font-size: 15px;
   line-height: 1.55;
   color: var(--ink-2);
-  border-bottom: 1px solid var(--rule-strong);
+  border-bottom: 1px solid var(--line-strong);
 }
 
 /* ---------- tabular data rows ---------- */
@@ -248,10 +265,10 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
   gap: 16px;
   padding: 9px 0;
 }
-.row + .row { border-top: 1px solid var(--rule); }
+.row + .row { border-top: 1px solid var(--line); }
 .row-key { font-size: 15px; color: var(--ink-2); }
 .row-val {
-  font-family: var(--mono);
+  font-family: var(--sans);
   font-size: 15px;
   font-variant-numeric: tabular-nums;
   color: var(--ink);
@@ -269,7 +286,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 .alarm-status.warn { color: var(--crit); }
 .alarm-status > div + div { margin-top: 6px; }
 .alarm-server {
-  font-family: var(--mono);
+  font-family: var(--sans);
   font-size: 12px;
   color: var(--accent);
   overflow-wrap: anywhere;
@@ -286,35 +303,35 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 .alarm-status button:hover { text-decoration: underline; text-underline-offset: 6px; }
 
 .ctl { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 14px 0; }
-.ctl + .ctl { border-top: 1px solid var(--rule); }
+.ctl + .ctl { border-top: 1px solid var(--line); }
 .ctl-name { font-size: 16px; }
 .ctl-note { font-size: 14px; color: var(--ink-3); margin-top: 2px; }
 .sw {
   width: 46px; height: 26px; border-radius: 13px;
   border: 1px solid var(--ink-3);
   position: relative; cursor: pointer; flex-shrink: 0;
-  transition: border-color .18s, background-color .18s;
+  transition: border-color .28s, background-color .28s;
 }
 .sw-knob {
   position: absolute; top: 3px; left: 3px;
   width: 18px; height: 18px; border-radius: 50%;
   background: var(--ink-3);
-  transition: transform .18s, background-color .18s;
+  transition: transform .28s, background-color .28s;
 }
-.sw.on { border-color: var(--accent); background: var(--accent-dim); }
+.sw.on { border-color: var(--accent); background: var(--accent-soft); }
 .sw.on .sw-knob { transform: translateX(20px); background: var(--accent); }
 
 /* ============================ CORTISOL ============================ */
-.gauge-band { padding: 30px var(--gutter) 26px; border-bottom: 1px solid var(--rule-strong); }
+.gauge-band { padding: 30px var(--gutter) 26px; border-bottom: 1px solid var(--line-strong); }
 .gauge-val {
-  font-size: 30px; font-weight: 600; letter-spacing: -0.5px;
+  font-family: var(--serif); font-size: 32px; font-weight: 500; letter-spacing: -0.5px;
   color: var(--accent); line-height: 1;
 }
 .gauge-ctx { font-size: 14px; color: var(--ink-2); margin-top: 8px; }
 .gauge { margin-top: 22px; }
 .gauge-svg { width: 100%; height: 26px; display: block; }
-.gauge-track { stroke: var(--rule-strong); stroke-width: 1.5; }
-.gauge-grad { stroke: var(--grad); stroke-width: 1; }
+.gauge-track { stroke: var(--line-strong); stroke-width: 1.5; }
+.gauge-grad { stroke: var(--line-strong); stroke-width: 1; }
 .gauge-mark { stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round; }
 .gauge-ends {
   display: flex; justify-content: space-between;
@@ -328,18 +345,18 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 .curve-wrap canvas { width: 100%; height: 100%; display: block; }
 
 .tip { padding: 14px 0; }
-.tip + .tip { border-top: 1px solid var(--rule); }
+.tip + .tip { border-top: 1px solid var(--line); }
 .tip-h { font-size: 16px; font-weight: 600; margin-bottom: 3px; }
 .tip-p { font-size: 16px; line-height: 1.55; color: var(--ink-2); }
 
 .meal { display: flex; gap: 14px; padding: 11px 0; align-items: flex-start; }
-.meal + .meal { border-top: 1px solid var(--rule); }
+.meal + .meal { border-top: 1px solid var(--line); }
 .meal-bar { width: 2px; align-self: stretch; min-height: 30px; flex-shrink: 0; }
 .meal-bar.optimal { background: var(--accent); }
-.meal-bar.acceptable { background: var(--accent-dim); }
+.meal-bar.acceptable { background: var(--accent-soft); }
 .meal-bar.avoid { background: var(--crit); }
 .meal-t {
-  font-family: var(--mono); font-size: 14px; font-weight: 500;
+  font-family: var(--sans); font-size: 14px; font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
 .meal-d { font-size: 15px; color: var(--ink-2); margin-top: 2px; }
@@ -347,7 +364,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 /* ============================ URGE ============================ */
 .urge-band {
   padding: 34px var(--gutter) 30px;
-  border-bottom: 1px solid var(--rule-strong);
+  border-bottom: 1px solid var(--line-strong);
   text-align: center;
 }
 .urge-lead {
@@ -356,28 +373,28 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 }
 .urge-btn {
   width: 168px; height: 168px; border-radius: 50%;
-  border: 1px solid var(--rule-strong);
+  border: 1px solid var(--line-strong);
   margin: 0 auto;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center; gap: 6px;
   cursor: pointer;
-  transition: border-color .18s;
+  transition: border-color .28s;
 }
 .urge-btn:hover, .urge-btn:active { border-color: var(--accent); }
 .urge-btn-l { font-size: 19px; font-weight: 600; line-height: 1.25; }
 .urge-btn-s { font-size: 12px; color: var(--accent); }
 
 .iv { padding: 13px 0; cursor: pointer; }
-.iv + .iv { border-top: 1px solid var(--rule); }
+.iv + .iv { border-top: 1px solid var(--line); }
 .iv-h { font-size: 16px; font-weight: 600; margin-bottom: 2px; }
 .iv-p { font-size: 15px; color: var(--ink-2); line-height: 1.5; }
 .iv:hover .iv-h { color: var(--accent); }
 
 .log { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; padding: 10px 0; }
-.log + .log { border-top: 1px solid var(--rule); }
+.log + .log { border-top: 1px solid var(--line); }
 .log-t { font-size: 14px; }
 .log-when {
-  font-family: var(--mono); font-size: 12px;
+  font-family: var(--sans); font-size: 12px;
   font-variant-numeric: tabular-nums; color: var(--ink-3); margin-top: 2px;
 }
 .log-r { font-size: 13px; font-weight: 500; flex-shrink: 0; }
@@ -392,7 +409,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 }
 /* counts, not clock values. mono is reserved for time. */
 .streak-n {
-  font-size: 54px; font-weight: 600;
+  font-family: var(--serif); font-size: 54px; font-weight: 500;
   letter-spacing: -2px; line-height: 0.9;
   font-variant-numeric: tabular-nums;
 }
@@ -400,12 +417,12 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 .pair {
   display: flex;
   padding: 0 var(--gutter) 22px;
-  border-bottom: 1px solid var(--rule-strong);
+  border-bottom: 1px solid var(--line-strong);
 }
 .pair-i { flex: 1; }
-.pair-i + .pair-i { border-left: 1px solid var(--rule); padding-left: 18px; }
+.pair-i + .pair-i { border-left: 1px solid var(--line); padding-left: 18px; }
 .pair-n {
-  font-size: 22px; font-weight: 600;
+  font-family: var(--serif); font-size: 24px; font-weight: 500;
   font-variant-numeric: tabular-nums; line-height: 1;
 }
 .pair-l { font-size: 12px; color: var(--ink-3); margin-top: 5px; }
@@ -418,7 +435,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 .cal-d {
   aspect-ratio: 1;
   display: flex; align-items: center; justify-content: center;
-  font-family: var(--mono); font-size: 12px;
+  font-family: var(--sans); font-size: 12px;
   font-variant-numeric: tabular-nums;
   color: var(--ink-3);
   border-bottom: 2px solid transparent;
@@ -432,7 +449,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
   flex: 1;
   padding: 0 0 9px;
   border-bottom: 2px solid var(--ink-3);
-  font-family: var(--mono);
+  font-family: var(--sans);
   font-variant-numeric: tabular-nums;
   outline: none;
 }
@@ -448,9 +465,9 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 
 /* ============================ REGULAR EATING ============================ */
 .slot { display: flex; align-items: baseline; gap: 14px; padding: 11px 0; cursor: pointer; }
-.slot + .slot { border-top: 1px solid var(--rule); }
+.slot + .slot { border-top: 1px solid var(--line); }
 .slot-t {
-  font-family: var(--mono); font-size: 14px; font-variant-numeric: tabular-nums;
+  font-family: var(--sans); font-size: 14px; font-variant-numeric: tabular-nums;
   color: var(--ink); width: 74px; flex-shrink: 0;
 }
 .slot-n { flex: 1; font-size: 16px; color: var(--ink-2); }
@@ -475,7 +492,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
   padding-top: max(40px, env(safe-area-inset-top));
 }
 .intro-body::-webkit-scrollbar { width: 0; }
-.intro-h { font-size: 26px; font-weight: 600; letter-spacing: -0.5px; margin-bottom: 22px; }
+.intro-h { font-family: var(--serif); font-size: 28px; font-weight: 500; letter-spacing: -0.5px; margin-bottom: 22px; }
 .intro-p { font-size: 16px; line-height: 1.6; color: var(--ink-2); }
 .intro-p + .intro-p { margin-top: 18px; }
 .intro-p b { color: var(--ink); font-weight: 600; }
@@ -493,11 +510,11 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
   display: flex; align-items: center; justify-content: space-between;
   padding: 14px var(--gutter);
   padding-top: max(14px, env(safe-area-inset-top));
-  border-bottom: 1px solid var(--rule-strong);
+  border-bottom: 1px solid var(--line-strong);
   flex-shrink: 0;
 }
 .flow-step {
-  font-family: var(--mono); font-size: 12px;
+  font-family: var(--sans); font-size: 12px;
   color: var(--ink-3); font-variant-numeric: tabular-nums;
 }
 .flow-x { font-size: 14px; color: var(--ink-3); cursor: pointer; padding: 8px; margin: -8px -8px -8px 0; }
@@ -507,7 +524,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 }
 .flow-body::-webkit-scrollbar { width: 0; }
 .flow-lead { font-size: 15px; line-height: 1.55; color: var(--accent); margin-bottom: 20px; }
-.flow-q { font-size: 22px; font-weight: 600; line-height: 1.3; margin-bottom: 6px; }
+.flow-q { font-family: var(--serif); font-size: 24px; font-weight: 500; line-height: 1.3; margin-bottom: 6px; }
 .flow-hint { font-size: 15px; color: var(--ink-3); margin-bottom: 20px; }
 .flow-sub { font-size: 13px; color: var(--ink-3); margin: 26px 0 10px; }
 
@@ -519,7 +536,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
   padding: 8px 0; border-bottom: 2px solid transparent; text-align: left;
 }
 .opt.on { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
-.opts.col .opt { font-size: 17px; padding: 15px 0; border-bottom: 1px solid var(--rule); width: 100%; }
+.opts.col .opt { font-size: 17px; padding: 15px 0; border-bottom: 1px solid var(--line); width: 100%; }
 .opts.col .opt + .opt { }
 .opts.col .opt.on { border-bottom-color: var(--accent); }
 .opt-d { display: block; font-size: 14px; color: var(--ink-3); margin-top: 3px; font-weight: 400; }
@@ -528,10 +545,10 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 .scale { display: flex; width: 100%; }
 .scale-i {
   flex: 1; padding: 10px 0 8px; cursor: pointer;
-  font-family: var(--mono); font-size: 13px;
+  font-family: var(--sans); font-size: 13px;
   font-variant-numeric: tabular-nums;
   color: var(--ink-3); text-align: center;
-  border-top: 2px solid var(--rule);
+  border-top: 2px solid var(--line);
 }
 .scale-i.on { color: var(--accent); border-top-color: var(--accent); font-weight: 600; }
 .scale-ends {
@@ -549,7 +566,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 
 .flow-foot {
   flex-shrink: 0;
-  border-top: 1px solid var(--rule-strong);
+  border-top: 1px solid var(--line-strong);
   padding-bottom: env(safe-area-inset-bottom);
   display: flex; align-items: stretch;
 }
@@ -567,7 +584,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 /* countdown while an intervention runs */
 .hold { text-align: center; padding: 30px 0 10px; }
 .hold-n {
-  font-family: var(--mono); font-size: 52px; font-weight: 500;
+  font-family: var(--serif); font-size: 52px; font-weight: 500;
   font-variant-numeric: tabular-nums; letter-spacing: -2px; line-height: 1;
 }
 .hold-l { font-size: 14px; color: var(--ink-3); margin-top: 12px; }
@@ -575,17 +592,17 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 .hold-tip { font-size: 16px; color: var(--ink-2); line-height: 1.55; margin-top: 8px; }
 
 .delta {
-  font-family: var(--mono); font-size: 14px;
+  font-family: var(--sans); font-size: 14px;
   color: var(--accent); margin-top: 12px;
   font-variant-numeric: tabular-nums;
 }
 
 /* ============================ LOG ============================ */
 .ep { padding: 14px 0; }
-.ep + .ep { border-top: 1px solid var(--rule); }
+.ep + .ep { border-top: 1px solid var(--line); }
 .ep-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 .ep-when {
-  font-family: var(--mono); font-size: 12px; color: var(--ink-3);
+  font-family: var(--sans); font-size: 12px; color: var(--ink-3);
   font-variant-numeric: tabular-nums; flex-shrink: 0;
 }
 .ep-out { font-size: 13px; font-weight: 500; flex-shrink: 0; }
@@ -595,7 +612,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 .ep-what { font-size: 16px; margin-top: 5px; }
 .ep-meta { font-size: 14px; color: var(--ink-3); margin-top: 3px; }
 .ep-arc {
-  font-family: var(--mono); font-size: 13px; color: var(--ink-2);
+  font-family: var(--sans); font-size: 13px; color: var(--ink-2);
   margin-top: 6px; font-variant-numeric: tabular-nums;
 }
 .ep-set { font-size: 13px; color: var(--ink-2); margin-top: 8px; line-height: 1.5; }
@@ -606,17 +623,17 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 
 /* ============================ PATTERNS ============================ */
 .hours { display: flex; align-items: flex-end; gap: 2px; height: 78px; margin-top: 4px; }
-.hour-b { flex: 1; background: var(--accent-dim); min-height: 1px; }
+.hour-b { flex: 1; background: var(--accent-soft); min-height: 1px; }
 .hour-b.hot { background: var(--accent); }
 .hours-ax {
   display: flex; justify-content: space-between;
-  font-family: var(--mono); font-size: 10px; color: var(--ink-3); margin-top: 6px;
+  font-family: var(--sans); font-size: 10px; color: var(--ink-3); margin-top: 6px;
 }
 .rank { display: flex; align-items: baseline; gap: 12px; padding: 9px 0; }
-.rank + .rank { border-top: 1px solid var(--rule); }
+.rank + .rank { border-top: 1px solid var(--line); }
 .rank-n { flex: 1; font-size: 15px; color: var(--ink-2); }
 .rank-v {
-  font-family: var(--mono); font-size: 14px; color: var(--ink);
+  font-family: var(--sans); font-size: 14px; color: var(--ink);
   font-variant-numeric: tabular-nums;
 }
 .insight {
@@ -632,13 +649,13 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
   width: 100%; max-width: 480px;
   display: flex;
   background: var(--ground);
-  border-top: 1px solid var(--rule-strong);
+  border-top: 1px solid var(--line-strong);
   padding-bottom: env(safe-area-inset-bottom);
   z-index: 50;
 }
 .nav-i {
   flex: 1;
-  padding: 15px 0 16px;
+  padding: 18px 0 19px;
   font-size: 13px;
   font-weight: 500;
   color: var(--ink-3);
@@ -659,12 +676,12 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 .breathe-ring {
   width: 150px; height: 150px; border-radius: 50%;
   border: 1px solid var(--accent);
-  transition: width .35s ease, height .35s ease, border-color .35s ease;
+  transition: width .45s var(--ease), height .45s var(--ease), border-color .45s var(--ease);
 }
 .breathe-ring.wide { width: 232px; height: 232px; border-color: var(--accent-hi); }
 .breathe-cue { font-size: 19px; font-weight: 500; margin-top: 34px; }
 .breathe-n {
-  font-family: var(--mono); font-size: 44px; font-weight: 500;
+  font-family: var(--serif); font-size: 44px; font-weight: 500;
   font-variant-numeric: tabular-nums; margin-top: 6px;
 }
 .breathe-r { font-size: 13px; color: var(--ink-3); margin-top: 26px; }
@@ -1682,7 +1699,7 @@ function drawCurve() {
     ctx.stroke();
   }
   ctx.fillStyle = css('--ink-3');
-  ctx.font = '10px "IBM Plex Mono", monospace';
+  ctx.font = '10px "Figtree", sans-serif';
   ctx.textAlign = 'center';
   ['12a','6a','12p','6p',''].forEach((l, i) => {
     if (l) ctx.fillText(l, pad.l + (i/4) * cw, h - 3);
@@ -1723,7 +1740,7 @@ function drawWeight() {
 
   if (state.weightLog.length < 2) {
     ctx.fillStyle = css('--ink-3');
-    ctx.font = '14px "IBM Plex Sans", sans-serif';
+    ctx.font = '14px "Figtree", sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('Two entries needed for a trend', w/2, h/2);
     return;
@@ -1736,7 +1753,7 @@ function drawWeight() {
 
   ctx.strokeStyle = css('--rule'); ctx.lineWidth = 1;
   ctx.fillStyle = css('--ink-3');
-  ctx.font = '10px "IBM Plex Mono", monospace';
+  ctx.font = '10px "Figtree", sans-serif';
   ctx.textAlign = 'right';
   for (let i = 0; i <= 2; i++) {
     const y = pad.t + (ch/2) * i;
