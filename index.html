@@ -26,38 +26,55 @@
 :root {
   color-scheme: light dark;
 
-  --ground:      #F4F6F5;   /* pale cool paper, no yellow cast */
-  --ink:         #16211F;   /* 15.2:1  deep pine, never pure black */
-  --ink-2:       #4E5C59;   /*  6.5:1  prose */
-  --ink-3:       #5F6D6A;   /*  4.9:1  smallest text allowed */
-  --line:        #DDE2E0;   /* hairline separators */
-  --line-strong: #C3CCC9;   /* region boundaries, dial track */
-  --accent:      #2F6B5F;   /*  5.7:1  the one brand hue */
-  --accent-soft: rgba(47,107,95,0.34);
-  --crit:        #A8443C;   /*  5.4:1  semantic only */
-  --lift:        #FFFFFF;   /* transient overlays only */
+  --ground:      #F3F5F4;   /* soft stone, never pure white */
+  --surface:     #FBFCFB;   /* earns its place twice: insight card, sheets */
+  --raised:      #FFFFFF;
+  --ink:         #162128;   /* 15.0:1 */
+  --ink-2:       #5F7078;   /*  4.7:1 */
+  --ink-3:       #5F7078;
+  --line:        #D7DFDB;
+  --line-strong: #C6D2CD;
+  --accent:      #37776C;   /*  4.8:1  darkened from #4E9C90, which was 3.0:1 */
+  --accent-press:#2C6058;
+  --wash:        rgba(55,119,108,0.12);
+  --accent-soft: rgba(55,119,108,0.30);
+  --accent-hi:   #4E9C90;
+  --crit:        #A8443C;
+  --success:     #3E7F45;
+  --warn:        #8A5F28;
+  --shadow:      0 1px 2px rgba(22,33,40,0.05), 0 8px 24px rgba(22,33,40,0.05);
+  --lift:        #FFFFFF;
 
   --sans:  "Figtree", ui-sans-serif, system-ui, sans-serif;
   --serif: "Literata", Georgia, serif;
-
   --gutter: 24px;
-  --ease: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --r: 16px;
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --ground:      #141A19;
-    --ink:         #E8EDEB;
-    --ink-2:       #AFBAB7;
-    --ink-3:       #8B9794;
-    --line:        #242D2B;
-    --line-strong: #37423F;
-    --accent:      #6FBBA8;
-    --accent-soft: rgba(111,187,168,0.30);
+    --ground:      #0F1720;
+    --surface:     #16212B;
+    --raised:      #1C2A35;
+    --ink:         #E6EEF2;
+    --ink-2:       #9FB0BC;
+    --ink-3:       #9FB0BC;
+    --line:        #22303B;
+    --line-strong: #2E3E4A;
+    --accent:      #6FC3B2;
+    --accent-press:#4FA392;
+    --wash:        rgba(111,195,178,0.14);
+    --accent-soft: rgba(111,195,178,0.32);
+    --accent-hi:   #9AD9CB;
     --crit:        #E08C84;
-    --lift:        #1D2523;
+    --success:     #7BC47F;
+    --warn:        #D8A56D;
+    --shadow:      0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.28);
+    --lift:        #1C2A35;
   }
 }
+
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { height: 100%; overflow: hidden; }
@@ -92,7 +109,6 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
   justify-content: space-between;
   padding: 14px var(--gutter) 12px;
   padding-top: max(14px, env(safe-area-inset-top));
-  border-bottom: 1px solid var(--line-strong);
   flex-shrink: 0;
 }
 .head-name { font-family: var(--serif); font-size: 17px; font-weight: 500; letter-spacing: -0.2px; }
@@ -117,11 +133,11 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 /* Rhythm carries the difference between sections, not frames. Dense numeric
    readouts sit tight; controls and prose get room. Four sections in a row at
    identical padding is what made this read as one repeated template. */
-.band { padding: 34px var(--gutter); border-bottom: 1px solid var(--line-strong); }
-.band.tight { padding: 24px var(--gutter) 26px; }
-.band.airy  { padding: 46px var(--gutter); }
+.band { padding: 30px var(--gutter) 34px; }
+.band.tight { padding: 22px var(--gutter) 26px; }
+.band.airy  { padding: 40px var(--gutter) 44px; }
 .band.airy .band-label { margin-bottom: 20px; }
-.band:last-child { border-bottom: none; }
+
 .band-label {
   font-size: 14px;
   font-weight: 500;
@@ -131,7 +147,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 .prose { font-size: 16px; line-height: 1.6; color: var(--ink-2); }
 
 /* ============================ DIAL ============================ */
-.dial-band { padding: 20px var(--gutter) 18px; }
+.dial-band { padding: 8px var(--gutter) 4px; }
 .dial-wrap {
   position: relative;
   width: 100%; max-width: 300px;
@@ -154,8 +170,8 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 .arc { fill: none; stroke-width: 5; stroke-linecap: butt; }
 .arc-fast-dim  { stroke: var(--accent-soft); }
 .arc-fast-live { stroke: var(--accent); }
-.arc-eat-dim   { stroke: var(--line-strong); stroke-width: 3; }
-.arc-eat-live  { stroke: var(--ink-3); stroke-width: 3; }
+.arc-eat-dim   { stroke: var(--ink-3); stroke-opacity: 0.38; stroke-width: 3; }
+.arc-eat-live  { stroke: var(--ink-3); stroke-opacity: 0.75; stroke-width: 3; }
 
 .hand { stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
 
@@ -192,18 +208,20 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 .protocols {
   display: flex;
   justify-content: center;
-  gap: 26px;
+  gap: 6px;
   margin-top: 22px;
 }
 .proto {
   font-family: var(--sans);
   font-size: 15px;
-  color: var(--ink-3);
+  color: var(--ink-2);
   cursor: pointer;
-  padding: 6px 2px;
-  border-bottom: 2px solid transparent;
+  padding: 9px 18px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  transition: color .25s var(--ease), background-color .25s var(--ease), border-color .25s var(--ease);
 }
-.proto.active { color: var(--accent); border-bottom-color: var(--accent); }
+.proto.active { color: var(--accent); background: var(--wash); border-color: var(--wash); font-weight: 600; }
 .protocols.locked .proto { opacity: 0.35; cursor: default; }
 .protocols.locked .proto.active { opacity: 1; }
 
@@ -220,62 +238,23 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
   color: var(--accent);
   text-align: center;
   cursor: pointer;
-  border-top: 1px solid var(--line-strong);
-  border-bottom: 1px solid var(--line-strong);
 }
 .act > span {
   display: inline-block;
   padding-bottom: 7px;
   border-bottom: 2px solid currentColor;
 }
-.act:active > span { opacity: 0.65; }
+.act { transition: transform .18s var(--ease); }
+.act:active { transform: scale(0.97); }
+.act:active > span { color: var(--accent-press); }
 .act.stop { color: var(--crit); }
 
 /* ---------- cortisol readout strip: dense, one line ---------- */
-.readout {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 16px var(--gutter);
-}
-.readout-key { font-size: 13px; color: var(--ink-3); flex-shrink: 0; }
-.readout-spark { flex: 1; height: 24px; display: block; }
 .spark-line { fill: none; stroke: var(--accent); stroke-opacity: 0.55; stroke-width: 1.25; }
 .spark-now { fill: var(--accent); }
-.readout-val {
-  font-family: var(--sans);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--accent);
-  flex-shrink: 0;
-}
-.advice {
-  padding: 0 var(--gutter) 20px;
-  font-size: 15px;
-  line-height: 1.55;
-  color: var(--ink-2);
-  border-bottom: 1px solid var(--line-strong);
-}
 
 /* ---------- tabular data rows ---------- */
-.row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 16px;
-  padding: 9px 0;
-}
-.row + .row { border-top: 1px solid var(--line); }
-.row-key { font-size: 15px; color: var(--ink-2); }
-.row-val {
-  font-family: var(--sans);
-  font-size: 15px;
-  font-variant-numeric: tabular-nums;
-  color: var(--ink);
-  text-align: right;
-}
-.row-val.none { color: var(--ink-3); }
-
+.row + 
 /* ---------- alarms: roomier, with controls ---------- */
 .alarm-status {
   font-size: 14px;
@@ -322,7 +301,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 .sw.on .sw-knob { transform: translateX(20px); background: var(--accent); }
 
 /* ============================ CORTISOL ============================ */
-.gauge-band { padding: 30px var(--gutter) 26px; border-bottom: 1px solid var(--line-strong); }
+.gauge-band { padding: 30px var(--gutter) 26px; }
 .gauge-val {
   font-family: var(--serif); font-size: 32px; font-weight: 500; letter-spacing: -0.5px;
   color: var(--accent); line-height: 1;
@@ -364,7 +343,6 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 /* ============================ URGE ============================ */
 .urge-band {
   padding: 34px var(--gutter) 30px;
-  border-bottom: 1px solid var(--line-strong);
   text-align: center;
 }
 .urge-lead {
@@ -416,8 +394,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 .streak-l { font-size: 15px; color: var(--ink-2); }
 .pair {
   display: flex;
-  padding: 0 var(--gutter) 22px;
-  border-bottom: 1px solid var(--line-strong);
+  padding: 0 var(--gutter) 26px;
 }
 .pair-i { flex: 1; }
 .pair-i + .pair-i { border-left: 1px solid var(--line); padding-left: 18px; }
@@ -642,6 +619,104 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 .insight + .insight { margin-top: 14px; }
 .insight.flag { color: var(--crit); }
 
+
+/* ---------- the one insight card. Surface is used here and on sheets,
+     nowhere else, so depth stays meaningful rather than decorative. ---------- */
+.rightnow {
+  display: block; width: calc(100% - var(--gutter) * 2);
+  margin: 4px var(--gutter) 8px;
+  padding: 22px 22px 20px;
+  background: var(--surface);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+  text-align: left; cursor: pointer;
+  transition: transform .2s var(--ease), background-color .2s var(--ease);
+}
+.rightnow:active { transform: scale(0.985); background: var(--raised); }
+.rightnow-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.rightnow-eyebrow { font-size: 13px; font-weight: 500; color: var(--ink-2); }
+.rightnow-val { font-size: 15px; font-weight: 600; color: var(--accent); }
+.rightnow-title { font-family: var(--serif); font-size: 20px; font-weight: 500; margin-top: 10px; }
+.rightnow-body { font-size: 15px; line-height: 1.55; color: var(--ink-2); margin-top: 6px; }
+.rightnow-spark { width: 100%; height: 34px; display: block; margin-top: 16px; }
+.rightnow-more { display: inline-block; font-size: 14px; font-weight: 500; color: var(--accent); margin-top: 14px; }
+
+/* ---------- today, as a timeline ---------- */
+.tl { list-style: none; margin: 0; padding: 0; }
+.tl-i {
+  position: relative; display: flex; gap: 16px;
+  padding: 12px 12px 12px 0; margin-left: 4px;
+  cursor: pointer; border-radius: 12px; overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+.tl-i::before {                      /* connector */
+  content: ''; position: absolute; left: 9px; top: 30px; bottom: -12px;
+  width: 1px; background: var(--line);
+}
+.tl-i:last-child::before { display: none; }
+.tl-dot {
+  position: relative; z-index: 1; flex-shrink: 0;
+  width: 19px; height: 19px; margin-top: 4px; border-radius: 50%;
+  border: 1.5px solid var(--line-strong); background: var(--ground);
+  transition: border-color .3s var(--ease), background-color .3s var(--ease);
+}
+.tl-i.done .tl-dot { border-color: var(--success); background: var(--success); }
+.tl-i.done .tl-dot::after {
+  content: ''; position: absolute; left: 5px; top: 4.5px;
+  width: 5px; height: 8px; border: solid var(--ground);
+  border-width: 0 1.5px 1.5px 0; transform: rotate(45deg);
+}
+.tl-i.now .tl-dot { border-color: var(--accent); box-shadow: 0 0 0 4px var(--wash); }
+.tl-body { flex: 1; min-width: 0; }
+.tl-time { font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.tl-name { font-size: 17px; margin-top: 1px; }
+.tl-note { font-size: 14px; color: var(--ink-2); margin-top: 2px; }
+.tl-i.done .tl-name, .tl-i.done .tl-time { color: var(--ink-2); }
+.tl-mark { flex-shrink: 0; align-self: center; font-size: 13px; font-weight: 500; color: var(--accent); }
+.tl-i.done .tl-mark { color: var(--success); }
+.tl-i.missed .tl-mark { color: var(--warn); }
+
+.ripple {
+  position: absolute; border-radius: 50%; pointer-events: none;
+  background: var(--wash); transform: scale(0); opacity: 1;
+  animation: ripple .55s var(--ease) forwards;
+}
+@keyframes ripple { to { transform: scale(2.4); opacity: 0; } }
+
+/* ---------- bottom sheet ---------- */
+.sheet-scrim {
+  position: fixed; inset: 0; z-index: 120;
+  background: rgba(15,23,32,0.42);
+  opacity: 0; pointer-events: none;
+  transition: opacity .3s var(--ease);
+}
+.sheet-scrim.on { opacity: 1; pointer-events: auto; }
+.sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 121;
+  max-width: 480px; margin: 0 auto;
+  background: var(--surface);
+  border-radius: 22px 22px 0 0;
+  padding: 10px var(--gutter) max(28px, env(safe-area-inset-bottom));
+  transform: translateY(101%);
+  transition: transform .38s var(--ease);
+  max-height: 82vh; overflow-y: auto;
+}
+.sheet.on { transform: translateY(0); }
+.sheet::-webkit-scrollbar { width: 0; }
+.sheet-grab { width: 36px; height: 4px; border-radius: 2px; background: var(--line-strong); margin: 0 auto 20px; }
+.sheet h2 { font-family: var(--serif); font-size: 23px; font-weight: 500; }
+.sheet p { font-size: 16px; line-height: 1.6; color: var(--ink-2); margin-top: 12px; }
+.sheet-close { display: block; width: 100%; text-align: center; font-size: 16px;
+  font-weight: 600; color: var(--accent); padding: 20px 12px 4px; cursor: pointer; }
+
+/* ---------- gliding nav indicator ---------- */
+.nav { position: fixed; }
+.nav-ink {
+  position: absolute; top: 0; height: 2px; width: 20%;
+  background: var(--accent); border-radius: 0 0 2px 2px;
+  transition: transform .38s var(--ease);
+}
+
 /* ============================ NAV ============================ */
 .nav {
   position: fixed; bottom: 0; left: 50%;
@@ -660,10 +735,8 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
   font-weight: 500;
   color: var(--ink-3);
   cursor: pointer;
-  border-top: 2px solid transparent;
-  margin-top: -1px;
 }
-.nav-i.active { color: var(--ink); border-top-color: var(--accent); }
+.nav-i.active { color: var(--ink); }
 
 /* ---------- overlays (mutually exclusive surfaces) ---------- */
 .breathe {
@@ -748,21 +821,23 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 
     <button class="act" id="actBtn" onclick="toggleFast()"><span>Start fast</span></button>
 
-    <div class="readout">
-      <span class="readout-key">cortisol</span>
-      <svg class="readout-spark" id="spark" viewBox="0 0 120 24" preserveAspectRatio="none" aria-hidden="true">
+    <button class="rightnow" onclick="openInsight()">
+      <div class="rightnow-top">
+        <span class="rightnow-eyebrow">Right now</span>
+        <span class="rightnow-val" id="readoutVal">...</span>
+      </div>
+      <div class="rightnow-title" id="insightTitle">Cortisol</div>
+      <p class="rightnow-body" id="advice">Estimating your circadian rhythm.</p>
+      <svg class="rightnow-spark" id="spark" viewBox="0 0 120 34" preserveAspectRatio="none" aria-hidden="true">
         <polyline class="spark-line" id="sparkLine" points=""/>
-        <circle class="spark-now" id="sparkNow" r="2.5" cx="0" cy="0"/>
+        <circle class="spark-now" id="sparkNow" r="2.8" cx="0" cy="0"/>
       </svg>
-      <span class="readout-val" id="readoutVal">...</span>
-    </div>
-    <p class="advice" id="advice">Estimating your circadian cortisol rhythm.</p>
+      <span class="rightnow-more">Why this matters now</span>
+    </button>
 
-    <section class="band tight">
-      <div class="band-label">Today's schedule</div>
-      <div class="row"><span class="row-key">Fasting window</span><span class="row-val none" id="schedFast">not started</span></div>
-      <div class="row"><span class="row-key">Eating window</span><span class="row-val none" id="schedEat">not started</span></div>
-      <div class="row"><span class="row-key">Next alarm</span><span class="row-val none" id="schedAlarm">none set</span></div>
+    <section class="band">
+      <div class="band-label">Today</div>
+      <ol class="tl" id="timeline"></ol>
     </section>
 
     <section class="band airy">
@@ -1002,12 +1077,21 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 
   <div class="toast" id="toast"></div>
 
+  <div class="sheet-scrim" id="scrim" onclick="closeSheet()"></div>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetH">
+    <div class="sheet-grab"></div>
+    <h2 id="sheetH">Why this matters now</h2>
+    <div id="sheetBody"></div>
+    <button class="sheet-close" onclick="closeSheet()">Close</button>
+  </div>
+
   <nav class="nav">
     <button class="nav-i active" onclick="go('Timer')">Timer</button>
     <button class="nav-i" onclick="go('Cortisol')">Cortisol</button>
     <button class="nav-i" onclick="go('Urge')">Urge</button>
     <button class="nav-i" onclick="go('Log')">Log</button>
     <button class="nav-i" onclick="go('Patterns')">Patterns</button>
+    <span class="nav-ink" id="navInk"></span>
   </nav>
 </div>
 
@@ -1127,7 +1211,7 @@ function buildDialStatic() {
   const sp = [];
   for (let i = 0; i <= 72; i++) {
     const h = i/72 * 24;
-    sp.push((i/72*120).toFixed(2) + ',' + (22 - (cortisolAt(h)/CORT_MAX) * 19).toFixed(2));
+    sp.push((i/72*120).toFixed(2) + ',' + (31 - (cortisolAt(h)/CORT_MAX) * 27).toFixed(2));
   }
   document.getElementById('sparkLine').setAttribute('points', sp.join(' '));
 
@@ -1206,20 +1290,6 @@ function renderFace() {
   }
 }
 
-function renderSchedule() {
-  const f = document.getElementById('schedFast');
-  const e = document.getElementById('schedEat');
-  const a = document.getElementById('schedAlarm');
-  if (state.phase === 'idle') {
-    f.textContent = 'not started'; f.classList.add('none');
-    e.textContent = 'not started'; e.classList.add('none');
-    a.textContent = 'none set';    a.classList.add('none');
-    return;
-  }
-  f.textContent = clock(state.fastStart) + ' – ' + clock(state.fastEnd); f.classList.remove('none');
-  e.textContent = clock(state.fastEnd) + ' – ' + clock(state.eatEnd);    e.classList.remove('none');
-  a.textContent = clock(state.phase === 'fasting' ? state.fastEnd : state.eatEnd); a.classList.remove('none');
-}
 
 function renderActionBtn() {
   const b = document.getElementById('actBtn');
@@ -1288,7 +1358,7 @@ function toComplete() {
   resetFast();
 }
 
-function refreshTimer() { renderFace(); renderDial(); renderSchedule(); renderActionBtn(); }
+function refreshTimer() { renderFace(); renderDial(); renderActionBtn(); renderTimeline(); }
 
 /* ---------------- alarms ---------------- */
 /* ---------------- alarms ----------------
@@ -1589,7 +1659,7 @@ function renderCortisol() {
   document.getElementById('readoutVal').textContent = word.toLowerCase();
   const sn = document.getElementById('sparkNow');
   sn.setAttribute('cx', (h/24 * 120).toFixed(2));
-  sn.setAttribute('cy', (22 - pct * 19).toFixed(2));
+  sn.setAttribute('cy', (31 - pct * 27).toFixed(2));
   document.getElementById('advice').textContent = ADVICE[band];
 
   // cortisol screen
@@ -1848,6 +1918,7 @@ function toggleRegularEating() {
   document.getElementById('eatSwitch').classList.toggle('on', state.eating.on);
   saveState();
   renderEatingPlan();
+  renderTimeline();
   if (state.phase !== 'idle') scheduleAlarms();
 }
 
@@ -1858,6 +1929,7 @@ function markEaten(i) {
   at >= 0 ? list.splice(at, 1) : list.push(i);
   saveState();
   renderEatingPlan();
+  renderTimeline();
 }
 
 function renderEatingPlan() {
@@ -2461,6 +2533,96 @@ function renderInsights(eps, byHour) {
     : '<p class="insight flag">' + o.text + '</p>').join('');
 }
 
+
+/* ---------------- today timeline ----------------
+   One list combining the fast boundaries with any planned eating slots, in
+   clock order. Tapping a meal marks it, which is the same state the eating
+   planner already keeps. */
+function timelineItems() {
+  const out = [], now = Date.now();
+  if (state.phase !== 'idle' && state.fastStart) {
+    out.push({ at: state.fastStart.getTime(), name: 'Fast started', note: 'Water, black coffee, herbal tea', fixed: true });
+    out.push({ at: state.fastEnd.getTime(), name: 'Eating window opens', note: 'Break it deliberately, sitting down', fixed: true });
+    out.push({ at: state.eatEnd.getTime(), name: 'Eating window closes', note: 'Next fast begins', fixed: true });
+  }
+  if (state.eating.on) {
+    const done = state.eaten[dateKey(new Date())] || [];
+    eatingSlots().forEach(sl => out.push({
+      at: sl.at.getTime(), name: sl.label, note: 'Planned eating time',
+      slot: sl.i, done: done.includes(sl.i)
+    }));
+  }
+  return out.sort((a, b) => a.at - b.at);
+}
+
+function renderTimeline() {
+  const el = document.getElementById('timeline');
+  if (!el) return;
+  const items = timelineItems(), now = Date.now();
+  if (!items.length) {
+    el.innerHTML = '<li class="empty">Start a fast, or turn on regular eating, to see your day here.</li>';
+    return;
+  }
+  const nextIdx = items.findIndex(i => i.at > now && !i.done);
+  el.innerHTML = items.map((i, n) => {
+    const done = i.done || (i.fixed && i.at <= now);
+    const cls = 'tl-i' + (done ? ' done' : '') + (n === nextIdx ? ' now' : '');
+    const missed = !done && i.slot !== undefined && i.at <= now;
+    const mark = i.done ? 'done' : missed ? 'missed' : (n === nextIdx ? 'next' : '');
+    return '<li class="' + cls + (missed ? ' missed' : '') + '"' + (i.slot !== undefined ? ' data-slot="' + i.slot + '"' : '') + '>' +
+      '<span class="tl-dot"></span><div class="tl-body">' +
+      '<div class="tl-time">' + clock(new Date(i.at)) + '</div>' +
+      '<div class="tl-name">' + esc(i.name) + '</div>' +
+      '<div class="tl-note">' + esc(i.note) + '</div></div>' +
+      (mark ? '<span class="tl-mark">' + mark + '</span>' : '') + '</li>';
+  }).join('');
+}
+
+// tap a meal row: ripple, then flip its state
+document.addEventListener('click', e => {
+  const row = e.target.closest('.tl-i[data-slot]');
+  if (!row) return;
+  const r = document.createElement('span');
+  r.className = 'ripple';
+  const b = row.getBoundingClientRect(), d = Math.max(b.width, b.height);
+  r.style.width = r.style.height = d + 'px';
+  r.style.left = (e.clientX - b.left - d / 2) + 'px';
+  r.style.top = (e.clientY - b.top - d / 2) + 'px';
+  row.appendChild(r);
+  setTimeout(() => r.remove(), 600);
+  markEaten(Number(row.dataset.slot));
+  renderTimeline();
+});
+
+/* ---------------- insight sheet ---------------- */
+const WHY = {
+  high: [['Cortisol is near its peak', 'Waking drives a sharp rise that takes a few hours to come down. Eating into that peak produces a larger insulin response than the same food later.'],
+         ['What helps', 'Delay the first meal an hour or two if you can, hold the coffee until the curve is falling, and get some daylight. Light early is the strongest signal for keeping the rhythm on time.']],
+  moderate: [['Cortisol is mid-range and falling', 'This is the most forgiving stretch of the day. Insulin sensitivity is reasonable and appetite signals are more trustworthy than they are at either end.'],
+             ['What helps', 'If you are breaking a fast, this is the window to do it. Protein first steadies blood sugar and takes the edge off the late-afternoon dip.']],
+  low: [['Cortisol is at its floor', 'The overnight low is when the body does most of its repair. It is also when willpower is thinnest, which is why evening is when urges peak.'],
+        ['What helps', 'Eating now competes with sleep hormones. If an urge shows up, it is far more likely to be stress or tiredness than hunger. The Urge tab routes on that difference.']]
+};
+function openInsight() {
+  const now = new Date();
+  const band = cortisolBand(cortisolAt(hoursOfDay(now)));
+  document.getElementById('sheetBody').innerHTML =
+    WHY[band].map(([h, b]) => '<h2 style="font-size:18px;margin-top:20px">' + h + '</h2><p>' + b + '</p>').join('');
+  document.getElementById('sheet').classList.add('on');
+  document.getElementById('scrim').classList.add('on');
+}
+function closeSheet() {
+  document.getElementById('sheet').classList.remove('on');
+  document.getElementById('scrim').classList.remove('on');
+}
+
+/* ---------------- nav indicator glides ---------------- */
+function moveNavInk(name) {
+  const ink = document.getElementById('navInk');
+  if (!ink) return;
+  ink.style.transform = 'translateX(' + (SCREENS.indexOf(name) * 100) + '%)';
+}
+
 /* ---------------- progress ---------------- */
 function updateStats() {
   const done = state.completedFasts.filter(f => f.completed);
@@ -2520,6 +2682,7 @@ function go(name) {
   document.getElementById('screen' + name).classList.add('active');
   document.querySelectorAll('.nav-i').forEach((n, i) =>
     n.classList.toggle('active', i === SCREENS.indexOf(name)));
+  moveNavInk(name);
   if (name === 'Cortisol') drawCurve();
   if (name === 'Urge') renderUrgeToday();
   if (name === 'Log') renderEpisodes();
@@ -2634,6 +2797,8 @@ if (state.phase !== 'idle') scheduleAlarms();
 refreshTimer();
 renderCortisol();
 renderEatingPlan();
+renderTimeline();
+moveNavInk('Timer');
 renderEpisodes();
 renderUrgeToday();
 renderPatterns();
@@ -2651,6 +2816,7 @@ try {
 /* Returning to the app: the timer state is derived from wall-clock time so it
    self-heals, but re-arm the in-page timers and let the worker flush anything
    that came due while we were gone. */
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'visible') return;
   refreshTimer();

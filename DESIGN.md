@@ -38,15 +38,28 @@ the hardest moments this app exists for happen in the evening.
 
 | Token | Light | Dark | Role |
 |-------|-------|------|------|
-| `--ground` | `#F4F6F5` | `#141A19` | The one and only surface |
-| `--ink` | `#16211F` | `#E8EDEB` | Primary text |
-| `--ink-2` | `#4E5C59` | `#AFBAB7` | Prose |
-| `--ink-3` | `#5F6D6A` | `#8B9794` | Smallest text allowed |
-| `--line` | `#DDE2E0` | `#242D2B` | Item separators |
-| `--line-strong` | `#C3CCC9` | `#37423F` | Region boundaries |
-| `--accent` | `#2F6B5F` | `#6FBBA8` | The one brand hue |
-| `--accent-soft` | 34% accent | 30% accent | Unelapsed fast window |
-| `--crit` | `#A8443C` | `#E08C84` | Semantic only |
+| `--ground` | `#F3F5F4` | `#0F1720` | The page |
+| `--surface` | `#FBFCFB` | `#16212B` | Earns its place twice only |
+| `--ink` | `#162128` | `#E6EEF2` | Primary text |
+| `--ink-2` | `#5F7078` | `#9FB0BC` | Prose, secondary |
+| `--line` | `#D7DFDB` | `#22303B` | Hairlines, used sparingly |
+| `--accent` | `#37776C` | `#6FC3B2` | The one brand hue |
+| `--accent-soft` | 30% | 32% | Unelapsed fast window, must read as data |
+| `--wash` | 12% | 14% | Selected chips, never a solid fill |
+| `--success` | `#3E7F45` | `#7BC47F` | Completed |
+| `--warn` | `#8A5F28` | `#D8A56D` | Missed |
+| `--crit` | `#A8443C` | `#E08C84` | End fast, lapse |
+
+The light accent arrived as `#4E9C90`, which measures 3.0:1 on the ground and
+fails for the primary action text. Darkened to `#37776C` at 4.8:1, keeping the
+sea-glass character.
+
+**Two painted surfaces, not zero.** Earlier passes targeted an empty array.
+This one deliberately allows `--surface` in exactly two places: the single
+Right now card, and overlay sheets. That is the doc's own second option, a
+3 to 5% lightness shift, and it buys the hierarchy the flat version lacked.
+Anywhere else is a regression. Verified on the render: the only painted
+elements are `.rightnow` and the sheet.
 
 Ground is a pale cool paper with no yellow cast, so it is not the cream tell.
 Ink is a deep pine rather than pure black. One accent, a deep teal-green,
@@ -110,6 +123,23 @@ readout (dense single row) → prose → tabular numerics → roomy controls.**
 Six distinct weights.
 
 ---
+
+## Rhythm of the home screen
+
+Dial, then one action, then one live card, then the day. Everything else is
+quieter than those four. Sections are separated by space rather than a rule on
+every band, which is what made the previous pass read as uniformly important.
+
+## Microinteractions
+
+Every action gets one visible response. All of them ease on
+`cubic-bezier(0.32, 0.72, 0, 1)` and collapse under `prefers-reduced-motion`.
+
+- Nav indicator glides between tabs rather than cutting.
+- Primary action scales to 0.97 and shifts to `--accent-press` while held.
+- Timeline rows ripple from the touch point, then flip their dot to success.
+- The Right now card presses in and opens a bottom sheet.
+- The dial arc animates its sweep; state words cross-fade.
 
 ## The dial
 
