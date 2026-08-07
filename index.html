@@ -978,7 +978,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
       </div>
       <div class="iv" onclick="quickTool('delay')">
         <div class="iv-h">Buy ten minutes</div>
-        <div class="iv-p">Not a refusal. A pause, then decide with a clearer head.</div>
+        <div class="iv-p">A pause, not a refusal. Decide once your head is clearer.</div>
       </div>
     </section>
 
@@ -1841,7 +1841,7 @@ function tipsFor(h) {
   ];
   if (h >= 16 && h < 20) return [
     { h: 'Close the window', p: 'Finishing by early evening protects the cortisol nadir and your sleep quality.' },
-    { h: 'Cravings incoming', p: 'Willpower tracks cortisol down. This is peak impulsive-eating time. Decide now, not later.' }
+    { h: 'Cravings incoming', p: 'Willpower tracks cortisol down. This is when impulsive eating peaks, so decide before you get there.' }
   ];
   return [
     { h: 'Recovery mode', p: 'Cortisol should be at its lowest. Eating now disrupts sleep hormones and favours fat storage.' },
@@ -2145,12 +2145,12 @@ const BUCKETS = {
     actions: [
       { id: 'leave',   name: 'Leave the kitchen', mins: 10, tip: 'Different room, door shut. Take your phone so you stay put.' },
       { id: 'outside', name: 'Step outside', mins: 5,  tip: 'Front step counts. Daylight and cooler air both help.' },
-      { id: 'shower',  name: 'Shower or wash your face', mins: 8, tip: 'Physical state change, and it puts a wall between you and the kitchen.' }
+      { id: 'shower',  name: 'Shower or wash your face', mins: 8, tip: 'It changes how you feel, and it puts a wall between you and the kitchen.' }
     ]
   },
   soothe: {
     name: 'Soothe without food',
-    why: 'The need underneath is usually real. Food is just the fastest answer to hand.',
+    why: 'The need underneath is usually something else. Food is the fastest answer to hand.',
     actions: [
       { id: 'drink',   name: 'Make a warm drink', mins: 6,  tip: 'Tea, decaf, hot water. The ritual is doing as much as the drink.' },
       { id: 'write',   name: 'Write down what happened', mins: 5, tip: 'One prompt: what stressed me just now? Nobody else reads it.' },
@@ -2340,7 +2340,7 @@ const FLOW_VIEWS = {
 
   outcome: () => `
     <div class="flow-q">What happened?</div>
-    <div class="flow-hint">Straight answer, no scoring. This is the part that makes the log worth keeping.</div>
+    <div class="flow-hint">Straight answer, no scoring. This is the one the patterns are built from.</div>
     <div class="opts col">
       <button class="opt${flow.draft.outcome === 'rode' ? ' on' : ''}" onclick="setField('outcome','rode')">
         It passed<span class="opt-d">Rode it out without eating.</span></button>
@@ -2401,7 +2401,7 @@ Object.assign(ALL_ACTIONS, {
                tip: 'Portion it out, sit down, then start.' },
   'eat-now': { id: 'eat-now', name: 'Eat now', mins: 0, tip: '' },
   delay:     { id: 'delay',   name: 'Ten minute pause', mins: 10,
-               tip: 'Not a no. Just later, once the spike has passed.' }
+               tip: 'You are not saying no, you are saying later, once the spike has passed.' }
 });
 
 document.getElementById('flowBody').addEventListener('click', e => {

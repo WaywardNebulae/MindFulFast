@@ -36,7 +36,7 @@ MindfulFast is an intermittent fasting timer built around two things most
 fasting apps ignore: the daily cortisol rhythm that shapes when eating feels
 easy or hard, and what to actually do when the urge to eat arrives.
 
-A DIAL, NOT A PROGRESS BAR
+THE TIMER
 
 Your fasting and eating windows are drawn at their real positions on a
 24-hour clock, so you see your 16:8 as a proportion of the actual day. A
@@ -67,22 +67,21 @@ move the stress out, change where you are, or soothe without food. Each one
 runs a timer while you do it.
 
 If it is not stress, you get a hunger check first, and eating a planned amount
-deliberately is treated as a real answer rather than a failure.
+deliberately counts as an answer, not a failure.
 
-Then it asks how the urge changed. That is the part that makes the log worth
-keeping.
+Then it asks how the urge changed, which is the number the log is for.
 
-A LOG THAT TELLS YOU SOMETHING
+THE LOG
 
 Every episode records the time, what happened, where you were, your mood, how
 strong the urge was, how in control you felt, what you tried, and how it went.
 
-Pattern review turns that into answers. What time of day urges cluster. Which
-situations and moods come up most. And which interventions actually reduced
-your urges the most, measured from your own entries rather than assumed.
+Pattern review turns that into answers: what time of day urges cluster, which
+situations and moods come up most, and which interventions actually reduced
+your urges, measured from your own entries rather than assumed.
 
 After a difficult episode, a short setback review asks what came before it,
-what kept it going, and what you would try next time. No scoring, no streak to
+what kept it going, and what you would try next time. Nothing is scored, and there is no streak to
 break.
 
 REGULAR EATING

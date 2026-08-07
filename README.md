@@ -1,8 +1,7 @@
 # MindfulFast
 
-An intermittent fasting timer built around two things most fasting apps leave
-out: the daily cortisol rhythm that shapes when eating feels easy or hard, and
-what to actually do when the urge to eat arrives.
+An intermittent fasting timer built around the daily cortisol rhythm, and
+around what to do when the urge to eat arrives.
 
 **[Open the app](https://waywardnebulae.github.io/MindFulFast/)**
 
@@ -48,9 +47,9 @@ stress out, change where you are, or soothe without food. Each runs a timer
 while you do it.
 
 If it is not stress, you get a hunger check first, and eating a planned amount
-deliberately is offered as a real answer rather than a smaller kind of failure.
+deliberately counts as an answer, not a smaller kind of failure.
 
-Then it asks how the urge changed. That is what makes the log worth keeping.
+Then it asks how the urge changed, which is the number the log is actually for.
 
 Breathing is four in, hold, six out, hold. The longer exhale is the part that
 lowers arousal.
@@ -61,13 +60,13 @@ Every episode records the time, what happened, where you were, your mood, how
 strong the urge was, how in control you felt, what you tried, and how it went.
 
 After a difficult episode a short setback review asks what came before it, what
-kept it going, and what you would try next time. No scoring, no streak to break.
+kept it going, and what you would try next time. Nothing is scored, and there is no streak to break.
 
 ### Patterns
 
-What time of day urges cluster. Which situations and moods come up most. And
+What time of day urges cluster, which situations and moods come up most, and
 which interventions actually reduced your urges, ranked by measured drop from
-your own entries rather than assumed.
+your own entries.
 
 ### Regular eating
 
