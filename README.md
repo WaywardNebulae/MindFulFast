@@ -129,12 +129,11 @@ index.html      the whole app
 sw.js           service worker: offline cache and alarm delivery
 manifest.json   PWA manifest
 privacy.html    privacy policy
-fonts/          IBM Plex Sans and Mono, subset, self-hosted
+fonts/          Literata and Figtree, subset, self-hosted
 icons/          app icons
 store/          Play listing assets and copy
 server/         optional push scheduler
 DESIGN.md       the design constraint set
-store/          Play listing assets and copy
 ```
 
 To run it locally:
@@ -152,10 +151,15 @@ The site publishes from the `gh-pages` branch.
 
 ## Design
 
-`DESIGN.md` holds the locked constraints and the reasoning. In short: one
-painted background, separation by rules and spacing rather than cards, text
-actions instead of filled blocks, and contrast measured rather than eyeballed.
-Dark only, as a deliberate choice.
+`DESIGN.md` holds the locked constraints and the reasoning. The direction is
+quiet daylight: one painted background, separation by space and hairlines
+rather than cards, text actions instead of filled blocks, and contrast
+measured rather than eyeballed.
+
+Literata carries headings and the timer, Figtree carries the interface. There
+is no monospace anywhere, which is most of what makes it feel calm rather than
+clinical. Light is the primary surface; dark is paired because the hardest
+moments this app exists for happen in the evening.
 
 ---
 
@@ -163,5 +167,5 @@ Dark only, as a deliberate choice.
 
 App code is MIT.
 
-IBM Plex Sans and IBM Plex Mono are used under the SIL Open Font License 1.1.
+Literata and Figtree are used under the SIL Open Font License 1.1.
 See `fonts/OFL.txt`.
