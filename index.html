@@ -175,6 +175,35 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 
 .hand { stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
 
+/* the scrub handle: only present while idle, when the start time is still
+   yours to choose */
+.handle-g { opacity: 0; pointer-events: none; transition: opacity .3s var(--ease); }
+.handle-g.on { opacity: 1; }
+.handle {
+  fill: var(--accent); stroke: var(--ground); stroke-width: 3;
+  transform-box: fill-box; transform-origin: center;
+  transition: transform .22s var(--ease);
+}
+.handle-halo {
+  fill: var(--accent); opacity: 0;
+  transform-box: fill-box; transform-origin: center; transform: scale(0.5);
+  transition: opacity .25s var(--ease), transform .25s var(--ease);
+}
+.dial.grabbing .handle { transform: scale(1.35); }
+.dial.grabbing .handle-halo { opacity: 0.18; transform: scale(1); }
+.dial.scrubbable { touch-action: none; cursor: grab; }
+.dial.grabbing { cursor: grabbing; }
+
+.dial-hint {
+  font-size: 13px; color: var(--ink-2); margin-top: 8px;
+  opacity: 0; transition: opacity .3s var(--ease);
+}
+.dial-hint.on { opacity: 1; }
+.dial-reset {
+  color: var(--accent); font-weight: 500; cursor: pointer;
+  padding: 6px; margin: -6px; pointer-events: auto;
+}
+
 .dial-face {
   position: absolute;
   inset: 0;
@@ -803,11 +832,16 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
           <path class="arc arc-fast-dim"  id="arcFastDim"  d=""/>
           <path class="arc arc-fast-live" id="arcFastLive" d=""/>
           <line class="hand" id="dialHand" x1="150" y1="150" x2="150" y2="150"/>
+          <g id="dialHandle" class="handle-g">
+            <circle class="handle-halo" id="handleHalo" r="18"/>
+            <circle class="handle" id="handleDot" r="9"/>
+          </g>
         </svg>
         <div class="dial-face">
           <div class="dial-state" id="dialState">Not fasting</div>
           <div class="dial-digits idle" id="dialDigits">16:00:00</div>
           <div class="dial-sub" id="dialSub">16-hour fast</div>
+          <div class="dial-hint" id="dialHint"></div>
         </div>
       </div>
 
@@ -1230,7 +1264,7 @@ function renderDial() {
 
   let s0, s1, s2, liveFast = '', liveEat = '';
   if (state.phase === 'idle') {
-    s0 = nowH; s1 = nowH + fastH; s2 = nowH + fastH + eatH;
+    s0 = hoursOfDay(previewStart()); s1 = s0 + fastH; s2 = s0 + fastH + eatH;
   } else {
     s0 = hoursOfDay(state.fastStart);
     s1 = s0 + (state.fastEnd - state.fastStart) / 3600000;
@@ -1249,10 +1283,96 @@ function renderDial() {
   document.getElementById('arcFastLive').setAttribute('d', liveFast);
   document.getElementById('arcEatLive').setAttribute('d', liveEat);
 
+  renderHandle(state.phase === 'idle', s0);
+
   const hand = document.getElementById('dialHand');
   const hi = polar(R_HAND_IN, nowH), ho = polar(R_HAND_OUT, nowH);
   hand.setAttribute('x1', hi[0].toFixed(2)); hand.setAttribute('y1', hi[1].toFixed(2));
   hand.setAttribute('x2', ho[0].toFixed(2)); hand.setAttribute('y2', ho[1].toFixed(2));
+}
+
+
+/* ---------------- dial scrubbing ----------------
+   While idle the ring is draggable: it previews when the fast would start and
+   end before you commit to it. Deliberately in-memory only, so a stale
+   preview can never survive a reload and quietly shift a real fast. */
+let plannedStart = null;                 // Date, or null meaning "now"
+let scrubbing = false;
+
+function previewStart() { return plannedStart || new Date(); }
+
+function clearPlanned() {
+  plannedStart = null;
+  refreshTimer();
+}
+
+function hourFromPoint(svg, clientX, clientY) {
+  const r = svg.getBoundingClientRect();
+  const x = (clientX - r.left) / r.width * 300 - CX;
+  const y = (clientY - r.top) / r.height * 300 - CY;
+  let h = ((Math.atan2(y, x) + Math.PI / 2) / (Math.PI * 2)) * 24;
+  return ((h % 24) + 24) % 24;
+}
+
+/* Pick the occurrence of that clock time closest to now, so dragging just
+   past midnight lands on tomorrow rather than jumping back a day. */
+function nearestTimeFor(hour) {
+  const now = new Date();
+  const snapped = Math.round(hour * 12) / 12;          // 5 minute steps
+  let best = null, bestDiff = Infinity;
+  for (const off of [-1, 0, 1]) {
+    const t = new Date(now);
+    t.setHours(0, Math.round(snapped * 60), 0, 0);
+    t.setDate(t.getDate() + off);
+    const diff = Math.abs(t - now);
+    if (diff < bestDiff) { bestDiff = diff; best = t; }
+  }
+  return best;
+}
+
+function initScrub() {
+  const svg = document.querySelector('.dial');
+  if (!svg) return;
+
+  const move = e => {
+    if (!scrubbing) return;
+    e.preventDefault();
+    plannedStart = nearestTimeFor(hourFromPoint(svg, e.clientX, e.clientY));
+    refreshTimer();
+  };
+  const up = () => {
+    if (!scrubbing) return;
+    scrubbing = false;
+    svg.classList.remove('grabbing');
+    window.removeEventListener('pointermove', move);
+    window.removeEventListener('pointerup', up);
+    if (navigator.vibrate) { try { navigator.vibrate(8); } catch (e) {} }
+  };
+
+  svg.addEventListener('pointerdown', e => {
+    if (state.phase !== 'idle') return;
+    scrubbing = true;
+    svg.classList.add('grabbing');
+    plannedStart = nearestTimeFor(hourFromPoint(svg, e.clientX, e.clientY));
+    refreshTimer();
+    window.addEventListener('pointermove', move, { passive: false });
+    window.addEventListener('pointerup', up);
+  });
+}
+
+function renderHandle(idle, startH) {
+  const svg = document.querySelector('.dial');
+  const g = document.getElementById('dialHandle');
+  if (!svg || !g) return;
+  svg.classList.toggle('scrubbable', idle);
+  g.classList.toggle('on', idle);
+  if (!idle) return;
+  const [x, y] = polar(R_ARC, startH);
+  ['handleDot', 'handleHalo'].forEach(id => {
+    const el = document.getElementById(id);
+    el.setAttribute('cx', x.toFixed(2));
+    el.setAttribute('cy', y.toFixed(2));
+  });
 }
 
 /* ---------------- timer face ---------------- */
@@ -1264,16 +1384,29 @@ function renderFace() {
 
   if (state.phase === 'idle') {
     const [fastH] = PROTOCOLS[state.protocol];
-    const ends = new Date(now + fastH * 3600000);
+    const start = previewStart();
+    const ends = new Date(start.getTime() + fastH * 3600000);
     digits.textContent = String(fastH).padStart(2,'0') + ':00';
     digits.classList.add('idle');
     st.textContent = 'Not fasting';
     st.classList.remove('live');
-    sub.textContent = 'ends ' + clock(ends) + ' if you start now';
+    sub.textContent = clock(start) + ' to ' + clock(ends);
+
+    const hint = document.getElementById('dialHint');
+    if (hint) {
+      if (plannedStart) {
+        hint.innerHTML = 'Drag the ring to adjust &middot; <span class="dial-reset" onclick="clearPlanned()">start now instead</span>';
+      } else {
+        hint.textContent = 'Drag the ring to set a start time';
+      }
+      hint.classList.add('on');
+    }
     return;
   }
   digits.classList.remove('idle');
   st.classList.add('live');
+  const hint = document.getElementById('dialHint');
+  if (hint) hint.classList.remove('on');
 
   if (state.phase === 'fasting') {
     const left = state.fastEnd.getTime() - now;
@@ -1303,6 +1436,7 @@ function renderActionBtn() {
 function selectProtocol(p) {
   if (state.phase !== 'idle') return;
   state.protocol = p;
+  plannedStart = null;
   document.querySelectorAll('.proto').forEach(c => c.classList.toggle('active', c.dataset.p === p));
   saveState(); renderFace(); renderDial();
 }
@@ -1313,7 +1447,8 @@ function toggleFast() { state.phase === 'idle' ? startFast() : endFast(); }
 
 function startFast() {
   const [fastH, eatH] = PROTOCOLS[state.protocol];
-  const now = new Date();
+  const now = previewStart();
+  plannedStart = null;
   state.phase = 'fasting';
   state.fastStart = now;
   state.fastEnd = new Date(now.getTime() + fastH * 3600000);
@@ -2805,6 +2940,7 @@ renderPatterns();
 updateStats();
 renderAlarmStatus();
 tick();
+initScrub();
 setInterval(tick, 1000);
 
 // launcher shortcut: ?go=urge opens straight into the protocol

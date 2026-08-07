@@ -140,6 +140,13 @@ Every action gets one visible response. All of them ease on
 - Timeline rows ripple from the touch point, then flip their dot to success.
 - The Right now card presses in and opens a bottom sheet.
 - The dial arc animates its sweep; state words cross-fade.
+- The ring is draggable while idle. A handle sits on the arc, swells with a
+  soft halo under the finger, and previews the whole window live.
+
+**The scrub preview is in-memory only.** Persisting it would let a stale
+choice survive a reload and quietly shift a real fast. It resets on commit and
+on any protocol change, and the handle is absent whenever a fast is running,
+because the start time is no longer yours to choose.
 
 ## The dial
 
