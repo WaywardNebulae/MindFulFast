@@ -1003,7 +1003,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
       <div class="ctl">
         <div>
           <div class="ctl-name">Hourly check-in</div>
-          <div class="ctl-note">Quiet reminder while fasting</div>
+          <div class="ctl-note">Once an hour while a fast is running</div>
         </div>
         <button class="sw" id="alarmHourly" onclick="toggleAlarm('hourly')" aria-label="Hourly check-in"><span class="sw-knob"></span></button>
       </div>
@@ -1064,11 +1064,11 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
       <div class="band-label">Straight to a tool</div>
       <div class="iv" onclick="quickTool('breathe')">
         <div class="iv-h">Slow the breath down</div>
-        <div class="iv-p">Longer out than in, about 90 seconds. The exhale is what settles you.</div>
+        <div class="iv-p">Longer out than in, about 90 seconds. A long exhale slows your heart rate down.</div>
       </div>
       <div class="iv" onclick="quickTool('walk')">
         <div class="iv-h">Walk it off</div>
-        <div class="iv-p">Five to ten minutes, brisk. Moves the stress through instead of around.</div>
+        <div class="iv-p">Five to ten minutes, brisk. Walking burns off some of the adrenaline.</div>
       </div>
       <div class="iv" onclick="quickTool('leave')">
         <div class="iv-h">Leave the room</div>
@@ -1076,7 +1076,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
       </div>
       <div class="iv" onclick="quickTool('delay')">
         <div class="iv-h">Buy ten minutes</div>
-        <div class="iv-p">A pause, not a refusal. Decide once your head is clearer.</div>
+        <div class="iv-p">Ten minutes, then decide with a clearer head. You can still eat after.</div>
       </div>
     </section>
 
@@ -1376,8 +1376,8 @@ function buildDialStatic() {
     const at = h => { const d = new Date(); d.setHours(0, Math.round((h % 24) * 60), 0, 0); return clock(d); };
     document.getElementById('lowNote').textContent =
       'Shaded from ' + at(low[0]) + ' to ' + at(low[1]) +
-      ', where the curve sits in its low band. The dial marks the same hours, ' +
-      'because that is when willpower is thinnest and urges peak.';
+      ', where the curve sits in its low band. The dial marks the same hours. ' +
+      'Urges cluster here for most people.';
   }
 
   document.getElementById('dialLabels').innerHTML =
@@ -1672,7 +1672,7 @@ function resetFast() {
 function toEating() {
   state.phase = 'eating';
   saveState(); renderActionBtn();
-  if (state.alarms.open) notify('Eating window open', 'Break your fast deliberately.');
+  if (state.alarms.open) notify('Eating window open', 'Sit down for the first meal.');
 }
 
 function toComplete(quiet) {
@@ -1721,7 +1721,7 @@ function buildAlarmList() {
     eatingSlots().forEach(s => {
       if (s.at.getTime() <= now || done.includes(s.i)) return;
       out.push({ id: 'meal-' + s.i, at: s.at.getTime(),
-                 title: s.label, body: 'Planned eating time. Sit down for it.' });
+                 title: s.label, body: 'Planned eating time.' });
     });
   }
 
@@ -1729,7 +1729,7 @@ function buildAlarmList() {
 
   if (state.alarms.open && state.fastEnd && state.fastEnd.getTime() > now) {
     out.push({ id: 'open', at: state.fastEnd.getTime(),
-               title: 'Eating window open', body: 'Break your fast deliberately.' });
+               title: 'Eating window open', body: 'Sit down for the first meal.' });
   }
   if (state.alarms.close && state.eatEnd && state.eatEnd.getTime() > now) {
     out.push({ id: 'close', at: state.eatEnd.getTime(),
@@ -2013,22 +2013,22 @@ function renderCortisol() {
 
 const ADVICE = {
   high: 'Cortisol is near its peak. Eating now drives a larger insulin response. Hold off if you can, and skip the coffee.',
-  moderate: 'Cortisol is mid-range and falling. This is the most forgiving part of the day to eat.',
+  moderate: 'Cortisol is mid-range and falling. Good stretch of the day to eat.',
   low: 'Cortisol is at its floor. Your body is in recovery. Eating now competes with sleep hormones.'
 };
 
 /* The band alone cannot tell you much. How long since you ate changes what
    the same reading means. */
 function fastedNote(since, band) {
-  if (since === null) return 'Log what you eat and this reads against your real last meal.';
+  if (since === null) return 'Log what you eat and this reads against your last meal instead of the clock.';
   const ago = durText(since);
   if (since < 120000) return 'You have just eaten, so this is about what comes next.';
   if (since < 45 * 60000) return 'You ate ' + ago + ' ago, so this is about what comes next.';
   if (band === 'low' && since > 16 * 3600000) {
-    return ago + ' since you ate. Breaking a long fast into the overnight low sits worst, so keep it small.';
+    return ago + ' since you ate. This is a poor time to break a long fast, so keep it small if you do.';
   }
   if (band === 'high' && since > 14 * 3600000) {
-    return ago + ' since you ate. Cortisol is high, so another hour lands better if you have it.';
+    return ago + ' since you ate. Cortisol is high, so wait another hour if you can.';
   }
   return ago + ' since you ate.';
 }
@@ -2046,10 +2046,10 @@ function tipsFor(h) {
   if (h >= 5 && h < 9) return [
     { h: 'Delay breakfast', p: 'Cortisol is already high. Eating on top of it spikes insulin harder. Wait one to two hours after waking.' },
     { h: 'Hold the coffee', p: 'Caffeine amplifies a peak that is already happening. It works better around 9 or 10am.' },
-    { h: 'Get outside', p: 'Ten minutes of direct daylight calibrates the whole day’s rhythm.' }
+    { h: 'Get outside', p: 'Ten minutes of direct daylight helps set your body clock for the day.' }
   ];
   if (h >= 9 && h < 12) return [
-    { h: 'Good window to eat', p: 'Cortisol is coming down off its peak and insulin sensitivity is high. The best time to break a fast.' },
+    { h: 'Good window to eat', p: 'Cortisol is coming down off its peak and insulin sensitivity is high.' },
     { h: 'Protein first', p: 'A protein-led first meal steadies blood sugar and cuts afternoon cravings.' }
   ];
   if (h >= 12 && h < 16) return [
@@ -2062,7 +2062,7 @@ function tipsFor(h) {
   ];
   return [
     { h: 'Recovery mode', p: 'Cortisol should be at its lowest. Eating now disrupts sleep hormones and favours fat storage.' },
-    { h: 'Wind down', p: 'Dim the lights and drop the screens. Tonight’s sleep sets tomorrow’s rhythm.' }
+    { h: 'Wind down', p: 'Dim the lights and put the screens down. Bad sleep tonight shifts tomorrow’s curve.' }
   ];
 }
 
@@ -2070,7 +2070,7 @@ function renderMeals() {
   let slots;
   if (state.phase !== 'eating' || !state.fastEnd) {
     slots = [
-      { t: '10:00 – 11:00 am', d: 'Optimal first meal, cortisol falling and insulin sensitivity high', s: 'optimal' },
+      { t: '10:00 – 11:00 am', d: 'First meal, with cortisol falling and insulin sensitivity high', s: 'optimal' },
       { t: '1:00 – 2:00 pm',   d: 'Second meal, cortisol stable', s: 'optimal' },
       { t: '5:00 – 6:00 pm',   d: 'Last meal, before the nadir begins', s: 'acceptable' },
       { t: 'after 8:00 pm',    d: 'Avoid. Disrupts sleep hormones and the overnight reset', s: 'avoid' }
@@ -2520,7 +2520,7 @@ function renderEatingPlan() {
   if (!state.eating.on) {
     wrap.innerHTML = '';
     note.className = 'eat-note';
-    note.textContent = 'Long gaps between meals make loss-of-control eating more likely, not less. If that is a pattern for you, eating on a schedule usually settles it before anything else does.';
+    note.textContent = 'Long gaps between meals make loss-of-control eating more likely, not less. If that is a pattern for you, eating on a schedule usually settles it.';
     return;
   }
 
@@ -2568,7 +2568,7 @@ const SITUATIONS = ['Work pressure','Argument','Bad news','Alone in the evening'
 const BUCKETS = {
   calm: {
     name: 'Calm my body',
-    why: 'Bring the system down before deciding anything.',
+    why: 'Settle your body down before you decide anything.',
     actions: [
       { id: 'breathe', name: 'Slow breathing', mins: 2,  tip: 'In for four, out for six. The long exhale is the part that works.' },
       { id: 'relax',   name: 'Release your shoulders', mins: 3, tip: 'Tense a muscle group hard for five seconds, then let go. Jaw, shoulders, hands, on down.' },
@@ -2586,21 +2586,21 @@ const BUCKETS = {
   },
   context: {
     name: 'Change where you are',
-    why: 'Most of the pull is the room, not the hunger.',
+    why: 'A lot of the pull comes from being in the room.',
     actions: [
       { id: 'leave',   name: 'Leave the kitchen', mins: 10, tip: 'Different room, door shut. Take your phone so you stay put.' },
       { id: 'outside', name: 'Step outside', mins: 5,  tip: 'Front step counts. Daylight and cooler air both help.' },
-      { id: 'shower',  name: 'Shower or wash your face', mins: 8, tip: 'It changes how you feel, and it puts a wall between you and the kitchen.' }
+      { id: 'shower',  name: 'Shower or wash your face', mins: 8, tip: 'It changes how you feel, and it gets you out of the kitchen for a few minutes.' }
     ]
   },
   soothe: {
     name: 'Soothe without food',
-    why: 'The need underneath is usually something else. Food is the fastest answer to hand.',
+    why: 'The need underneath is usually something else. Food is just the quickest thing to reach for.',
     actions: [
       { id: 'drink',   name: 'Make a warm drink', mins: 6,  tip: 'Tea, decaf, hot water. The ritual is doing as much as the drink.' },
       { id: 'write',   name: 'Write down what happened', mins: 5, tip: 'One prompt: what stressed me just now? Nobody else reads it.' },
-      { id: 'reach',   name: 'Text or call someone', mins: 8, tip: 'You do not have to mention food. Contact is the point.' },
-      { id: 'audio',   name: 'Put on something calming', mins: 10, tip: 'Music, a podcast, anything that occupies the part of you that is spinning.' }
+      { id: 'reach',   name: 'Text or call someone', mins: 8, tip: 'You do not have to mention food. Talking to someone is enough on its own.' },
+      { id: 'audio',   name: 'Put on something calming', mins: 10, tip: 'Music, a podcast, anything that gives your head something else to do.' }
     ]
   }
 };
@@ -2723,11 +2723,11 @@ const FLOW_VIEWS = {
     return `
     ${stressed
       ? `<div class="flow-lead">Your stress may be driving this urge. Bring your system down first, then decide whether you are physically hungry.</div>`
-      : `<div class="flow-lead">No obvious stress behind it. Worth checking whether this is actual hunger before anything else.</div>`}
+      : `<div class="flow-lead">Nothing stressful behind it, then. Check whether you are hungry first.</div>`}
     <div class="flow-q">${stressed ? 'What do you want to try?' : 'Are you physically hungry?'}</div>
     <div class="flow-hint">${stressed
       ? 'Any of these buys you the fifteen minutes the urge needs to pass.'
-      : 'Empty stomach, low energy, been a while since you ate. Not just wanting something.'}</div>
+      : 'Empty stomach, low energy, a while since you last ate. Wanting something is different.'}</div>
     <div class="opts col">
       ${stressed ? '' :
         `<button class="opt${flow.draft.bucket === 'hungry' ? ' on' : ''}" data-set="bucket" data-val="hungry">
@@ -2846,7 +2846,7 @@ Object.assign(ALL_ACTIONS, {
                tip: 'Portion it out, sit down, then start.' },
   'eat-now': { id: 'eat-now', name: 'Eat now', mins: 0, tip: '' },
   delay:     { id: 'delay',   name: 'Ten minute pause', mins: 10,
-               tip: 'You are not saying no, you are saying later, once the spike has passed.' }
+               tip: 'Later still counts as deciding. Most of the spike passes in that time.' }
 });
 
 document.getElementById('flowBody').addEventListener('click', e => {
@@ -2963,7 +2963,7 @@ function saveEpisode() {
   flow = null;
   renderEpisodes(); renderPatterns(); renderUrgeToday(); updateStats();
   showToast(d.outcome === 'lapse'
-    ? 'Logged. That is useful information, not a failure.'
+    ? 'Logged. Nothing here is scored.'
     : d.urge1 !== null && d.urge1 < d.urge0
       ? 'Logged. Urge went from ' + d.urge0 + ' to ' + d.urge1 + '.'
       : 'Logged.');
@@ -3086,21 +3086,21 @@ function renderInsights(eps, byHour) {
   const peakHour = byHour.indexOf(Math.max(...byHour));
   const h12 = (peakHour % 12) || 12;
   out.push('Urges cluster around ' + h12 + (peakHour >= 12 ? 'pm' : 'am') +
-           '. Worth having a plan in place before then rather than during.');
+           '. Worth having a plan ready before then.');
 
   const rated = eps.filter(e => e.urge0 != null && e.urge1 != null);
   if (rated.length >= 3) {
     const avg = rated.reduce((s, e) => s + (e.urge0 - e.urge1), 0) / rated.length;
     out.push(avg > 0
       ? 'Urges drop by about ' + avg.toFixed(1) + ' points once you do something. They pass on their own more often than they feel like they will.'
-      : 'Urges are not dropping much yet. Try giving the timer longer, or a different bucket.');
+      : 'Urges are not dropping much yet. Try giving the timer longer, or a different kind of tool.');
   }
 
   // The signal that matters most in a fasting app: urges concentrating late
   // in the fast means restraint is feeding them.
   const duringFast = eps.filter(e => e.situation === 'After a long fast' || e.situation === 'Skipped a meal').length;
   if (duringFast >= 2 && duringFast / eps.length > 0.25) {
-    out.push({ flag: true, text: 'A good share of these follow a long gap without food. Restriction drives loss-of-control eating, so shortening the fast or turning on regular eating will do more here than any urge tool.' });
+    out.push({ flag: true, text: 'A good share of these follow a long gap without food. Restriction drives loss-of-control eating, so shortening the fast or turning on regular eating will help more than the urge tools.' });
   }
 
   const lapses = eps.filter(e => e.outcome === 'lapse').length;
@@ -3122,7 +3122,7 @@ function timelineItems() {
   const out = [], now = Date.now();
   if (state.phase !== 'idle' && state.fastStart) {
     out.push({ at: state.fastStart.getTime(), name: 'Fast started', note: 'Water, black coffee, herbal tea', fixed: true });
-    out.push({ at: state.fastEnd.getTime(), name: 'Eating window opens', note: 'Break it deliberately, sitting down', fixed: true });
+    out.push({ at: state.fastEnd.getTime(), name: 'Eating window opens', note: 'Break it sitting down', fixed: true });
     out.push({ at: state.eatEnd.getTime(), name: 'Eating window closes', note: 'Next fast begins', fixed: true });
   }
   const key = dateKey(new Date());
@@ -3186,11 +3186,11 @@ document.addEventListener('click', e => {
 /* ---------------- insight sheet ---------------- */
 const WHY = {
   high: [['Cortisol is near its peak', 'Waking drives a sharp rise that takes a few hours to come down. Eating into that peak produces a larger insulin response than the same food later.'],
-         ['What helps', 'Delay the first meal an hour or two if you can, hold the coffee until the curve is falling, and get some daylight. Light early is the strongest signal for keeping the rhythm on time.']],
-  moderate: [['Cortisol is mid-range and falling', 'This is the most forgiving stretch of the day. Insulin sensitivity is reasonable and appetite signals are more trustworthy than they are at either end.'],
+         ['What helps', 'Delay the first meal an hour or two if you can, hold the coffee until the curve is falling, and get some daylight. Morning light is what keeps the rhythm on time.']],
+  moderate: [['Cortisol is mid-range and falling', 'Insulin sensitivity is reasonable here, and appetite signals are more trustworthy than they are at either end of the day.'],
              ['What helps', 'If you are breaking a fast, this is the window to do it. Protein first steadies blood sugar and takes the edge off the late-afternoon dip.']],
   low: [['Cortisol is at its floor', 'The overnight low is when the body does most of its repair. It is also when willpower is thinnest, which is why evening is when urges peak.'],
-        ['What helps', 'Eating now competes with sleep hormones. If an urge shows up, it is far more likely to be stress or tiredness than hunger. The Urge tab routes on that difference.']]
+        ['What helps', 'Eating now competes with sleep hormones. If an urge shows up, it is far more likely to be stress or tiredness than hunger. The Urge tab starts by asking which one it is.']]
 };
 function openInsight() {
   const now = new Date();

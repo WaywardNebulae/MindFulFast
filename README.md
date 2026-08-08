@@ -21,9 +21,9 @@ ring inside it. A cursor marks where you are now, and the ring is draggable, so
 you can set a start time instead of accepting the moment you opened the app.
 
 The face is shaded across the hours where cortisol sits in its low band, which
-is why the dial is not symmetrical. Those are the hours when willpower is
-thinnest and urges peak, and they are read off the same curve the Cortisol
-screen plots rather than typed in.
+is why the dial is not symmetrical. Urges cluster in those hours for most
+people. The bounds are read off the same curve the Cortisol screen plots, so
+the two cannot drift apart.
 
 Protocols: 16:8, 18:6, 20:4, and one meal a day.
 
@@ -32,8 +32,8 @@ not calming.
 
 ### Eating log
 
-What you ate and when. The timer reads off it rather than off a button you
-remembered to press:
+What you ate and when. The timer reads off it, so it does not depend on you
+remembering to press anything:
 
 - Logging a meal ends the fast at that moment, and the eating window opens
   from there. A fast is over when you eat, whatever the countdown still says.
@@ -44,8 +44,8 @@ remembered to press:
 - Ticking off a planned meal in regular eating writes the same record, so the
   two never disagree.
 
-Each entry keeps the time, whether it was a meal, a snack, or a drink, and a
-note if you want one.
+Each entry keeps the time and whether it was a meal, a snack, or a drink. You
+can add a note.
 
 ### Cortisol
 
@@ -65,8 +65,8 @@ population model. Nothing is measured from your body.
 
 ### Urge
 
-A guided protocol, not a list of distractions. It asks what is driving the urge
-first, because stress and hunger need different answers.
+A guided protocol rather than a list of distractions. It asks what is driving
+the urge first, because stress and hunger need different answers.
 
 If stress is behind it, you get four directions: calm your body, move the
 stress out, change where you are, or soothe without food. Each runs a timer
@@ -77,8 +77,8 @@ deliberately counts as an answer, not a smaller kind of failure.
 
 Then it asks how the urge changed, which is the number the log is actually for.
 
-Breathing is four in, hold, six out, hold. The longer exhale is the part that
-lowers arousal.
+Breathing is four in, hold, six out, hold. The long exhale is what brings your
+heart rate down.
 
 ### Log
 
@@ -86,7 +86,8 @@ Every episode records the time, what happened, where you were, your mood, how
 strong the urge was, how in control you felt, what you tried, and how it went.
 
 After a difficult episode a short setback review asks what came before it, what
-kept it going, and what you would try next time. Nothing is scored, and there is no streak to break.
+kept it going, and what you would try next time. Nothing is scored, and there
+is no streak to break.
 
 ### Patterns
 
@@ -184,9 +185,9 @@ and the dial's track, which stands for the rest of the day, clears 3:1 as a
 meaningful graphic.
 
 Literata carries headings and the timer, Figtree carries the interface. There
-is no monospace anywhere, which is most of what makes it feel calm rather than
-clinical. Light is the primary surface; dark is paired because the hardest
-moments this app exists for happen in the evening.
+is no monospace anywhere, which did more for the mood than any palette change.
+Light is the primary surface. Dark is paired because the hardest moments this
+app exists for happen in the evening.
 
 ---
 
