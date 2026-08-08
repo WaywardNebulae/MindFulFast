@@ -38,21 +38,36 @@ the hardest moments this app exists for happen in the evening.
 
 | Token | Light | Dark | Role |
 |-------|-------|------|------|
-| `--ground` | `#F3F5F4` | `#0F1720` | The page |
+| `--ground` | `#EDF1EF` | `#0F1720` | The page |
 | `--surface` | `#FBFCFB` | `#16212B` | Earns its place twice only |
-| `--ink` | `#162128` | `#E6EEF2` | Primary text |
-| `--ink-2` | `#5F7078` | `#9FB0BC` | Prose, secondary |
-| `--line` | `#D7DFDB` | `#22303B` | Hairlines, used sparingly |
-| `--accent` | `#37776C` | `#6FC3B2` | The one brand hue |
-| `--accent-soft` | 30% | 32% | Unelapsed fast window, must read as data |
+| `--ink` | `#101B22` | `#EAF2F6` | Primary text |
+| `--ink-2` | `#4E6068` | `#AEBFCA` | Prose, secondary |
+| `--ink-3` | `#5F7078` | `#93A5B1` | Section labels, captions |
+| `--line` | `#C9D4CF` | `#27363F` | Hairlines, used sparingly |
+| `--track` | `#7C8C86` | `#506878` | The dial's 24h track, 3.1:1 |
+| `--accent` | `#2F6E63` | `#6FC3B2` | The one brand hue |
+| `--accent-soft` | 44% | 34% | Unelapsed fast window, must read as data |
 | `--wash` | 12% | 14% | Selected chips, never a solid fill |
-| `--success` | `#3E7F45` | `#7BC47F` | Completed |
+| `--band-low` | 5% ink | 5.5% | The cortisol low sector |
+| `--success` | `#316A38` | `#7BC47F` | Completed |
 | `--warn` | `#8A5F28` | `#D8A56D` | Missed |
 | `--crit` | `#A8443C` | `#E08C84` | End fast, lapse |
 
 The light accent arrived as `#4E9C90`, which measures 3.0:1 on the ground and
-fails for the primary action text. Darkened to `#37776C` at 4.8:1, keeping the
-sea-glass character.
+fails for the primary action text. Darkened twice, now `#2F6E63` at 5.2:1,
+keeping the sea-glass character.
+
+**The contrast pass.** The first light build read as bland, and measuring
+showed why: the ground sat at `#F3F5F4` with `--ink-2` and `--ink-3` set to
+the same value, so the type had two levels rather than three, and the dial's
+unelapsed arc sat at 30% accent over near-white. Deepening the ground,
+splitting the ink ladder, and taking `--accent-soft` to 44% did more than any
+of the earlier palette swaps, because it changed ratios rather than hues.
+
+Hairline tokens are decorative and exempt from 3:1. `--track` is not: it is
+the part of the dial standing for the rest of the day, so it is a graphic
+that carries meaning and measures 3.1:1. It was `--line` at 1.3:1 for one
+render, which made the ring look incomplete.
 
 **Two painted surfaces, not zero.** Earlier passes targeted an empty array.
 This one deliberately allows `--surface` in exactly two places: the single
@@ -155,20 +170,38 @@ windows are arcs at their **actual clock positions**, so the ring is always
 complete and splits into two visibly different segments, you read your
 16:8 as a proportion of the real day.
 
-- Ring `r=130` stroke 5, **butt caps**. Round caps leave a visible dot at
-  every arc end and read as debris. Fast = accent (elapsed) over `--accent-soft`
-  (remaining). Eat sits at stroke 3 so it is clearly subordinate.
-- Cursor crosses the ring (`r` 121→139) so it reads as a marker on a scale,
+- **Two concentric rings.** The fast is the outer ring at `r=108` stroke 9,
+  drawn over a full-circle `--track` so the face is complete even when idle.
+  The eating window is its own ring at `r=92` stroke 4, subordinate by both
+  radius and weight. They shared one radius for a while and the eating window
+  read as more fast, which is the opposite of true.
+- Round caps, with the arc ends landing on the track rather than in space.
+  An earlier pass used butt caps because round ones left stray dots; that was
+  a geometry problem, not a cap problem.
+- Cursor crosses both rings (`r` 84→118) so it reads as a marker on a scale,
   never a hand floating outside it.
 - Graduations every 2h, longer at the quarters, with `12a / 6a / 12p / 6p`.
 - Countdown is **HH:MM**. Seconds ticking is anxious, and minutes are the
   right unit for a 16-hour fast.
 
-**Cut during review:** a cortisol ribbon plotted radially inside the dial.
-A smooth unimodal curve in polar coordinates just looks like another
-circle, it competed with the window ring and carried no information the
-sparkline already carries better. Decoration that argues it is data is
-still decoration.
+**Still cut:** a cortisol ribbon plotted radially inside the dial. A smooth
+unimodal curve in polar coordinates just looks like another circle, it
+competed with the window ring, and it carried no information the sparkline
+already carries better. Decoration that argues it is data is still
+decoration.
+
+**Shipped instead: the low sector.** The face is shaded across the hours
+where the model sits in its low band, roughly 5:37 pm to 5:20 am. It is a
+flat fill between two hard edges at real clock times, not a curve, so it
+does not read as a second ring, and the edges are the information: that is
+when willpower is thinnest and urges peak. The bounds come from
+`lowWindow()`, which walks `cortisolAt` and finds the crossings, so the dial
+and the 24-hour chart can never disagree. The chart shades the same hours and
+captions them, which is where the sector gets explained.
+
+It also solves the blandness the ribbon was cut for creating. A circle with
+one asymmetric shaded region reads as a day. A circle with a symmetric ring
+reads as a widget.
 
 Note for future edits: `cortisolAt()` is piecewise. Every branch must meet
 its neighbour at the boundary or the curve grows a spike (this happened at

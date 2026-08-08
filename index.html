@@ -1,7 +1,7 @@
 <meta charset="UTF-8">
 <title>MindfulFast</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#F4F6F5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#EDF1EF" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#141A19" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -26,21 +26,23 @@
 :root {
   color-scheme: light dark;
 
-  --ground:      #F3F5F4;   /* soft stone, never pure white */
+  --ground:      #EDF1EF;   /* soft stone, never pure white */
   --surface:     #FBFCFB;   /* earns its place twice: insight card, sheets */
   --raised:      #FFFFFF;
-  --ink:         #162128;   /* 15.0:1 */
-  --ink-2:       #5F7078;   /*  4.7:1 */
-  --ink-3:       #5F7078;
-  --line:        #D7DFDB;
-  --line-strong: #C6D2CD;
-  --accent:      #37776C;   /*  4.8:1  darkened from #4E9C90, which was 3.0:1 */
-  --accent-press:#2C6058;
-  --wash:        rgba(55,119,108,0.12);
-  --accent-soft: rgba(55,119,108,0.30);
+  --ink:         #101B22;   /* 16.6:1 */
+  --ink-2:       #4E6068;   /*  6.4:1 */
+  --ink-3:       #5F7078;   /*  4.8:1 */
+  --line:        #C9D4CF;
+  --line-strong: #A8B8B1;
+  --track:       #7C8C86;   /*  3.1:1  the dial's 24-hour track, a graphic that carries meaning */
+  --accent:      #2F6E63;   /*  5.6:1  darkened from #4E9C90, which was 3.0:1 */
+  --accent-press:#245951;
+  --wash:        rgba(47,110,99,0.12);
+  --accent-soft: rgba(47,110,99,0.44);
+  --band-low:    rgba(16,27,34,0.05);   /* the cortisol low, marked on the dial */
   --accent-hi:   #4E9C90;
   --crit:        #A8443C;
-  --success:     #3E7F45;
+  --success:     #316A38;   /*  5.7:1 */
   --warn:        #8A5F28;
   --shadow:      0 1px 2px rgba(22,33,40,0.05), 0 8px 24px rgba(22,33,40,0.05);
   --lift:        #FFFFFF;
@@ -57,15 +59,17 @@
     --ground:      #0F1720;
     --surface:     #16212B;
     --raised:      #1C2A35;
-    --ink:         #E6EEF2;
-    --ink-2:       #9FB0BC;
-    --ink-3:       #9FB0BC;
-    --line:        #22303B;
-    --line-strong: #2E3E4A;
+    --ink:         #EAF2F6;
+    --ink-2:       #AEBFCA;
+    --ink-3:       #93A5B1;
+    --line:        #27363F;
+    --line-strong: #3B4F5C;
+    --track:       #506878;   /*  3.1:1 */
     --accent:      #6FC3B2;
     --accent-press:#4FA392;
     --wash:        rgba(111,195,178,0.14);
-    --accent-soft: rgba(111,195,178,0.32);
+    --accent-soft: rgba(111,195,178,0.34);
+    --band-low:    rgba(160,196,214,0.055);
     --accent-hi:   #9AD9CB;
     --crit:        #E08C84;
     --success:     #7BC47F;
@@ -161,23 +165,31 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 }
 .dial { width: 100%; height: 100%; display: block; }
 
-.tick { stroke: var(--ink-3); stroke-opacity: 0.34; stroke-width: 1; }
-.tick.major { stroke: var(--ink-2); stroke-opacity: 0.95; stroke-width: 1.6; }
+.tick { stroke: var(--ink-3); stroke-opacity: 0.5; stroke-width: 1; }
+.tick.major { stroke: var(--ink-2); stroke-width: 1.8; }
 .dial-lab {
   fill: var(--ink-2);
   font-family: var(--sans);
-  font-size: 11px;
-  letter-spacing: 0.06em;
+  font-size: 12px;
+  letter-spacing: 0.04em;
   text-anchor: middle;
   dominant-baseline: central;
 }
 
-/* the ring reads as two segments: fast vs eat, elapsed vs remaining */
-.arc { fill: none; stroke-width: 8; stroke-linecap: round; }
-.arc-fast-dim  { stroke: var(--accent-soft); }
-.arc-fast-live { stroke: var(--accent); }
-.arc-eat-dim   { stroke: var(--ink-3); stroke-opacity: 0.30; stroke-width: 8; }
-.arc-eat-live  { stroke: var(--ink-3); stroke-opacity: 0.62; stroke-width: 8; }
+/* The stretch of the day where cortisol sits in its low band, taken from the
+   same model the Cortisol screen plots. It is the reason the dial is not
+   symmetrical, and the reason evenings are the hard part. */
+.band-low { fill: var(--band-low); }
+
+/* Two concentric rings. The outer one is the fast, always a complete circle
+   so the face reads as an instrument rather than a progress bar. The inner
+   one is the eating window, thinner because it is subordinate. */
+.track { fill: none; stroke: var(--track); stroke-opacity: 0.55; stroke-width: 9; }
+.arc { fill: none; stroke-linecap: round; }
+.arc-fast-dim  { stroke: var(--accent-soft); stroke-width: 9; }
+.arc-fast-live { stroke: var(--accent); stroke-width: 9; }
+.arc-eat-dim   { stroke: var(--ink-3); stroke-opacity: 0.34; stroke-width: 4; }
+.arc-eat-live  { stroke: var(--ink-2); stroke-opacity: 0.9; stroke-width: 4; }
 
 .hand { stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
 .lead { fill: var(--accent); }
@@ -201,11 +213,10 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 .dial.scrubbable { touch-action: none; cursor: grab; }
 .dial.grabbing { cursor: grabbing; }
 
-.dial-hint {
-  font-size: 14px; color: var(--ink-2); margin-top: 8px;
-  opacity: 0; transition: opacity .3s var(--ease);
-}
-.dial-hint.on { opacity: 1; }
+/* Collapsed rather than faded out: an invisible line still holding its space
+   left a hole under the action while a fast was running. */
+.dial-hint { display: none; font-size: 14px; color: var(--ink-2); margin-top: 8px; }
+.dial-hint.on { display: block; }
 .dial-reset {
   color: var(--accent); font-weight: 500; cursor: pointer;
   padding: 6px; margin: -6px; pointer-events: auto;
@@ -900,8 +911,10 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
     <div class="dial-band">
       <div class="dial-wrap">
         <svg class="dial" viewBox="0 0 300 300" aria-hidden="true">
+          <path class="band-low" id="dialLow" d=""/>
           <g id="dialTicks"></g>
           <g id="dialLabels"></g>
+          <circle class="track" cx="150" cy="150" r="108"/>
           <path class="arc arc-eat-dim"   id="arcEatDim"   d=""/>
           <path class="arc arc-eat-live"  id="arcEatLive"  d=""/>
           <path class="arc arc-fast-dim"  id="arcFastDim"  d=""/>
@@ -1015,6 +1028,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
     <section class="band">
       <div class="band-label">24-hour curve</div>
       <div class="curve-wrap"><canvas id="curveCanvas"></canvas></div>
+      <p class="gauge-note" id="lowNote"></p>
     </section>
 
     <section class="band airy">
@@ -1295,8 +1309,10 @@ function cortisolBand(v) { return v > 14 ? 'high' : v > 8 ? 'moderate' : 'low'; 
 
 /* ---------------- dial geometry ---------------- */
 const CX = 150, CY = 150;
-const R_ARC = 108;                              // the window ring
-const R_HAND_IN = 99, R_HAND_OUT = 117;        // cursor crosses the ring
+const R_ARC = 108;                              // the fast ring
+const R_EAT = 92;                               // the eating window, subordinate
+const R_LOW_OUT = 97, R_LOW_IN = 0;           // the cortisol low sector
+const R_HAND_IN = 84, R_HAND_OUT = 118;        // cursor crosses both rings
 const R_TICK_OUT = 143, R_TICK_MIN = 136, R_TICK_MAJ = 128;
 const R_LABEL = 118;
 
@@ -1313,6 +1329,30 @@ function arcPath(r, h0, h1) {
          (span > 12 ? 1 : 0) + ' 1 ' + fmt(polar(r, h0 + span));
 }
 
+/* A filled sector between two radii, for the cortisol low band. */
+function bandPath(rOut, rIn, h0, h1) {
+  const big = (h1 - h0) > 12 ? 1 : 0;
+  return 'M' + fmt(polar(rOut, h0)) +
+         'A' + rOut + ' ' + rOut + ' 0 ' + big + ' 1 ' + fmt(polar(rOut, h1)) +
+         'L' + fmt(polar(rIn, h1)) +
+         'A' + rIn + ' ' + rIn + ' 0 ' + big + ' 0 ' + fmt(polar(rIn, h0)) + 'Z';
+}
+
+/* Where the model crosses into and out of its low band. Read off the curve
+   rather than typed in, so the two screens can never drift apart. */
+function lowWindow() {
+  const step = 0.02;
+  let start = null, end = null;
+  for (let h = 0; h < 24; h += step) {
+    const a = cortisolBand(cortisolAt(h)) === 'low';
+    const b = cortisolBand(cortisolAt((h + step) % 24)) === 'low';
+    if (!a && b) start = h + step;
+    if (a && !b) end = h + step;
+  }
+  if (start === null || end === null) return null;
+  return [start, end < start ? end + 24 : end];
+}
+
 function buildDialStatic() {
   // graduations every 2h, longer at the quarters: a scale, not a texture
   let ticks = '';
@@ -1326,6 +1366,17 @@ function buildDialStatic() {
              '" y1="' + a[1].toFixed(2) + '" x2="' + b[0].toFixed(2) + '" y2="' + b[1].toFixed(2) + '"/>';
   }
   document.getElementById('dialTicks').innerHTML = ticks;
+
+  const low = lowWindow();
+  if (low) {
+    document.getElementById('dialLow')
+      .setAttribute('d', bandPath(R_LOW_OUT, R_LOW_IN, low[0], low[1]));
+    const at = h => { const d = new Date(); d.setHours(0, Math.round((h % 24) * 60), 0, 0); return clock(d); };
+    document.getElementById('lowNote').textContent =
+      'Shaded from ' + at(low[0]) + ' to ' + at(low[1]) +
+      ', where the curve sits in its low band. The dial marks the same hours, ' +
+      'because that is when willpower is thinnest and urges peak.';
+  }
 
   document.getElementById('dialLabels').innerHTML =
     [[0,'12a'],[6,'6a'],[12,'12p'],[18,'6p']].map(([h, t]) => {
@@ -1366,12 +1417,12 @@ function renderDial() {
       liveFast = arcPath(R_ARC, s0, Math.min(s0 + elapsed, s1));
     } else {
       liveFast = arcPath(R_ARC, s0, s1);
-      liveEat  = arcPath(R_ARC, s1, Math.min(s0 + elapsed, s2));
+      liveEat  = arcPath(R_EAT, s1, Math.min(s0 + elapsed, s2));
     }
   }
 
   document.getElementById('arcFastDim').setAttribute('d', arcPath(R_ARC, s0, s1));
-  document.getElementById('arcEatDim').setAttribute('d', arcPath(R_ARC, s1, s2));
+  document.getElementById('arcEatDim').setAttribute('d', arcPath(R_EAT, s1, s2));
   document.getElementById('arcFastLive').setAttribute('d', liveFast);
   document.getElementById('arcEatLive').setAttribute('d', liveEat);
 
@@ -1381,7 +1432,8 @@ function renderDial() {
       : s0 + Math.min((now - state.fastStart) / 3600000, s2 - s0);
     if (liveEnd === null) lead.setAttribute('opacity', '0');
     else {
-      const [lx, ly] = polar(R_ARC, liveEnd);
+      // The lead rides whichever ring the live edge is on.
+      const [lx, ly] = polar(liveEnd > s1 ? R_EAT : R_ARC, liveEnd);
       lead.setAttribute('cx', lx.toFixed(2)); lead.setAttribute('cy', ly.toFixed(2));
       lead.setAttribute('opacity', '1');
     }
@@ -1554,8 +1606,6 @@ function renderActionBtn() {
     '</span><span class="act-arrow" aria-hidden="true">&#8594;</span>';
   b.classList.toggle('stop', state.phase === 'fasting');
   document.getElementById('protocols').classList.toggle('locked', !idle);
-  const mb = document.getElementById('mealBtn');
-  if (mb) mb.textContent = state.phase === 'fasting' ? 'Log a meal, ending the fast' : 'Log a meal';
 }
 
 /* ---------------- fast lifecycle ---------------- */
@@ -2059,8 +2109,18 @@ function drawCurve() {
   const pad = { l: 20, r: 20, t: 10, b: 22 };   // room for the edge axis labels
   const cw = w - pad.l - pad.r, ch = h - pad.t - pad.b;
 
+  // The same low band the dial marks, so the two obviously refer to each other.
+  const low = lowWindow();
+  if (low) {
+    ctx.fillStyle = css('--band-low');
+    [[low[0], Math.min(low[1], 24)], [0, Math.max(0, low[1] - 24)]].forEach(([a, z]) => {
+      if (z <= a) return;
+      ctx.fillRect(pad.l + (a / 24) * cw, pad.t, ((z - a) / 24) * cw, ch);
+    });
+  }
+
   // hour graduations, taller every 6h
-  ctx.strokeStyle = css('--grad'); ctx.lineWidth = 1;
+  ctx.strokeStyle = css('--line-strong'); ctx.lineWidth = 1;
   for (let i = 0; i <= 24; i++) {
     const x = pad.l + (i/24) * cw, maj = i % 6 === 0;
     ctx.beginPath();
@@ -2086,7 +2146,7 @@ function drawCurve() {
   pts.forEach(p => ctx.lineTo(p[0], p[1]));
   ctx.lineTo(pts[pts.length-1][0], pad.t + ch);
   ctx.closePath();
-  ctx.fillStyle = 'rgba(90,168,148,0.09)';
+  ctx.fillStyle = css('--wash');
   ctx.fill();
 
   ctx.beginPath();
@@ -2097,7 +2157,7 @@ function drawCurve() {
   const now = new Date(), nh = hoursOfDay(now);
   const nx = pad.l + (nh/24) * cw;
   const ny = pad.t + ch - (cortisolAt(nh)/CORT_MAX) * ch;
-  ctx.strokeStyle = css('--rule-strong'); ctx.lineWidth = 1;
+  ctx.strokeStyle = css('--ink-2'); ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(nx, pad.t); ctx.lineTo(nx, pad.t + ch); ctx.stroke();
   ctx.beginPath(); ctx.arc(nx, ny, 3.5, 0, Math.PI*2);
   ctx.fillStyle = css('--accent'); ctx.fill();

@@ -16,8 +16,14 @@ on your device.
 
 A 24-hour dial rather than a progress bar. Your fasting and eating windows are
 drawn at their real positions on the clock, so you read 16:8 as a proportion of
-the actual day. A cursor marks where you are now, and the ring is draggable, so
+the actual day. The fast is the outer ring, the eating window its own thinner
+ring inside it. A cursor marks where you are now, and the ring is draggable, so
 you can set a start time instead of accepting the moment you opened the app.
+
+The face is shaded across the hours where cortisol sits in its low band, which
+is why the dial is not symmetrical. Those are the hours when willpower is
+thinnest and urges peak, and they are read off the same curve the Cortisol
+screen plots rather than typed in.
 
 Protocols: 16:8, 18:6, 20:4, and one meal a day.
 
@@ -173,7 +179,9 @@ The site publishes from the `gh-pages` branch.
 `DESIGN.md` holds the locked constraints and the reasoning. The direction is
 quiet daylight: one painted background, separation by space and hairlines
 rather than cards, text actions instead of filled blocks, and contrast
-measured rather than eyeballed.
+measured rather than eyeballed. Every colour that carries text clears 4.5:1,
+and the dial's track, which stands for the rest of the day, clears 3:1 as a
+meaningful graphic.
 
 Literata carries headings and the timer, Figtree carries the interface. There
 is no monospace anywhere, which is most of what makes it feel calm rather than
