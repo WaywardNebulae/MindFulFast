@@ -1053,7 +1053,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
   <!-- ======================= URGE ======================= -->
   <main class="screen" id="screenUrge">
     <div class="urge-band">
-      <p class="urge-lead">Urges peak in 15 to 20 minutes, then pass. Work out what is driving this one first.</p>
+      <p class="urge-lead">Most urges peak within 15 to 20 minutes and then fade. Start by working out what is causing this one.</p>
       <button class="urge-btn" onclick="startUrgeFlow()">
         <span class="urge-btn-l">I have<br>an urge</span>
         <span class="urge-btn-s">Start here</span>
@@ -1061,22 +1061,22 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
     </div>
 
     <section class="band">
-      <div class="band-label">Straight to a tool</div>
+      <div class="band-label">Single tools</div>
       <div class="iv" onclick="quickTool('breathe')">
-        <div class="iv-h">Slow the breath down</div>
-        <div class="iv-p">Longer out than in, about 90 seconds. A long exhale slows your heart rate down.</div>
+        <div class="iv-h">Slow breathing</div>
+        <div class="iv-p">About 90 seconds, with the out-breath longer than the in-breath. This slows your heart rate down.</div>
       </div>
       <div class="iv" onclick="quickTool('walk')">
-        <div class="iv-h">Walk it off</div>
-        <div class="iv-p">Five to ten minutes, brisk. Walking burns off some of the adrenaline.</div>
+        <div class="iv-h">Brisk walk</div>
+        <div class="iv-p">Five to ten minutes. Walking clears stress hormones faster than sitting still.</div>
       </div>
       <div class="iv" onclick="quickTool('leave')">
-        <div class="iv-h">Leave the room</div>
-        <div class="iv-p">Change what you can see. Distance from the kitchen does most of the work.</div>
+        <div class="iv-h">Leave the kitchen</div>
+        <div class="iv-p">Go to a different room and shut the door. Being near food is part of what triggers the urge.</div>
       </div>
       <div class="iv" onclick="quickTool('delay')">
-        <div class="iv-h">Buy ten minutes</div>
-        <div class="iv-p">Ten minutes, then decide with a clearer head. You can still eat after.</div>
+        <div class="iv-h">Wait ten minutes</div>
+        <div class="iv-p">Set a timer and decide when it goes off. You can still eat then.</div>
       </div>
     </section>
 
@@ -1672,7 +1672,7 @@ function resetFast() {
 function toEating() {
   state.phase = 'eating';
   saveState(); renderActionBtn();
-  if (state.alarms.open) notify('Eating window open', 'Sit down for the first meal.');
+  if (state.alarms.open) notify('Eating window open', 'Sit down to eat.');
 }
 
 function toComplete(quiet) {
@@ -1729,7 +1729,7 @@ function buildAlarmList() {
 
   if (state.alarms.open && state.fastEnd && state.fastEnd.getTime() > now) {
     out.push({ id: 'open', at: state.fastEnd.getTime(),
-               title: 'Eating window open', body: 'Sit down for the first meal.' });
+               title: 'Eating window open', body: 'Sit down to eat.' });
   }
   if (state.alarms.close && state.eatEnd && state.eatEnd.getTime() > now) {
     out.push({ id: 'close', at: state.eatEnd.getTime(),
@@ -1739,7 +1739,7 @@ function buildAlarmList() {
     let i = 1;
     for (let t = now + 3600000; t < state.fastEnd.getTime(); t += 3600000, i++) {
       out.push({ id: 'hourly-' + i, at: t,
-                 title: 'Fasting check-in', body: 'Still going. Stay hydrated.' });
+                 title: 'Fasting check-in', body: 'Still fasting. Drink some water.' });
     }
   }
   return out;
@@ -2014,7 +2014,7 @@ function renderCortisol() {
 const ADVICE = {
   high: 'Cortisol is near its peak. Eating now drives a larger insulin response. Hold off if you can, and skip the coffee.',
   moderate: 'Cortisol is mid-range and falling. Good stretch of the day to eat.',
-  low: 'Cortisol is at its floor. Your body is in recovery. Eating now competes with sleep hormones.'
+  low: 'Cortisol is at its lowest. Eating now works against the hormones that control sleep.'
 };
 
 /* The band alone cannot tell you much. How long since you ate changes what
@@ -2053,16 +2053,16 @@ function tipsFor(h) {
     { h: 'Protein first', p: 'A protein-led first meal steadies blood sugar and cuts afternoon cravings.' }
   ];
   if (h >= 12 && h < 16) return [
-    { h: 'Train now if you train', p: 'Mid-range cortisol supports output, and training here steepens the evening decline.' },
-    { h: 'Stress-eating window', p: 'Afternoon pressure spikes cortisol. If an urge shows up, go to the Urge tab before the kitchen.' }
+    { h: 'Good time to train', p: 'Mid-range cortisol supports hard effort, and training now makes the evening drop steeper.' },
+    { h: 'Stress-eating window', p: 'Afternoon stress raises cortisol. If an urge starts, open the Urge tab before you go to the kitchen.' }
   ];
   if (h >= 16 && h < 20) return [
-    { h: 'Close the window', p: 'Finishing by early evening protects the cortisol nadir and your sleep quality.' },
-    { h: 'Cravings incoming', p: 'Willpower tracks cortisol down. This is when impulsive eating peaks, so decide before you get there.' }
+    { h: 'Finish eating soon', p: 'Finishing by early evening keeps the overnight low intact and helps you sleep.' },
+    { h: 'Cravings are more likely now', p: 'Self-control drops along with cortisol. Impulsive eating is most common in these hours, so decide what you are eating in advance.' }
   ];
   return [
-    { h: 'Recovery mode', p: 'Cortisol should be at its lowest. Eating now disrupts sleep hormones and favours fat storage.' },
-    { h: 'Wind down', p: 'Dim the lights and put the screens down. Bad sleep tonight shifts tomorrow’s curve.' }
+    { h: 'Cortisol at its lowest', p: 'Cortisol should be at its lowest now. Eating this late disrupts sleep and favours fat storage.' },
+    { h: 'Getting ready for sleep', p: 'Dim the lights and put the screens down. Poor sleep tonight shifts tomorrow’s curve.' }
   ];
 }
 
@@ -2237,7 +2237,7 @@ function runBreathe() {
       if (++breathe.round > breathe.rounds) {
         const inFlow = breathe.fromFlow;
         stopBreathing();
-        if (!inFlow) showToast('Done. Check in with yourself before deciding.');
+        if (!inFlow) showToast('Finished. Check whether the urge has changed.');
         return;
       }
     }
@@ -2414,7 +2414,7 @@ function renderMealSheet() {
       MEAL_WHEN.map(([m, l]) => '<button class="mopt' + (m === mealDraft.back ? ' on' : '') +
         '" data-mw="' + m + '">' + l + '</button>').join('') +
     '</div></div>' +
-    '<div class="mrow"><div class="mrow-l">Note, if you want one</div>' +
+    '<div class="mrow"><div class="mrow-l">Note (optional)</div>' +
       '<input class="min" id="mealNote" placeholder="Eggs and toast" value="' +
         esc(mealDraft.note) + '"></div>' +
     '<p class="since" style="padding:20px 0 0">' + esc(mealSheetLine(at)) + '</p>' +
@@ -2551,7 +2551,7 @@ function renderEatingPlan() {
       + clash.label.toLowerCase() + '. If urges are the thing you are trying to fix, eat the meal and shorten the fast.';
   } else {
     note.className = 'eat-note';
-    note.textContent = 'Eating every ' + state.eating.gapH + ' hours, whether or not hunger shows up. Tap a slot when you have eaten it.';
+    note.textContent = 'Eating every ' + state.eating.gapH + ' hours, whether or not you feel hungry. Tap a slot once you have eaten it.';
   }
 }
 
@@ -2567,40 +2567,40 @@ const SITUATIONS = ['Work pressure','Argument','Bad news','Alone in the evening'
 
 const BUCKETS = {
   calm: {
-    name: 'Calm my body',
-    why: 'Settle your body down before you decide anything.',
+    name: 'Calm your body',
+    why: 'Slow your heart rate down first, then decide.',
     actions: [
-      { id: 'breathe', name: 'Slow breathing', mins: 2,  tip: 'In for four, out for six. The long exhale is the part that works.' },
-      { id: 'relax',   name: 'Release your shoulders', mins: 3, tip: 'Tense a muscle group hard for five seconds, then let go. Jaw, shoulders, hands, on down.' },
+      { id: 'breathe', name: 'Slow breathing', mins: 2,  tip: 'In for four, out for six. Keep the out-breath longer than the in-breath.' },
+      { id: 'relax',   name: 'Release your shoulders', mins: 3, tip: 'Tense a muscle group hard for five seconds, then let go. Jaw, shoulders, hands, legs.' },
       { id: 'sit',     name: 'Sit still and count exhales', mins: 5, tip: 'Count ten breaths out. Lost count is normal, start again at one.' }
     ]
   },
   move: {
-    name: 'Move the stress out',
-    why: 'Give the stress response somewhere to go.',
+    name: 'Use up the adrenaline',
+    why: 'Physical activity clears stress hormones faster than sitting still.',
     actions: [
-      { id: 'walk',    name: 'Brisk walk', mins: 10, tip: 'Outside if you can. Pace matters more than distance.' },
-      { id: 'stretch', name: 'Stretch it out', mins: 5, tip: 'Neck, shoulders, hips, hamstrings. Slow, nothing forced.' },
-      { id: 'song',    name: 'Move for one song', mins: 4, tip: 'Pick something fast. Whatever you like, as long as you move.' }
+      { id: 'walk',    name: 'Brisk walk', mins: 10, tip: 'Outside if you can. Walk fast enough to breathe harder.' },
+      { id: 'stretch', name: 'Stretch', mins: 5, tip: 'Neck, shoulders, hips, hamstrings. Slowly, and do not force any of them.' },
+      { id: 'song',    name: 'Move for one song', mins: 4, tip: 'Pick something fast and keep moving until it ends.' }
     ]
   },
   context: {
     name: 'Change where you are',
-    why: 'A lot of the pull comes from being in the room.',
+    why: 'Being near food is part of what triggers the urge.',
     actions: [
-      { id: 'leave',   name: 'Leave the kitchen', mins: 10, tip: 'Different room, door shut. Take your phone so you stay put.' },
-      { id: 'outside', name: 'Step outside', mins: 5,  tip: 'Front step counts. Daylight and cooler air both help.' },
-      { id: 'shower',  name: 'Shower or wash your face', mins: 8, tip: 'It changes how you feel, and it gets you out of the kitchen for a few minutes.' }
+      { id: 'leave',   name: 'Leave the kitchen', mins: 10, tip: 'Different room, door shut. Take your phone so you have a reason to stay.' },
+      { id: 'outside', name: 'Step outside', mins: 5,  tip: 'The front step is far enough. Daylight and cooler air both help.' },
+      { id: 'shower',  name: 'Shower or wash your face', mins: 8, tip: 'Cold or warm water both work. It also keeps you out of the kitchen for a few minutes.' }
     ]
   },
   soothe: {
-    name: 'Soothe without food',
-    why: 'The need underneath is usually something else. Food is just the quickest thing to reach for.',
+    name: 'Comfort yourself another way',
+    why: 'Food is the quickest thing to reach for, but it is usually not what you need.',
     actions: [
-      { id: 'drink',   name: 'Make a warm drink', mins: 6,  tip: 'Tea, decaf, hot water. The ritual is doing as much as the drink.' },
+      { id: 'drink',   name: 'Make a warm drink', mins: 6,  tip: 'Tea, decaf, hot water. Making it takes about as long as the urge does.' },
       { id: 'write',   name: 'Write down what happened', mins: 5, tip: 'One prompt: what stressed me just now? Nobody else reads it.' },
-      { id: 'reach',   name: 'Text or call someone', mins: 8, tip: 'You do not have to mention food. Talking to someone is enough on its own.' },
-      { id: 'audio',   name: 'Put on something calming', mins: 10, tip: 'Music, a podcast, anything that gives your head something else to do.' }
+      { id: 'reach',   name: 'Text or call someone', mins: 8, tip: 'You do not have to mention food. Any conversation works.' },
+      { id: 'audio',   name: 'Put on something calming', mins: 10, tip: 'Music or a podcast. Something you have to pay a bit of attention to.' }
     ]
   }
 };
@@ -2710,7 +2710,7 @@ const FLOW_VIEWS = {
 
   intensity: () => `
     <div class="flow-q">How strong is it?</div>
-    <div class="flow-hint">No wrong answer. This is what tells you later whether anything helped.</div>
+    <div class="flow-hint">Rate it now so you can compare it afterwards.</div>
     <div class="flow-sub">Urge right now</div>
     ${scale('urge0')}
     <div class="scale-ends"><span>barely there</span><span>overwhelming</span></div>
@@ -2722,12 +2722,12 @@ const FLOW_VIEWS = {
     const stressed = flow.draft.stress === true || flow.draft.keyedUp === true;
     return `
     ${stressed
-      ? `<div class="flow-lead">Your stress may be driving this urge. Bring your system down first, then decide whether you are physically hungry.</div>`
-      : `<div class="flow-lead">Nothing stressful behind it, then. Check whether you are hungry first.</div>`}
+      ? `<div class="flow-lead">Stress is probably driving this urge. Lower your stress level first, then decide whether you are hungry.</div>`
+      : `<div class="flow-lead">No stress behind it, then. The next question is whether you are hungry.</div>`}
     <div class="flow-q">${stressed ? 'What do you want to try?' : 'Are you physically hungry?'}</div>
     <div class="flow-hint">${stressed
-      ? 'Any of these buys you the fifteen minutes the urge needs to pass.'
-      : 'Empty stomach, low energy, a while since you last ate. Wanting something is different.'}</div>
+      ? 'Each option runs a timer while you do it.'
+      : 'Empty stomach, low energy, a while since you last ate. Wanting to eat is a separate thing.'}</div>
     <div class="opts col">
       ${stressed ? '' :
         `<button class="opt${flow.draft.bucket === 'hungry' ? ' on' : ''}" data-set="bucket" data-val="hungry">
@@ -2741,24 +2741,24 @@ const FLOW_VIEWS = {
   action: () => {
     if (flow.draft.bucket === 'hungry') {
       return `
-        <div class="flow-lead">Then eat, properly.</div>
-        <div class="flow-q">Portion it before you start</div>
-        <div class="flow-hint">On a plate, sitting down, not out of the packet. Eating a planned amount deliberately is the opposite of a lapse, not a smaller version of one.</div>
-        <div class="flow-sub">Give yourself a moment first</div>
+        <div class="flow-lead">Then eat.</div>
+        <div class="flow-q">Decide the amount before you start</div>
+        <div class="flow-hint">Put it on a plate and sit down rather than eating from the packet. Eating a planned amount on purpose counts as handling the urge.</div>
+        <div class="flow-sub">Before you start</div>
         <div class="opts col">
           <button class="opt${flow.draft.action === 'pause' ? ' on' : ''}" data-act="pause">
-            Pause two minutes, then eat<span class="opt-d">Long enough to portion it and sit down.</span></button>
+            Pause two minutes, then eat<span class="opt-d">Enough time to serve it and sit down.</span></button>
           <button class="opt${flow.draft.action === 'eat-now' ? ' on' : ''}" data-act="eat-now">
             Eat now<span class="opt-d">Skip the timer.</span></button>
         </div>`;
     }
     const b = BUCKETS[flow.draft.bucket];
-    if (!b) return `<div class="flow-q">Pick a direction first</div>
-                    <div class="flow-hint">Go back a step and choose one.</div>`;
+    if (!b) return `<div class="flow-q">Nothing selected</div>
+                    <div class="flow-hint">Go back a step and pick one.</div>`;
     return `
       <div class="flow-lead">${esc(b.why)}</div>
       <div class="flow-q">${esc(b.name)}</div>
-      <div class="flow-hint">Pick one. The timer runs while you do it.</div>
+      <div class="flow-hint">Pick one. A timer runs while you do it.</div>
       <div class="opts col">
         ${b.actions.map(a =>
           `<button class="opt${flow.draft.action === a.id ? ' on' : ''}" data-act="${a.id}">
@@ -2770,14 +2770,14 @@ const FLOW_VIEWS = {
     <div class="hold">
       <div class="hold-n" id="holdN">00:00</div>
       <div class="hold-l">left</div>
-      <div class="hold-do">${esc(flow.draft.actionName || 'Give it a few minutes')}</div>
+      <div class="hold-do">${esc(flow.draft.actionName || 'Wait a few minutes')}</div>
       <div class="hold-tip">${esc(flow.draft.actionTip || '')}</div>
     </div>
-    <div class="flow-sub">You can move on whenever you are ready.</div>`,
+    <div class="flow-sub">You can move on before the timer ends.</div>`,
 
   recheck: () => `
     <div class="flow-q">How is it now?</div>
-    <div class="flow-hint">Compared with before. Urges drop in waves, not straight lines.</div>
+    <div class="flow-hint">Compared with your first rating. Urges often drop unevenly.</div>
     <div class="flow-sub">Urge right now</div>
     ${scale('urge1')}
     <div class="scale-ends"><span>barely there</span><span>overwhelming</span></div>
@@ -2785,12 +2785,12 @@ const FLOW_VIEWS = {
 
   outcome: () => `
     <div class="flow-q">What happened?</div>
-    <div class="flow-hint">Straight answer, no scoring. This is the one the patterns are built from.</div>
+    <div class="flow-hint">Nothing here is scored. The Patterns screen is built from this answer.</div>
     <div class="opts col">
       <button class="opt${flow.draft.outcome === 'rode' ? ' on' : ''}" onclick="setField('outcome','rode')">
         It passed<span class="opt-d">Rode it out without eating.</span></button>
       <button class="opt${flow.draft.outcome === 'planned' ? ' on' : ''}" onclick="setField('outcome','planned')">
-        I ate, on purpose<span class="opt-d">A planned amount, deliberately. This counts as a win.</span></button>
+        I ate, on purpose<span class="opt-d">A planned amount, on purpose.</span></button>
       <button class="opt${flow.draft.outcome === 'lapse' ? ' on' : ''}" onclick="setField('outcome','lapse')">
         It got away from me<span class="opt-d">More than planned, or felt out of control.</span></button>
     </div>
@@ -2799,16 +2799,16 @@ const FLOW_VIEWS = {
            value="${esc(flow.draft.next)}" oninput="setField('next', this.value, true)">`,
 
   setback: () => `
-    <div class="flow-lead">A lapse is information, not a verdict. The point is what it tells you.</div>
+    <div class="flow-lead">These questions are here to find the cause. Nothing is scored.</div>
     <div class="flow-q">Setback review</div>
     <div class="flow-sub">What came before it?</div>
-    <input class="flow-in" id="sbBefore" placeholder="The hours leading up to it"
+    <input class="flow-in" id="sbBefore" placeholder="What was happening beforehand"
            value="${esc(flow.draft.setback?.before || '')}" oninput="setSetback('before', this.value)">
     <div class="flow-sub">What kept it going?</div>
     <input class="flow-in" id="sbKept" placeholder="Once it started"
            value="${esc(flow.draft.setback?.kept || '')}" oninput="setSetback('kept', this.value)">
     <div class="flow-sub">What would you try next time?</div>
-    <input class="flow-in" id="sbNext" placeholder="One thing, small enough to actually do"
+    <input class="flow-in" id="sbNext" placeholder="One thing you could realistically do"
            value="${esc(flow.draft.setback?.next || '')}" oninput="setSetback('next', this.value)">`
 };
 
@@ -2843,10 +2843,10 @@ const ALL_ACTIONS = {};
 Object.values(BUCKETS).forEach(b => b.actions.forEach(a => { ALL_ACTIONS[a.id] = a; }));
 Object.assign(ALL_ACTIONS, {
   pause:     { id: 'pause',   name: 'Two minute pause, then eat', mins: 2,
-               tip: 'Portion it out, sit down, then start.' },
+               tip: 'Serve the amount you planned, then start.' },
   'eat-now': { id: 'eat-now', name: 'Eat now', mins: 0, tip: '' },
   delay:     { id: 'delay',   name: 'Ten minute pause', mins: 10,
-               tip: 'Later still counts as deciding. Most of the spike passes in that time.' }
+               tip: 'Waiting two minutes is a decision too. The urge usually drops in that time.' }
 });
 
 document.getElementById('flowBody').addEventListener('click', e => {
@@ -2933,7 +2933,7 @@ function paintHold() {
   if (left <= 0 && flow.holdTimer) {
     clearInterval(flow.holdTimer); flow.holdTimer = null;
     chime();
-    showToast('Time is up. Check in with yourself.');
+    showToast('Time is up. Check whether the urge has changed.');
   }
 }
 
@@ -3085,22 +3085,22 @@ function renderInsights(eps, byHour) {
 
   const peakHour = byHour.indexOf(Math.max(...byHour));
   const h12 = (peakHour % 12) || 12;
-  out.push('Urges cluster around ' + h12 + (peakHour >= 12 ? 'pm' : 'am') +
-           '. Worth having a plan ready before then.');
+  out.push('Most of your urges happen around ' + h12 + (peakHour >= 12 ? 'pm' : 'am') +
+           '. Decide what you will do in advance.');
 
   const rated = eps.filter(e => e.urge0 != null && e.urge1 != null);
   if (rated.length >= 3) {
     const avg = rated.reduce((s, e) => s + (e.urge0 - e.urge1), 0) / rated.length;
     out.push(avg > 0
-      ? 'Urges drop by about ' + avg.toFixed(1) + ' points once you do something. They pass on their own more often than they feel like they will.'
-      : 'Urges are not dropping much yet. Try giving the timer longer, or a different kind of tool.');
+      ? 'Urges drop by about ' + avg.toFixed(1) + ' points once you do something. They fade on their own more often than it feels like they will.'
+      : 'Your urges are not dropping much yet. Try a longer timer, or a different kind of tool.');
   }
 
   // The signal that matters most in a fasting app: urges concentrating late
   // in the fast means restraint is feeding them.
   const duringFast = eps.filter(e => e.situation === 'After a long fast' || e.situation === 'Skipped a meal').length;
   if (duringFast >= 2 && duringFast / eps.length > 0.25) {
-    out.push({ flag: true, text: 'A good share of these follow a long gap without food. Restriction drives loss-of-control eating, so shortening the fast or turning on regular eating will help more than the urge tools.' });
+    out.push({ flag: true, text: 'Many of these follow a long gap without food. Undereating is a known cause of loss-of-control eating, so shorten the fast or turn on regular eating before trying more urge tools.' });
   }
 
   const lapses = eps.filter(e => e.outcome === 'lapse').length;
@@ -3122,7 +3122,7 @@ function timelineItems() {
   const out = [], now = Date.now();
   if (state.phase !== 'idle' && state.fastStart) {
     out.push({ at: state.fastStart.getTime(), name: 'Fast started', note: 'Water, black coffee, herbal tea', fixed: true });
-    out.push({ at: state.fastEnd.getTime(), name: 'Eating window opens', note: 'Break it sitting down', fixed: true });
+    out.push({ at: state.fastEnd.getTime(), name: 'Eating window opens', note: 'Sit down to eat', fixed: true });
     out.push({ at: state.eatEnd.getTime(), name: 'Eating window closes', note: 'Next fast begins', fixed: true });
   }
   const key = dateKey(new Date());
@@ -3189,8 +3189,8 @@ const WHY = {
          ['What helps', 'Delay the first meal an hour or two if you can, hold the coffee until the curve is falling, and get some daylight. Morning light is what keeps the rhythm on time.']],
   moderate: [['Cortisol is mid-range and falling', 'Insulin sensitivity is reasonable here, and appetite signals are more trustworthy than they are at either end of the day.'],
              ['What helps', 'If you are breaking a fast, this is the window to do it. Protein first steadies blood sugar and takes the edge off the late-afternoon dip.']],
-  low: [['Cortisol is at its floor', 'The overnight low is when the body does most of its repair. It is also when willpower is thinnest, which is why evening is when urges peak.'],
-        ['What helps', 'Eating now competes with sleep hormones. If an urge shows up, it is far more likely to be stress or tiredness than hunger. The Urge tab starts by asking which one it is.']]
+  low: [['Cortisol is at its lowest', 'Most tissue repair happens during the overnight low. Self-control is also at its weakest then, which is why urges are more common in the evening.'],
+        ['What helps', 'Eating now works against the hormones that control sleep. An urge at this hour is more likely to be stress or tiredness than hunger, so the Urge tab asks which one it is.']]
 };
 function openInsight() {
   const now = new Date();

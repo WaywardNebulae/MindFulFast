@@ -1,7 +1,7 @@
 # MindfulFast
 
-An intermittent fasting timer built around the daily cortisol rhythm, and
-around what to do when the urge to eat arrives.
+An intermittent fasting timer that uses the daily cortisol rhythm, with a
+guided routine for handling the urge to eat.
 
 **[Open the app](https://waywardnebulae.github.io/MindFulFast/)**
 
@@ -21,26 +21,26 @@ ring inside it. A cursor marks where you are now, and the ring is draggable, so
 you can set a start time instead of accepting the moment you opened the app.
 
 The face is shaded across the hours where cortisol sits in its low band, which
-is why the dial is not symmetrical. Urges cluster in those hours for most
-people. The bounds are read off the same curve the Cortisol screen plots, so
-the two cannot drift apart.
+is why the dial is not symmetrical. Urges are more common in those hours. The
+bounds are calculated from the same curve the Cortisol screen plots, so the two
+cannot disagree.
 
 Protocols: 16:8, 18:6, 20:4, and one meal a day.
 
-The countdown is hours and minutes. Seconds ticking down for sixteen hours is
-not calming.
+The countdown shows hours and minutes. Seconds are left off deliberately,
+since watching them tick for sixteen hours makes most people more anxious.
 
 ### Eating log
 
 What you ate and when. The timer reads off it, so it does not depend on you
 remembering to press anything:
 
-- Logging a meal ends the fast at that moment, and the eating window opens
-  from there. A fast is over when you eat, whatever the countdown still says.
+- Logging a meal ends the fast at that moment and opens the eating window
+  from there, whatever the countdown still says.
 - Log a meal earlier than the fast start and the fast moves to it, because you
   cannot have been fasting since before you ate.
-- The next fast counts from your last meal, not from whenever you got round to
-  tapping start. The dial says so, and offers to start from now instead.
+- The next fast counts from your last meal rather than from when you tapped
+  start. The dial says which time it is using and lets you override it.
 - Ticking off a planned meal in regular eating writes the same record, so the
   two never disagree.
 
@@ -54,8 +54,8 @@ overnight. That shape affects insulin sensitivity, appetite, and how much
 willpower is left in the evening.
 
 The app shows where you are on that curve and changes its guidance with it:
-when to hold off on coffee, when breaking a fast lands best, when cravings are
-most likely.
+when to hold off on coffee, when to break a fast, and when cravings are more
+likely.
 
 The guidance reads against your eating log too, since the same reading means
 something different an hour after a meal than it does sixteen hours after one.
@@ -65,20 +65,20 @@ population model. Nothing is measured from your body.
 
 ### Urge
 
-A guided protocol rather than a list of distractions. It asks what is driving
-the urge first, because stress and hunger need different answers.
+A guided sequence rather than a list of distractions. It asks what is causing
+the urge first, because stress and hunger need different responses.
 
-If stress is behind it, you get four directions: calm your body, move the
-stress out, change where you are, or soothe without food. Each runs a timer
-while you do it.
+If stress is causing it, you choose between four approaches: calm your body,
+use up the adrenaline, change where you are, or comfort yourself another way.
+Each one runs a timer.
 
-If it is not stress, you get a hunger check first, and eating a planned amount
-deliberately counts as an answer, not a smaller kind of failure.
+If stress is not causing it, you get a hunger check first. Eating a planned
+amount on purpose is recorded as handling the urge.
 
-Then it asks how the urge changed, which is the number the log is actually for.
+It then asks how the urge changed. That number is what the pattern review uses.
 
-Breathing is four in, hold, six out, hold. The long exhale is what brings your
-heart rate down.
+The breathing exercise is four in, hold, six out, hold. The long out-breath is
+what lowers your heart rate.
 
 ### Log
 
@@ -100,22 +100,22 @@ your own entries.
 Long gaps without food make loss-of-control eating more likely, not less. So
 the app can schedule meals and snacks at a set interval and remind you.
 
-These reminders are deliberately **not** subordinate to the fasting window. If a
-fast is scheduled over a planned meal the app says so, and pattern review will
-tell you to shorten the fast when urges follow long gaps. A fasting timer that
-quietly overrode the meal plan would be creating the problem the log measures.
+These reminders take priority over the fasting window. If a fast is scheduled
+over a planned meal the app says so, and pattern review will tell you to
+shorten the fast when urges follow long gaps. A fasting timer that overrode the
+meal plan would be causing the problem the log is there to measure.
 
 ---
 
 ## Alarms
 
-A web page cannot run code on a timer once it is closed, so alarm delivery is
-layered by what the platform actually allows.
+A web page cannot run code on a timer once it is closed, so alarms use several
+mechanisms depending on what the browser supports.
 
 The schedule lives in IndexedDB and the service worker fires anything due on
 every wake-up it gets. Where the browser supports scheduled notification
 triggers, delivery is exact. Otherwise an alarm arrives on the browser's next
-wake and says how late it was rather than pretending to be on time.
+wake and states how late it is.
 
 `server/` holds an optional push scheduler for exact delivery to a closed app.
 It is off by default and needs a host you run yourself. See `server/README.md`.
@@ -177,17 +177,15 @@ The site publishes from the `gh-pages` branch.
 
 ## Design
 
-`DESIGN.md` holds the locked constraints and the reasoning. The direction is
-quiet daylight: one painted background, separation by space and hairlines
-rather than cards, text actions instead of filled blocks, and contrast
-measured rather than eyeballed. Every colour that carries text clears 4.5:1,
-and the dial's track, which stands for the rest of the day, clears 3:1 as a
-meaningful graphic.
+`DESIGN.md` holds the constraints and the reasoning. One painted background,
+sections separated by space and hairlines instead of cards, text actions
+instead of filled blocks. Every colour that carries text measures at least
+4.5:1 against its background, and the dial's track measures 3:1.
 
-Literata carries headings and the timer, Figtree carries the interface. There
-is no monospace anywhere, which did more for the mood than any palette change.
-Light is the primary surface. Dark is paired because the hardest moments this
-app exists for happen in the evening.
+Literata sets headings and the timer, Figtree sets the interface. There is no
+monospace anywhere, which changed the feel of the app more than any palette
+change did. Light is the primary theme. Dark is included because most people
+using this app will need it in the evening.
 
 ---
 
