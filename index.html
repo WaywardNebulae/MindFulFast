@@ -494,6 +494,62 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 .eat-note { font-size: 14px; line-height: 1.5; color: var(--ink-3); padding-bottom: 14px; }
 .eat-note.clash { color: var(--crit); }
 
+/* ============================ EATING LOG ============================ */
+/* Secondary action. Ink, not accent, so the fast control stays the only
+   accent-coloured thing in its region. */
+.act-2 {
+  display: block; margin: 0 auto; padding: 10px 16px;
+  font-family: var(--sans); font-size: 16px; color: var(--ink-2);
+  background: none; border: 0; cursor: pointer;
+}
+.act-2:active { color: var(--ink); }
+.act-2 b { font-weight: 500; color: var(--ink); }
+
+.since { font-size: 14px; line-height: 1.5; color: var(--ink-3); padding-bottom: 16px; }
+.since b { font-weight: 500; color: var(--ink-2); }
+
+.mrow { padding: 20px 0 0; }
+.mrow-l { font-size: 14px; color: var(--ink-3); margin-bottom: 10px; }
+.mopts { display: flex; flex-wrap: wrap; gap: 2px; margin: 0 -10px; }
+.mopt {
+  font-family: var(--sans); font-size: 15px; color: var(--ink-2);
+  background: none; cursor: pointer; white-space: nowrap;
+  padding: 8px 10px 9px; border: 0;
+  border-bottom: 1.5px solid transparent;
+  transition: color .25s var(--ease), border-color .25s var(--ease);
+}
+.mopt.on { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
+.min {
+  width: 100%; padding: 0 0 9px; margin-top: 4px;
+  border-bottom: 2px solid var(--line-strong);
+  font-family: var(--sans); font-size: 16px; outline: none;
+}
+.min:focus { border-bottom-color: var(--accent); }
+.min::placeholder { color: var(--ink-3); font-family: var(--sans); }
+.msave {
+  display: block; width: 100%; margin-top: 28px; padding: 14px;
+  font-family: var(--sans); font-size: 18px; font-weight: 600;
+  color: var(--accent); background: none; border: 0; cursor: pointer;
+}
+.msave:active { transform: scale(0.98); }
+
+.ml { display: flex; align-items: baseline; gap: 14px; padding: 11px 0; }
+.ml + .ml { border-top: 1px solid var(--line); }
+.ml-t {
+  font-family: var(--sans); font-size: 14px; font-variant-numeric: tabular-nums;
+  color: var(--ink); width: 74px; flex-shrink: 0;
+}
+.ml-b { flex: 1; min-width: 0; }
+.ml-n { font-size: 16px; }
+.ml-note { font-size: 14px; color: var(--ink-3); margin-top: 2px; }
+.ml-x {
+  font-family: var(--sans); font-size: 14px; color: var(--ink-3);
+  background: none; border: 0; cursor: pointer; padding: 4px 0 4px 12px; flex-shrink: 0;
+}
+.ml-x:active { color: var(--crit); }
+.ml-day { font-size: 14px; color: var(--ink-3); padding: 18px 0 4px; }
+.ml-day:first-child { padding-top: 0; }
+
 /* ============================ INTRO ============================ */
 .intro {
   position: fixed; inset: 0; z-index: 130;
@@ -729,7 +785,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 }
 .sheet-scrim.on { opacity: 1; pointer-events: auto; }
 .sheet {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 121;
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 210;
   max-width: 480px; margin: 0 auto;
   background: var(--surface);
   border-radius: 22px 22px 0 0;
@@ -744,7 +800,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 .sheet h2 { font-family: var(--serif); font-size: 23px; font-weight: 500; }
 .sheet p { font-size: 16px; line-height: 1.6; color: var(--ink-2); margin-top: 12px; }
 .sheet-close { display: block; width: 100%; text-align: center; font-size: 16px;
-  font-weight: 600; color: var(--accent); padding: 20px 12px 4px; cursor: pointer; }
+  font-weight: 500; color: var(--ink-2); padding: 20px 12px 4px; cursor: pointer; }
 
 /* ---------- gliding nav indicator ---------- */
 .nav { position: fixed; }
@@ -875,6 +931,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
     <div class="act-wrap">
       <button class="act" id="actBtn" onclick="toggleFast()"><span>Start fast</span><span class="act-arrow" aria-hidden="true">&#8594;</span></button>
       <div class="dial-hint" id="dialHint"></div>
+      <button class="act-2" id="mealBtn" onclick="openMealSheet()">Log a meal</button>
     </div>
 
     <button class="rightnow" onclick="openInsight()">
@@ -882,6 +939,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
         <span class="rightnow-eyebrow">Right now</span>
         <div class="rightnow-title" id="insightTitle">Cortisol</div>
         <p class="rightnow-body" id="advice">Estimating your circadian rhythm.</p>
+        <p class="rightnow-body" id="adviceSince"></p>
       </div>
       <div>
         <svg class="rightnow-spark" id="spark" viewBox="0 0 120 34" preserveAspectRatio="none" aria-hidden="true">
@@ -966,6 +1024,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 
     <section class="band tight">
       <div class="band-label">Meal timing</div>
+      <div class="since" id="mealSince"></div>
       <div id="meals"></div>
     </section>
 
@@ -1018,6 +1077,12 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
       <span class="streak-l">episodes logged</span>
     </div>
     <button class="act" onclick="startUrgeFlow(true)"><span>Log an episode</span></button>
+
+    <section class="band">
+      <div class="band-label">What you ate</div>
+      <div class="since" id="logSince"></div>
+      <div id="mealList"><div class="empty">Nothing logged yet.</div></div>
+    </section>
 
     <section class="band">
       <div class="band-label">History</div>
@@ -1164,6 +1229,8 @@ let state = {
   episodes: [],
   eating: { on: false, first: '08:00', gapH: 3.5, count: 5 },
   eaten: {},                              // { 'YYYY-MM-DD': [slotIndex, ...] }
+  meals: [],                              // [{ id, at, kind, note, slot }]
+  fastLogged: false,                      // this cycle already went into completedFasts
   alarms: { open: true, close: true, hourly: false }
 };
 
@@ -1336,7 +1403,19 @@ function renderDial() {
 let plannedStart = null;                 // Date, or null meaning "now"
 let scrubbing = false;
 
-function previewStart() { return plannedStart || new Date(); }
+/* With nothing dragged, a fast counts from your last logged meal rather than
+   from whenever you got round to opening the app. */
+function previewStart() {
+  if (plannedStart) return plannedStart;
+  const m = lastMeal();
+  if (m && Date.now() - m.at < 12 * 3600000) return new Date(m.at);
+  return new Date();
+}
+
+function startFromNow() {
+  plannedStart = new Date();
+  refreshTimer();
+}
 
 function clearPlanned() {
   plannedStart = null;
@@ -1431,8 +1510,13 @@ function renderFace() {
 
     const hint = document.getElementById('dialHint');
     if (hint) {
+      const lm = lastMeal();
+      const fromMeal = !plannedStart && lm && Date.now() - lm.at < 12 * 3600000;
       if (plannedStart) {
         hint.innerHTML = 'Drag the ring to adjust &middot; <span class="dial-reset" onclick="clearPlanned()">start now instead</span>';
+      } else if (fromMeal) {
+        hint.innerHTML = 'Counting from your last meal at ' + clock(new Date(lm.at)) +
+          ' &middot; <span class="dial-reset" onclick="startFromNow()">start now instead</span>';
       } else {
         hint.textContent = 'Drag the ring to set a start time';
       }
@@ -1464,10 +1548,14 @@ function renderFace() {
 function renderActionBtn() {
   const b = document.getElementById('actBtn');
   const idle = state.phase === 'idle';
-  b.innerHTML = '<span>' + (idle ? 'Start fast' : 'End fast') +
+  const label = idle ? 'Start fast'
+              : state.phase === 'fasting' ? 'End fast' : 'Start next fast';
+  b.innerHTML = '<span>' + label +
     '</span><span class="act-arrow" aria-hidden="true">&#8594;</span>';
-  b.classList.toggle('stop', !idle);
+  b.classList.toggle('stop', state.phase === 'fasting');
   document.getElementById('protocols').classList.toggle('locked', !idle);
+  const mb = document.getElementById('mealBtn');
+  if (mb) mb.textContent = state.phase === 'fasting' ? 'Log a meal, ending the fast' : 'Log a meal';
 }
 
 /* ---------------- fast lifecycle ---------------- */
@@ -1481,13 +1569,25 @@ function selectProtocol(p) {
 document.querySelectorAll('.proto').forEach(c =>
   c.addEventListener('click', () => selectProtocol(c.dataset.p)));
 
-function toggleFast() { state.phase === 'idle' ? startFast() : endFast(); }
+function toggleFast() {
+  if (state.phase === 'idle') return startFast();
+  if (state.phase === 'fasting') return endFast();
+  startNextFast();
+}
+
+/* Closing the eating window early. The next fast counts from your last meal,
+   the same as it would have if the window had simply run out. */
+function startNextFast() {
+  toComplete(true);
+  startFast();
+}
 
 function startFast() {
   const [fastH, eatH] = PROTOCOLS[state.protocol];
   const now = previewStart();
   plannedStart = null;
   state.phase = 'fasting';
+  state.fastLogged = false;
   state.fastStart = now;
   state.fastEnd = new Date(now.getTime() + fastH * 3600000);
   state.eatEnd  = new Date(now.getTime() + (fastH + eatH) * 3600000);
@@ -1498,7 +1598,7 @@ function startFast() {
 }
 
 function endFast() {
-  if (state.phase === 'fasting') {
+  if (state.phase === 'fasting' && !state.fastLogged) {
     const elapsed = Date.now() - state.fastStart.getTime();
     const [fastH] = PROTOCOLS[state.protocol];
     state.completedFasts.push({
@@ -1512,6 +1612,7 @@ function endFast() {
 
 function resetFast() {
   state.phase = 'idle';
+  state.fastLogged = false;
   state.fastStart = state.fastEnd = state.eatEnd = null;
   saveState(); clearAlarms(); refreshTimer(); updateStats();
 }
@@ -1522,12 +1623,14 @@ function toEating() {
   if (state.alarms.open) notify('Eating window open', 'Break your fast deliberately.');
 }
 
-function toComplete() {
-  state.completedFasts.push({
-    date: new Date().toISOString(), protocol: state.protocol,
-    duration: state.eatEnd - state.fastStart, completed: true
-  });
-  if (state.alarms.close) notify('Eating window closed', 'Next fast begins now.');
+function toComplete(quiet) {
+  if (!state.fastLogged) {
+    state.completedFasts.push({
+      date: new Date().toISOString(), protocol: state.protocol,
+      duration: state.eatEnd - state.fastStart, completed: true
+    });
+  }
+  if (!quiet && state.alarms.close) notify('Eating window closed', 'Next fast begins now.');
   resetFast();
 }
 
@@ -1835,6 +1938,14 @@ function renderCortisol() {
   sn.setAttribute('cy', (31 - pct * 27).toFixed(2));
   document.getElementById('advice').textContent = ADVICE[band];
 
+  // Read against the real last meal rather than the clock alone.
+  const since = sinceLast();
+  document.getElementById('adviceSince').textContent = fastedNote(since, band);
+  ['mealSince', 'logSince'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = sinceLine();
+  });
+
   // cortisol screen
   document.getElementById('cortVal').textContent = word;
   document.getElementById('cortCtx').textContent = phaseLabel(now.getHours());
@@ -1853,6 +1964,22 @@ const ADVICE = {
   moderate: 'Cortisol is mid-range and falling. This is the most forgiving part of the day to eat.',
   low: 'Cortisol is at its floor. Your body is in recovery. Eating now competes with sleep hormones.'
 };
+
+/* The band alone cannot tell you much. How long since you ate changes what
+   the same reading means. */
+function fastedNote(since, band) {
+  if (since === null) return 'Log what you eat and this reads against your real last meal.';
+  const ago = durText(since);
+  if (since < 120000) return 'You have just eaten, so this is about what comes next.';
+  if (since < 45 * 60000) return 'You ate ' + ago + ' ago, so this is about what comes next.';
+  if (band === 'low' && since > 16 * 3600000) {
+    return ago + ' since you ate. Breaking a long fast into the overnight low sits worst, so keep it small.';
+  }
+  if (band === 'high' && since > 14 * 3600000) {
+    return ago + ' since you ate. Cortisol is high, so another hour lands better if you have it.';
+  }
+  return ago + ' since you ate.';
+}
 
 function phaseLabel(h) {
   if (h >= 5 && h < 9)  return 'Cortisol awakening response';
@@ -2062,6 +2189,215 @@ function stopBreathing() {
 }
 
 /* ---------------- urges ---------------- */
+/* ================= eating log =================
+   The record of what you actually ate and when. Everything else reads off
+   it: the fast ends the moment a meal is logged rather than when the
+   countdown runs out, the next fast counts from your last meal, and the
+   cortisol guidance is written against a real elapsed time instead of the
+   clock alone. */
+
+const MEAL_KINDS = ['Meal', 'Snack', 'Drink'];
+const MEAL_WHEN = [[0, 'Now'], [15, '15 min ago'], [30, '30 min'], [60, '1 hour'], [120, '2 hours']];
+
+function mealId() {
+  return 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+function lastMeal() {
+  const now = Date.now();
+  let best = null;
+  for (const m of state.meals) if (m.at <= now && (!best || m.at > best.at)) best = m;
+  return best;
+}
+
+function sinceLast() { const m = lastMeal(); return m ? Date.now() - m.at : null; }
+
+function durText(ms) {
+  const mins = Math.max(0, Math.round(ms / 60000));
+  const h = Math.floor(mins / 60), r = mins % 60;
+  if (!h) return mins + (mins === 1 ? ' minute' : ' minutes');
+  return h + 'h' + (r ? ' ' + r + 'm' : '');
+}
+
+function sinceLine() {
+  const m = lastMeal();
+  if (!m) return 'Nothing logged yet.';
+  const ago = Date.now() - m.at;
+  return 'Last ate at <b>' + clock(new Date(m.at)) + '</b>' +
+    (ago < 120000 ? ', just now.' : ', ' + durText(ago) + ' ago.');
+}
+
+function dayLabel(d) {
+  const k = dateKey(d), y = new Date();
+  y.setDate(y.getDate() - 1);
+  if (k === dateKey(new Date())) return 'Today';
+  if (k === dateKey(y)) return 'Yesterday';
+  return d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
+}
+
+function logMeal(at, kind, note, slot) {
+  state.meals.push({
+    id: mealId(), at, kind,
+    note: note || '', slot: (slot === undefined ? null : slot)
+  });
+  state.meals.sort((a, b) => a.at - b.at);
+
+  let msg = kind + ' logged at ' + clock(new Date(at)) + '.';
+  if (state.phase === 'fasting' && at >= state.fastStart.getTime()) {
+    msg = breakFastAt(at, kind);
+  } else if (state.phase === 'fasting') {
+    // You cannot have been fasting since before you ate, so the fast moves.
+    msg = restartFastAt(at, kind);
+  } else if (state.phase === 'eating' && at >= state.eatEnd.getTime()) {
+    toComplete();
+    msg = kind + ' logged at ' + clock(new Date(at)) + ', after the window closed.';
+  }
+  saveState();
+  afterMealChange();
+  scheduleAlarms();
+  showToast(msg);
+}
+
+/* Eating is what ends a fast, so the record and the timer cannot disagree. */
+function breakFastAt(at, kind) {
+  const [fastH, eatH] = PROTOCOLS[state.protocol];
+  const elapsed = at - state.fastStart.getTime();
+  state.completedFasts.push({
+    date: new Date(at).toISOString(), protocol: state.protocol,
+    duration: elapsed, completed: elapsed >= fastH * 3600000 * 0.8
+  });
+  state.phase = 'eating';
+  state.fastLogged = true;
+  state.fastEnd = new Date(at);
+  state.eatEnd = new Date(at + eatH * 3600000);
+  updateStats();
+  return (elapsed < 60000
+    ? kind + ' logged. Fast ended.'
+    : kind + ' logged. Fast ended at ' + durText(elapsed) + '.') +
+    ' Eating window closes ' + clock(state.eatEnd) + '.';
+}
+
+/* A meal logged earlier than the fast start means the start was wrong, not
+   that you ate during a fast that had not begun. */
+function restartFastAt(at, kind) {
+  const [fastH, eatH] = PROTOCOLS[state.protocol];
+  state.fastStart = new Date(at);
+  state.fastEnd = new Date(at + fastH * 3600000);
+  state.eatEnd = new Date(at + (fastH + eatH) * 3600000);
+  return kind + ' logged at ' + clock(new Date(at)) +
+    '. Your fast now counts from there, so it ends ' + clock(state.fastEnd) + '.';
+}
+
+/* Removing a record does not restart a fast it already ended. The fast is
+   over because you ate, and deleting the note about it changes nothing. */
+function removeMeal(id) {
+  const i = state.meals.findIndex(m => m.id === id);
+  if (i < 0) return;
+  const m = state.meals[i];
+  state.meals.splice(i, 1);
+  if (m.slot !== null) {
+    const list = state.eaten[dateKey(new Date(m.at))];
+    if (list) {
+      const j = list.indexOf(m.slot);
+      if (j >= 0) list.splice(j, 1);
+    }
+  }
+  saveState();
+  afterMealChange();
+  showToast('Removed from the log.');
+}
+
+function afterMealChange() {
+  refreshTimer();
+  renderEatingPlan();
+  renderMealLog();
+  renderCortisol();
+}
+
+/* ---------------- the log sheet ---------------- */
+let mealDraft = { kind: 'Meal', back: 0, note: '' };
+
+function openMealSheet() {
+  mealDraft = { kind: 'Meal', back: 0, note: '' };
+  renderMealSheet();
+  document.getElementById('sheet').classList.add('on');
+  document.getElementById('scrim').classList.add('on');
+}
+
+function mealSheetLine(at) {
+  const t = clock(at);
+  if (state.phase === 'fasting') {
+    if (at.getTime() >= state.fastStart.getTime()) {
+      const el = at.getTime() - state.fastStart.getTime();
+      if (el < 60000) return 'Logging this at ' + t + ' ends the fast you have just started.';
+      return 'Logging this at ' + t + ' ends the fast at ' + durText(el) + '.';
+    }
+    return 'That is before your fast started, so the fast will count from ' + t + ' instead.';
+  }
+  if (state.phase === 'eating') {
+    return 'Logging this at ' + t + '. Your eating window closes ' + clock(state.eatEnd) + '.';
+  }
+  return 'Logging this at ' + t + '. Your next fast counts from here.';
+}
+
+function renderMealSheet() {
+  const at = new Date(Date.now() - mealDraft.back * 60000);
+  document.getElementById('sheetH').textContent = 'Log a meal';
+  document.getElementById('sheetBody').innerHTML =
+    '<div class="mrow"><div class="mrow-l">What</div><div class="mopts">' +
+      MEAL_KINDS.map(k => '<button class="mopt' + (k === mealDraft.kind ? ' on' : '') +
+        '" data-mk="' + k + '">' + k + '</button>').join('') +
+    '</div></div>' +
+    '<div class="mrow"><div class="mrow-l">When</div><div class="mopts">' +
+      MEAL_WHEN.map(([m, l]) => '<button class="mopt' + (m === mealDraft.back ? ' on' : '') +
+        '" data-mw="' + m + '">' + l + '</button>').join('') +
+    '</div></div>' +
+    '<div class="mrow"><div class="mrow-l">Note, if you want one</div>' +
+      '<input class="min" id="mealNote" placeholder="Eggs and toast" value="' +
+        esc(mealDraft.note) + '"></div>' +
+    '<p class="since" style="padding:20px 0 0">' + esc(mealSheetLine(at)) + '</p>' +
+    '<button class="msave" onclick="saveMeal()">Log it</button>';
+}
+
+function saveMeal() {
+  const note = document.getElementById('mealNote');
+  logMeal(Date.now() - mealDraft.back * 60000, mealDraft.kind,
+          note ? note.value.trim() : '', null);
+  closeSheet();
+}
+
+document.addEventListener('click', e => {
+  const k = e.target.closest('[data-mk]'), w = e.target.closest('[data-mw]');
+  const del = e.target.closest('[data-mdel]');
+  if (del) { removeMeal(del.dataset.mdel); return; }
+  if (!k && !w) return;
+  const note = document.getElementById('mealNote');
+  if (note) mealDraft.note = note.value;
+  if (k) mealDraft.kind = k.dataset.mk;
+  if (w) mealDraft.back = Number(w.dataset.mw);
+  renderMealSheet();
+});
+
+function renderMealLog() {
+  const el = document.getElementById('mealList');
+  if (!el) return;
+  const recent = state.meals.filter(m => m.at <= Date.now()).slice(-60).reverse();
+  if (!recent.length) {
+    el.innerHTML = '<div class="empty">Nothing logged yet. Log what you eat and the timer counts from it.</div>';
+    return;
+  }
+  let html = '', day = '';
+  recent.forEach(m => {
+    const k = dateKey(new Date(m.at));
+    if (k !== day) { day = k; html += '<div class="ml-day">' + dayLabel(new Date(m.at)) + '</div>'; }
+    html += '<div class="ml"><span class="ml-t">' + clock(new Date(m.at)) + '</span>' +
+      '<div class="ml-b"><div class="ml-n">' + esc(m.kind) + '</div>' +
+      (m.note ? '<div class="ml-note">' + esc(m.note) + '</div>' : '') + '</div>' +
+      '<button class="ml-x" data-mdel="' + esc(m.id) + '">Remove</button></div>';
+  });
+  el.innerHTML = html;
+}
+
 /* ---------------- regular eating ----------------
    CBT-E puts regular eating early because going long stretches without food
    is itself a driver of loss-of-control episodes. So these slots are not
@@ -2095,14 +2431,23 @@ function toggleRegularEating() {
   if (state.phase !== 'idle') scheduleAlarms();
 }
 
+/* Ticking a planned slot is the same act as logging a meal, so it writes a
+   real record rather than a separate checkbox nobody else can read. */
 function markEaten(i) {
   const key = dateKey(new Date());
   const list = state.eaten[key] || (state.eaten[key] = []);
   const at = list.indexOf(i);
-  at >= 0 ? list.splice(at, 1) : list.push(i);
-  saveState();
-  renderEatingPlan();
-  renderTimeline();
+  if (at >= 0) {
+    list.splice(at, 1);
+    const m = state.meals.find(x => x.slot === i && dateKey(new Date(x.at)) === key);
+    if (m) state.meals.splice(state.meals.indexOf(m), 1);
+    saveState();
+    afterMealChange();
+    return;
+  }
+  list.push(i);
+  const slot = eatingSlots().find(s => s.i === i);
+  logMeal(Date.now(), slot ? slot.label : 'Meal', '', i);
 }
 
 function renderEatingPlan() {
@@ -2718,13 +3063,22 @@ function timelineItems() {
     out.push({ at: state.fastEnd.getTime(), name: 'Eating window opens', note: 'Break it deliberately, sitting down', fixed: true });
     out.push({ at: state.eatEnd.getTime(), name: 'Eating window closes', note: 'Next fast begins', fixed: true });
   }
+  const key = dateKey(new Date());
   if (state.eating.on) {
-    const done = state.eaten[dateKey(new Date())] || [];
-    eatingSlots().forEach(sl => out.push({
-      at: sl.at.getTime(), name: sl.label, note: 'Planned eating time',
-      slot: sl.i, done: done.includes(sl.i)
-    }));
+    const done = state.eaten[key] || [];
+    eatingSlots().forEach(sl => {
+      const rec = state.meals.find(m => m.slot === sl.i && dateKey(new Date(m.at)) === key);
+      out.push({
+        at: rec ? rec.at : sl.at.getTime(), name: sl.label,
+        note: rec ? 'Eaten at ' + clock(new Date(rec.at)) : 'Planned eating time',
+        slot: sl.i, done: done.includes(sl.i)
+      });
+    });
   }
+  state.meals.forEach(m => {
+    if (m.slot !== null || dateKey(new Date(m.at)) !== key) return;
+    out.push({ at: m.at, name: m.kind, note: m.note || 'Logged', done: true });
+  });
   return out.sort((a, b) => a.at - b.at);
 }
 
@@ -2779,6 +3133,7 @@ const WHY = {
 function openInsight() {
   const now = new Date();
   const band = cortisolBand(cortisolAt(hoursOfDay(now)));
+  document.getElementById('sheetH').textContent = 'Why this matters now';
   document.getElementById('sheetBody').innerHTML =
     WHY[band].map(([h, b]) => '<h2 style="font-size:18px;margin-top:20px">' + h + '</h2><p>' + b + '</p>').join('');
   document.getElementById('sheet').classList.add('on');
@@ -2970,6 +3325,7 @@ if (state.phase !== 'idle') scheduleAlarms();
 refreshTimer();
 renderCortisol();
 renderEatingPlan();
+renderMealLog();
 renderTimeline();
 moveNavInk('Timer');
 renderEpisodes();

@@ -16,13 +16,30 @@ on your device.
 
 A 24-hour dial rather than a progress bar. Your fasting and eating windows are
 drawn at their real positions on the clock, so you read 16:8 as a proportion of
-the actual day. A cursor marks where you are now, and graduations run every two
-hours.
+the actual day. A cursor marks where you are now, and the ring is draggable, so
+you can set a start time instead of accepting the moment you opened the app.
 
 Protocols: 16:8, 18:6, 20:4, and one meal a day.
 
 The countdown is hours and minutes. Seconds ticking down for sixteen hours is
 not calming.
+
+### Eating log
+
+What you ate and when. The timer reads off it rather than off a button you
+remembered to press:
+
+- Logging a meal ends the fast at that moment, and the eating window opens
+  from there. A fast is over when you eat, whatever the countdown still says.
+- Log a meal earlier than the fast start and the fast moves to it, because you
+  cannot have been fasting since before you ate.
+- The next fast counts from your last meal, not from whenever you got round to
+  tapping start. The dial says so, and offers to start from now instead.
+- Ticking off a planned meal in regular eating writes the same record, so the
+  two never disagree.
+
+Each entry keeps the time, whether it was a meal, a snack, or a drink, and a
+note if you want one.
 
 ### Cortisol
 
@@ -33,6 +50,9 @@ willpower is left in the evening.
 The app shows where you are on that curve and changes its guidance with it:
 when to hold off on coffee, when breaking a fast lands best, when cravings are
 most likely.
+
+The guidance reads against your eating log too, since the same reading means
+something different an hour after a meal than it does sixteen hours after one.
 
 These figures are an estimate calculated from the time of day using a
 population model. Nothing is measured from your body.
