@@ -6,6 +6,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="fonts.css">
 <style>
 /* ============================================================
@@ -2181,7 +2183,7 @@ function drawWeight() {
   const pad = { l: 36, r: 6, t: 10, b: 14 };
   const cw = w - pad.l - pad.r, ch = h - pad.t - pad.b;
 
-  ctx.strokeStyle = css('--rule'); ctx.lineWidth = 1;
+  ctx.strokeStyle = css('--line'); ctx.lineWidth = 1;
   ctx.fillStyle = css('--ink-3');
   ctx.font = '10px "Figtree", sans-serif';
   ctx.textAlign = 'right';

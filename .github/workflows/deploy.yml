@@ -55,6 +55,26 @@ jobs:
           node --check /tmp/app.js
           node --check sw.js
 
+      # css('--x') on a name that does not exist returns an empty string, and
+      # assigning '' to strokeStyle is a silent no-op that leaves the previous
+      # colour in place. Three canvas colours shipped as fallback black that
+      # way. A missing token is a build failure now.
+      - name: Check every colour token the canvas asks for is declared
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import re, sys, pathlib
+          html = pathlib.Path('index.html').read_text()
+          used = set(re.findall(r"css\('(--[a-z0-9-]+)'\)", html))
+          declared = set(re.findall(r'^\s*(--[a-z0-9-]+)\s*:', html, re.M))
+          missing = sorted(used - declared)
+          if missing:
+              print('canvas reads tokens that are never declared:')
+              [print(' -', t) for t in missing]
+              sys.exit(1)
+          print(len(used), 'canvas colour tokens all declared')
+          PY
+
       - name: Check every asset the service worker precaches exists
         run: |
           set -euo pipefail
