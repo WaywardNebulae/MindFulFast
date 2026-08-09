@@ -351,6 +351,20 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 .sw.on { border-color: var(--accent); background: var(--accent-soft); }
 .sw.on .sw-knob { transform: translateX(20px); background: var(--accent); }
 
+.wake-in {
+  padding: 6px 0 7px;
+  border-bottom: 2px solid var(--ink-3);
+  font-family: var(--sans);
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  outline: none;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.wake-in:focus { border-bottom-color: var(--accent); }
+.wake-in::-webkit-calendar-picker-indicator { opacity: 0.55; cursor: pointer; }
+
 /* ============================ CORTISOL ============================ */
 .gauge-band { padding: 30px var(--gutter) 26px; }
 .gauge-val {
@@ -1023,9 +1037,21 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
         </svg>
         <div class="gauge-ends"><span>Low</span><span>Peak</span></div>
       </div>
-      <p class="gauge-note">Estimated from the time of day using a population
+      <p class="gauge-note">Estimated from your wake time using a population
         model of the daily rhythm. Nothing is measured from your body.</p>
     </div>
+
+    <section class="band tight">
+      <div class="band-label">Wake time</div>
+      <div class="ctl">
+        <div>
+          <div class="ctl-name">You usually wake at</div>
+          <div class="ctl-note" id="wakeNote"></div>
+        </div>
+        <input class="wake-in" id="wakeIn" type="time" value="07:00"
+               aria-label="Usual wake time" onchange="setWake(this.value)">
+      </div>
+    </section>
 
     <section class="band">
       <div class="band-label">24-hour curve</div>
@@ -1178,8 +1204,8 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
       <p class="intro-p">MindfulFast is a self-help tool. It is not medical
         advice, diagnosis, or treatment, and it does not replace a clinician.</p>
       <p class="intro-p">The cortisol readings are an <b>estimate from a
-        population model of the daily rhythm</b>, calculated from the time of
-        day. Nothing is measured from your body.</p>
+        population model of the daily rhythm</b>, calculated from your wake
+        time. Nothing is measured from your body.</p>
       <p class="intro-p">Fasting does not suit everyone. Talk to a doctor first
         if you are pregnant or breastfeeding, under 18, diabetic, taking
         medication with food, or have a history of disordered eating.</p>
@@ -1239,6 +1265,7 @@ const SCREENS = ['Timer','Cortisol','Urge','Log','Patterns'];
 
 let state = {
   protocol: '16:8',
+  wake: '07:00',            // the cortisol curve is anchored to this, not to midnight
   phase: 'idle',            // idle | fasting | eating
   fastStart: null, fastEnd: null, eatEnd: null,
   completedFasts: [], urgeLog: [], weightLog: [],
@@ -1295,10 +1322,18 @@ function clock(d) {
   return (h % 12 || 12) + ':' + String(d.getMinutes()).padStart(2,'0') + (h >= 12 ? ' pm' : ' am');
 }
 
-/* ---------------- cortisol model ---------------- */
-/* Piecewise circadian model. Each branch must meet its neighbour at the
+/* ---------------- cortisol model ----------------
+   The rhythm is anchored to waking, not to midnight. The shape below is
+   written against a reference riser who wakes at 07:00, and every clock hour
+   is converted into that reference frame before it is read off. Someone who
+   wakes at 10 gets the same curve slid three hours later, which is what the
+   published data actually describes. Without this the app tells a late riser
+   their cortisol peaked while they were still asleep. */
+const REF_WAKE = 7;
+
+/* Piecewise, in reference hours. Each branch must meet its neighbour at the
    boundary, or a discontinuity shows up as a spike in the curve. */
-function cortisolAt(hour) {
+function cortisolShape(hour) {
   if (hour < 4)  return 2 + Math.sin((hour/4) * Math.PI) * 1;   // 2 -> 2
   if (hour < 8)  return 2 + ((hour-4)/4) * 18;                  // 2 -> 20 (waking response)
   if (hour < 12) return 20 - ((hour-8)/4) * 8;                  // 20 -> 12
@@ -1306,8 +1341,27 @@ function cortisolAt(hour) {
   if (hour < 20) return 14 - ((hour-14)/6) * 10;                // 14 -> 4
   return 4 - ((hour-20)/4) * 2;                                 // 4 -> 2
 }
+
+function wakeHour() {
+  const [h, m] = String(state.wake || '07:00').split(':').map(Number);
+  return (isFinite(h) ? h : 7) + (isFinite(m) ? m : 0) / 60;
+}
+const wrap24 = h => ((h % 24) + 24) % 24;
+
+/* clock hour -> reference hour, and back */
+function refHour(clockH) { return wrap24(clockH - (wakeHour() - REF_WAKE)); }
+function clockHour(refH) { return wrap24(refH + (wakeHour() - REF_WAKE)); }
+
+function cortisolAt(hour) { return cortisolShape(refHour(hour)); }
 const CORT_MAX = 20;
 function cortisolBand(v) { return v > 14 ? 'high' : v > 8 ? 'moderate' : 'low'; }
+
+/* A reference hour written as a wall-clock time, for copy that names an hour. */
+function clockAtRef(refH) {
+  const d = new Date();
+  d.setHours(0, Math.round(clockHour(refH) * 60), 0, 0);
+  return clock(d);
+}
 
 /* ---------------- dial geometry ---------------- */
 const CX = 150, CY = 150;
@@ -1376,8 +1430,8 @@ function buildDialStatic() {
     const at = h => { const d = new Date(); d.setHours(0, Math.round((h % 24) * 60), 0, 0); return clock(d); };
     document.getElementById('lowNote').textContent =
       'Shaded from ' + at(low[0]) + ' to ' + at(low[1]) +
-      ', where the curve sits in its low band. The dial marks the same hours. ' +
-      'Urges cluster here for most people.';
+      ', where the curve sits in its low band and urges cluster for most people. ' +
+      'The dial marks the same hours, and both move with your wake time.';
   }
 
   document.getElementById('dialLabels').innerHTML =
@@ -2000,7 +2054,7 @@ function renderCortisol() {
 
   // cortisol screen
   document.getElementById('cortVal').textContent = word;
-  document.getElementById('cortCtx').textContent = phaseLabel(now.getHours());
+  document.getElementById('cortCtx').textContent = phaseLabel(h);
   const mx = 1 + 298 * pct;
   const mk = document.getElementById('gaugeMark');
   mk.setAttribute('x1', mx.toFixed(1)); mk.setAttribute('x2', mx.toFixed(1));
@@ -2008,7 +2062,23 @@ function renderCortisol() {
   document.getElementById('tips').innerHTML = tipsFor(h).map(t =>
     '<div class="tip"><div class="tip-h">' + t.h + '</div><div class="tip-p">' + t.p + '</div></div>').join('');
 
+  const wn = document.getElementById('wakeNote');
+  if (wn) wn.textContent = 'The curve is anchored here. Your peak lands around '
+    + clockAtRef(8) + '.';
+
   renderMeals();
+}
+
+/* Moving the wake time slides the whole model, so everything drawn from it has
+   to be rebuilt: the dial's low sector, the sparkline, and the 24-hour chart. */
+function setWake(v) {
+  if (!/^\d{1,2}:\d{2}$/.test(v || '')) return;
+  state.wake = v;
+  saveState();
+  buildDialStatic();
+  renderCortisol();
+  renderDial();
+  if (document.getElementById('screenCortisol').classList.contains('active')) drawCurve();
 }
 
 const ADVICE = {
@@ -2033,31 +2103,35 @@ function fastedNote(since, band) {
   return ago + ' since you ate.';
 }
 
-function phaseLabel(h) {
-  if (h >= 5 && h < 9)  return 'Cortisol awakening response';
-  if (h >= 9 && h < 12) return 'Mid-morning decline';
-  if (h >= 12 && h < 14) return 'Midday plateau';
-  if (h >= 14 && h < 18) return 'Afternoon decline';
-  if (h >= 18 && h < 21) return 'Evening wind-down';
-  return 'Nighttime nadir';
+/* Named against the curve rather than the clock, since a late riser's peak is
+   not "mid-morning" and the label would be wrong for them. */
+function phaseLabel(clockH) {
+  const h = refHour(clockH);
+  if (h >= 5 && h < 9)  return 'Waking rise';
+  if (h >= 9 && h < 12) return 'Post-peak decline';
+  if (h >= 12 && h < 14) return 'Plateau';
+  if (h >= 14 && h < 18) return 'Long decline';
+  if (h >= 18 && h < 21) return 'Wind-down';
+  return 'Lowest point';
 }
 
-function tipsFor(h) {
+function tipsFor(clockH) {
+  const h = refHour(clockH);
   if (h >= 5 && h < 9) return [
     { h: 'Delay breakfast', p: 'Cortisol is already high and eating on top of it spikes insulin harder. Wait one to two hours after waking.' },
-    { h: 'Hold the coffee', p: 'Caffeine amplifies a peak that is already happening, so it works better around 9 or 10am.' },
+    { h: 'Hold the coffee', p: 'Caffeine amplifies a peak that is already happening, so it works better around ' + clockAtRef(9) + ' for you.' },
     { h: 'Get outside', p: 'Ten minutes of direct daylight helps set your body clock for the day.' }
   ];
   if (h >= 9 && h < 12) return [
     { h: 'Good window to eat', p: 'Cortisol is coming down off its peak and insulin sensitivity is high.' },
-    { h: 'Protein first', p: 'A protein-led first meal steadies blood sugar and cuts afternoon cravings.' }
+    { h: 'Protein first', p: 'A protein-led first meal steadies blood sugar and cuts the cravings that come later in the day.' }
   ];
   if (h >= 12 && h < 16) return [
     { h: 'Good time to train', p: 'Mid-range cortisol supports hard effort, and training now makes the evening drop steeper.' },
-    { h: 'Stress-eating window', p: 'Afternoon stress raises cortisol. If an urge starts, open the Urge tab before you go to the kitchen.' }
+    { h: 'Stress-eating window', p: 'Stress at this point in the day raises cortisol. If an urge starts, open the Urge tab before you go to the kitchen.' }
   ];
   if (h >= 16 && h < 20) return [
-    { h: 'Finish eating soon', p: 'Finishing by early evening keeps the overnight low intact and helps you sleep.' },
+    { h: 'Finish eating soon', p: 'Finishing by ' + clockAtRef(19) + ' or so keeps your overnight low intact and helps you sleep.' },
     { h: 'Cravings are more likely now', p: 'Self-control drops along with cortisol. Impulsive eating is most common in these hours, so decide what you are eating in advance.' }
   ];
   return [
@@ -2069,11 +2143,12 @@ function tipsFor(h) {
 function renderMeals() {
   let slots;
   if (state.phase !== 'eating' || !state.fastEnd) {
+    // Positioned off the curve, so they move with the wake time like everything else.
     slots = [
-      { t: '10:00 – 11:00 am', d: 'First meal, with cortisol falling and insulin sensitivity high', s: 'optimal' },
-      { t: '1:00 – 2:00 pm',   d: 'Second meal, cortisol stable', s: 'optimal' },
-      { t: '5:00 – 6:00 pm',   d: 'Last meal, before the nadir begins', s: 'acceptable' },
-      { t: 'after 8:00 pm',    d: 'Avoid. Disrupts sleep hormones and the overnight reset', s: 'avoid' }
+      { t: clockAtRef(10) + ' to ' + clockAtRef(11), d: 'First meal, with cortisol falling and insulin sensitivity high', s: 'optimal' },
+      { t: clockAtRef(13) + ' to ' + clockAtRef(14), d: 'Second meal, cortisol stable', s: 'optimal' },
+      { t: clockAtRef(17) + ' to ' + clockAtRef(18), d: 'Last meal, before the drop to the low', s: 'acceptable' },
+      { t: 'after ' + clockAtRef(20), d: 'Avoid, since it disrupts sleep hormones and the overnight reset', s: 'avoid' }
     ];
   } else {
     const mid = new Date(state.fastEnd.getTime() + (state.eatEnd - state.fastEnd) / 2);
@@ -3380,6 +3455,7 @@ loadState();
 migrate();
 maybeShowIntro();
 buildDialStatic();
+document.getElementById('wakeIn').value = state.wake || '07:00';
 document.querySelectorAll('.proto').forEach(c => c.classList.toggle('active', c.dataset.p === state.protocol));
 ['open','close','hourly'].forEach(k =>
   document.getElementById('alarm' + k[0].toUpperCase() + k.slice(1)).classList.toggle('on', state.alarms[k]));

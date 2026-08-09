@@ -191,8 +191,8 @@ already carries better. Decoration that argues it is data is still
 decoration.
 
 **Shipped instead: the low sector.** The face is shaded across the hours
-where the model sits in its low band, roughly 5:37 pm to 5:20 am. It is a
-flat fill between two hard edges at real clock times, not a curve, so it
+where the model sits in its low band, 5:37 pm to 5:20 am for a 7am riser. It
+is a flat fill between two hard edges at clock times, not a curve, so it
 does not read as a second ring, and the edges are the information: that is
 when willpower is thinnest and urges peak. The bounds come from
 `lowWindow()`, which walks `cortisolAt` and finds the crossings, so the dial
@@ -203,9 +203,38 @@ It also solves the blandness the ribbon was cut for creating. A circle with
 one asymmetric shaded region reads as a day. A circle with a symmetric ring
 reads as a widget.
 
-Note for future edits: `cortisolAt()` is piecewise. Every branch must meet
+---
+
+## The curve is anchored to waking, not to midnight
+
+The published cortisol rhythm is described relative to when you wake, so an
+app that hardcodes it to clock time is wrong for everyone who does not wake
+at seven. It was telling a late riser their cortisol peaked while they were
+still asleep, and every downstream feature inherited that: the band on the
+gauge, the dial's low sector, the tips, the suggested meal times.
+
+So `cortisolShape()` holds the shape in reference hours against a riser who
+wakes at `REF_WAKE = 7`, and `refHour()` converts a clock hour into that
+frame before it is read. `cortisolAt()` is the composition of the two and is
+what every caller still uses, so call sites did not change. `clockAtRef()`
+goes the other way, for copy that has to name an hour.
+
+Consequences worth knowing:
+
+- Anything with an hour baked into it has to go through the conversion.
+  `phaseLabel()` and `tipsFor()` take a clock hour and shift internally.
+  The idle meal suggestions are built from `clockAtRef()`, not typed.
+- Phase names are relative to the curve (waking rise, post-peak decline,
+  long decline) rather than to the clock. "Mid-morning decline" is a false
+  statement for someone who wakes at noon.
+- `setWake()` has to rebuild the dial's low sector and the sparkline, which
+  are drawn once by `buildDialStatic()`, not on every tick.
+- The default is `07:00`, which reproduces the previous curve exactly, so
+  existing installs see no change until they set their own.
+
+Note for future edits: `cortisolShape()` is piecewise. Every branch must meet
 its neighbour at the boundary or the curve grows a spike (this happened at
-hour 14).
+hour 14). Feed it reference hours only, already wrapped into 0 to 24.
 
 ---
 

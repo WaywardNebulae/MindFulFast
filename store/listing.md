@@ -53,7 +53,11 @@ willpower you have in the evening. MindfulFast shows where you are on that
 curve and gives guidance that changes with it: when to hold off on coffee,
 when breaking a fast lands best, and when cravings are most likely.
 
-These figures are an estimate calculated from the time of day using a
+The rhythm is anchored to when you wake rather than to the clock, so you set
+your usual wake time and the whole model slides to it. A late riser does not
+get told their cortisol peaked while they were asleep.
+
+These figures are an estimate calculated from your wake time using a
 population model. Nothing is measured from your body.
 
 WHEN THE URGE HITS

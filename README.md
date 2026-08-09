@@ -53,6 +53,12 @@ Cortisol peaks shortly after waking, falls through the morning, and bottoms out
 overnight. That shape affects insulin sensitivity, appetite, and how much
 willpower is left in the evening.
 
+The rhythm is anchored to when you wake rather than to the clock, so the
+Cortisol screen takes your usual wake time and slides the whole model to it.
+Set it to 10:30 and your peak moves to 11:30, the low band and the dial's
+shaded sector move with it, and the suggested meal times move too. It defaults
+to 7am, which is the curve the app used before this was configurable.
+
 The app shows where you are on that curve and changes its guidance with it:
 when to hold off on coffee, when to break a fast, and when cravings are more
 likely.
