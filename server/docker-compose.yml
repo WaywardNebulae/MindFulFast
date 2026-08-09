@@ -1,0 +1,22 @@
+# For a Raspberry Pi, home server, or any VPS.
+#
+#   cp .env.example .env     # then run `npm run keys` and fill it in
+#   docker compose up -d
+#
+# Put it behind a reverse proxy with TLS, or expose it with a Cloudflare
+# Tunnel. Browsers refuse push subscriptions over plain HTTP.
+
+services:
+  push:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "8787:8787"
+    volumes:
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:8787/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
