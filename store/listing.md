@@ -23,9 +23,9 @@ MindfulFast Cortisol Timer
 ## Short description (80 max)
 
 ```
-A fasting timer built on your cortisol rhythm, with real help for eating urges.
+A fasting timer built on your cortisol rhythm, with help for eating urges.
 ```
-78 characters.
+73 characters.
 
 ---
 
@@ -34,12 +34,12 @@ A fasting timer built on your cortisol rhythm, with real help for eating urges.
 ```
 MindfulFast is an intermittent fasting timer built around two things most
 fasting apps ignore: the daily cortisol rhythm that shapes when eating feels
-easy or hard, and what to actually do when the urge to eat arrives.
+easy or hard, and what to do when the urge to eat arrives.
 
 THE TIMER
 
-Your fasting and eating windows are drawn at their real positions on a
-24-hour clock, so you see your 16:8 as a proportion of the actual day. A
+Your fasting and eating windows are drawn at their positions on a
+24-hour clock, so you see your 16:8 as a proportion of the day. A
 cursor marks where you are now. The countdown runs in hours and minutes,
 because seconds ticking down for sixteen hours is not calming.
 
@@ -59,7 +59,7 @@ population model. Nothing is measured from your body.
 WHEN THE URGE HITS
 
 Most apps hand you a list of distractions. MindfulFast asks what is driving
-it first, because a stress-driven urge and actual hunger need different
+it first, because a stress-driven urge and hunger need different
 answers.
 
 If stress is behind it, you get a protocol rather than a list: calm your body,
@@ -77,7 +77,7 @@ Every episode records the time, what happened, where you were, your mood, how
 strong the urge was, how in control you felt, what you tried, and how it went.
 
 Pattern review turns that into answers: what time of day urges cluster, which
-situations and moods come up most, and which interventions actually reduced
+situations and moods come up most, and which interventions reduced
 your urges, measured from your own entries rather than assumed.
 
 After a difficult episode, a short setback review asks what came before it,
@@ -89,7 +89,7 @@ REGULAR EATING
 Long gaps without food make loss-of-control eating more likely, not less. So
 MindfulFast can schedule meals and snacks at a set interval and remind you.
 
-These reminders are deliberately not subordinate to the fasting window. If a
+These reminders are not subordinate to the fasting window. If a
 fast is scheduled over a planned meal, the app tells you, and it says
 plainly that shortening the fast will do more for urges than any breathing
 exercise. A fasting timer that quietly overrode the meal plan would be
@@ -97,7 +97,7 @@ creating the problem the log is measuring.
 
 YOUR DATA STAYS ON YOUR PHONE
 
-No account. No sign-in. No analytics, ads, or tracking. Everything you log
+No account, no sign-in, no analytics, ads, or tracking. Everything you log
 lives in storage on your device and is deleted when you uninstall. There is no
 copy anywhere else, because nothing is ever sent anywhere.
 

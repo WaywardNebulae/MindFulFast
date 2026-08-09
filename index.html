@@ -1186,8 +1186,8 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
       <p class="intro-p">If eating feels out of control, or thoughts about food
         and weight are taking over, that is worth telling someone. A clinician
         trained in CBT-E can help more than any app.</p>
-      <p class="intro-p intro-fine">Everything you log stays on this device. No
-        account, no servers, nothing collected.</p>
+      <p class="intro-p intro-fine">Everything you log stays on this device, with no
+        account, no servers, and nothing collected.</p>
     </div>
     <button class="act intro-go" onclick="dismissIntro()"><span>I understand</span></button>
   </div>
@@ -2722,8 +2722,8 @@ const FLOW_VIEWS = {
     const stressed = flow.draft.stress === true || flow.draft.keyedUp === true;
     return `
     ${stressed
-      ? `<div class="flow-lead">Stress is probably driving this urge. Lower your stress level first, then decide whether you are hungry.</div>`
-      : `<div class="flow-lead">No stress behind it, then. The next question is whether you are hungry.</div>`}
+      ? `<div class="flow-lead">Stress is probably driving this urge, so lower your stress level first and then decide whether you are hungry.</div>`
+      : `<div class="flow-lead">No stress behind it, so the next question is whether you are hungry.</div>`}
     <div class="flow-q">${stressed ? 'What do you want to try?' : 'Are you physically hungry?'}</div>
     <div class="flow-hint">${stressed
       ? 'Each option runs a timer while you do it.'
@@ -2785,7 +2785,7 @@ const FLOW_VIEWS = {
 
   outcome: () => `
     <div class="flow-q">What happened?</div>
-    <div class="flow-hint">Nothing here is scored. The Patterns screen is built from this answer.</div>
+    <div class="flow-hint">Nothing here is scored, and the Patterns screen is built from this answer.</div>
     <div class="opts col">
       <button class="opt${flow.draft.outcome === 'rode' ? ' on' : ''}" onclick="setField('outcome','rode')">
         It passed<span class="opt-d">Rode it out without eating.</span></button>
@@ -2799,7 +2799,7 @@ const FLOW_VIEWS = {
            value="${esc(flow.draft.next)}" oninput="setField('next', this.value, true)">`,
 
   setback: () => `
-    <div class="flow-lead">These questions are here to find the cause. Nothing is scored.</div>
+    <div class="flow-lead">These questions are here to find the cause, and nothing is scored.</div>
     <div class="flow-q">Setback review</div>
     <div class="flow-sub">What came before it?</div>
     <input class="flow-in" id="sbBefore" placeholder="What was happening beforehand"
@@ -3086,13 +3086,13 @@ function renderInsights(eps, byHour) {
   const peakHour = byHour.indexOf(Math.max(...byHour));
   const h12 = (peakHour % 12) || 12;
   out.push('Most of your urges happen around ' + h12 + (peakHour >= 12 ? 'pm' : 'am') +
-           '. Decide what you will do in advance.');
+           ', so decide what you will do in advance.');
 
   const rated = eps.filter(e => e.urge0 != null && e.urge1 != null);
   if (rated.length >= 3) {
     const avg = rated.reduce((s, e) => s + (e.urge0 - e.urge1), 0) / rated.length;
     out.push(avg > 0
-      ? 'Urges drop by about ' + avg.toFixed(1) + ' points once you do something. They fade on their own more often than it feels like they will.'
+      ? 'Urges drop by about ' + avg.toFixed(1) + ' points once you do something, and they fade on their own more often than it feels like they will.'
       : 'Your urges are not dropping much yet, so try a longer timer or a different kind of tool.');
   }
 
@@ -3296,12 +3296,12 @@ function renderAlarmStatus() {
   };
 
   if (!('Notification' in window)) {
-    line('This browser cannot show notifications. Alarms appear only while the app is open.');
+    line('This browser cannot show notifications, so alarms appear only while the app is open.');
     return;
   }
   if (Notification.permission === 'denied') {
     el.className = 'alarm-status warn';
-    line('Notifications are blocked. Alarms appear only while the app is open. Re-enable them in your browser settings for this site.');
+    line('Notifications are blocked, so alarms appear only while the app is open. Re-enable them in your browser settings for this site.');
     return;
   }
   if (Notification.permission !== 'granted') {
@@ -3312,7 +3312,7 @@ function renderAlarmStatus() {
 
   const server = pushServerUrl();
   if (server) {
-    line('Exact delivery on. A push server fires each alarm at its minute, whether or not the app is open.');
+    line('A push server fires each alarm at its exact minute, whether or not the app is open.');
     const host = document.createElement('div');
     host.className = 'alarm-server';
     host.textContent = server;
