@@ -1,0 +1,9 @@
+{
+  "name": "mindfulfast",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test boot-gate.test.js",
+    "icons": "node tools/render-icons.mjs"
+  }
+}
