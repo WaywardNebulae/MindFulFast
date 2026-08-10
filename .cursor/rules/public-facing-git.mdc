@@ -1,0 +1,21 @@
+---
+description: Public-facing git names; commits must look like the human author made them
+alwaysApply: true
+---
+
+# Public-facing git
+
+This repo is treated as public-facing. Branch names, PR titles, and commit history must read like Ruth-Ann’s own work — not an internal agent session.
+
+## Branches
+
+- Prefer clear product names: `mindfulfast`, `leaf-icon-loading`, `play-store-assets`
+- Do **not** use internal prefixes or IDs: `claude/…`, random suffixes like `8yv5bo`, `cursor/…`, `agent/…`
+- When creating or renaming branches, default to short, descriptive, public names
+
+## Commits
+
+- Write messages as if the user authored the change (normal project voice, not “agent implemented…”)
+- Do **not** add `Co-authored-by: Cursor`, `Co-authored-by: Claude`, or similar agent trailers
+- Do **not** mention AI, agents, or tooling in commit messages unless the user asks
+- Assume anything pushed to GitHub may be seen by store reviewers or collaborators
