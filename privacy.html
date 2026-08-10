@@ -38,11 +38,7 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
-main {
-  max-width: 660px;
-  margin: 0 auto;
-  padding: 48px 24px 80px;
-}
+main { max-width: 660px; margin: 0 auto; padding: 48px 24px 80px; }
 .back {
   display: inline-block;
   font-size: 15px;
@@ -56,22 +52,14 @@ h1 {
   font-weight: 500;
   letter-spacing: -0.5px;
 }
-.updated {
-  font-size: 13px;
-  color: var(--ink-3);
-  margin-top: 10px;
-}
-.lede {
-  font-size: 18px;
-  color: var(--ink);
-  margin-top: 22px;
-}
+.updated { font-size: 13px; color: var(--ink-3); margin-top: 10px; }
+.lede { font-size: 18px; color: var(--ink); margin-top: 22px; }
 h2 {
   font-family: var(--serif);
   font-size: 22px;
   font-weight: 500;
-  margin-top: 40px;
-  padding-top: 24px;
+  margin-top: 36px;
+  padding-top: 22px;
   border-top: 1px solid var(--line);
 }
 p, li { color: var(--ink-2); margin-top: 14px; }
@@ -79,10 +67,7 @@ ul { padding-left: 20px; }
 li { margin-top: 8px; }
 b { color: var(--ink); font-weight: 600; }
 a { color: var(--accent); }
-code {
-  font-size: 0.92em;
-  color: var(--ink);
-}
+code { font-size: 0.92em; color: var(--ink); }
 </style>
 </head>
 <body>
@@ -91,87 +76,43 @@ code {
   <h1>Privacy policy</h1>
   <div class="updated">MindfulFast - last updated 10 August 2026</div>
 
-  <p class="lede">We do not collect your data. MindfulFast is strictly local.
-  Everything you enter stays on your device. Nothing is uploaded to us,
-  because there is no MindfulFast server receiving it.</p>
+  <p class="lede">MindfulFast stores data only on your device. We do not
+  collect, transmit, or share your information. There is no MindfulFast cloud
+  account and no remote copy of your log.</p>
 
-  <h2>What this means</h2>
+  <h2>Local-only storage</h2>
+  <p>Fasting times, alarms, urge notes, weight entries, and settings stay in
+  on-device storage (<code>localStorage</code> / <code>IndexedDB</code>).
+  Uninstalling the app or clearing app storage deletes them. We cannot recover
+  that data for you.</p>
+
+  <h2>No data collection or transmission</h2>
   <ul>
-    <li>No account and no sign-in</li>
-    <li>No analytics, advertising, tracking, or crash-reporting services</li>
-    <li>No cloud sync and no remote backup by us</li>
-    <li>No sale or sharing of personal information, because we never receive it</li>
+    <li>No analytics</li>
+    <li>No ads</li>
+    <li>No crash or diagnostics SDKs</li>
+    <li>No cloud sync</li>
+    <li>No accounts or sign-in</li>
   </ul>
-  <p>The app is designed to work offline. Your fasting timer, urge log, weight
-  entries, and settings live in storage on this phone or browser only.</p>
+  <p>Ordinary use does not send your health log or settings to us or to third
+  parties. The app is built to work offline.</p>
+  <p>An optional push helper for exact alarms while the app is closed is
+  <b>off by default</b>. Nothing is sent unless you paste a server address
+  yourself. That path is not part of normal use.</p>
 
-  <h2>What the app stores on your device</h2>
-  <p>The following may be kept locally in your browser's <code>localStorage</code>
-  and <code>IndexedDB</code>:</p>
-  <ul>
-    <li>Your chosen fasting protocol, and the start and end times of fasts</li>
-    <li>Alarm preferences and scheduled alarm times</li>
-    <li>Regular eating times and which slots you have marked as eaten</li>
-    <li>Urge episodes: time, situation, location, mood, urge and control
-        ratings, what you tried, the outcome, and any notes or setback review
-        you write</li>
-    <li>Weight entries you choose to log</li>
-    <li>Your wake time, used only to shift the cortisol estimate on this device</li>
-  </ul>
-  <p>That data does not leave the device as part of normal use.</p>
-
-  <h2>Deleting your data</h2>
-  <p>Clearing the app's storage in your browser or device settings, or
-  uninstalling the app, permanently deletes everything stored locally. There is
-  no copy on our side to erase or restore.</p>
-
-  <h2>Notifications</h2>
-  <p>If you allow notifications, the app uses them for fasting alarms and meal
-  reminders. Permission is asked only when you enable an alarm, and you can
-  turn it off in your device settings. Alarm times are held on your device.</p>
-
-  <h2>Optional push server (off by default)</h2>
-  <p>A web page cannot reliably fire an alarm after it is fully closed. Exact
-  delivery while the app is closed needs a small push helper. That helper is
-  <b>off by default</b>. Nothing is sent anywhere unless you choose to connect
-  one and paste its address yourself.</p>
-  <p>If you connect one, it receives only:</p>
-  <ul>
-    <li>Your browser's push subscription (an anonymous endpoint from the
-        browser vendor's push service)</li>
-    <li>Upcoming alarm times and short notification text, for example
-        “Eating window open”</li>
-  </ul>
-  <p>It never receives your weight, urge log, fasting history, moods, or notes.
-  If you run the helper yourself, which is the intended use, you control that
-  machine. Disconnecting it in the app unsubscribes and asks it to forget this
-  device.</p>
-  <p>Unless you turn that option on, MindfulFast stays fully local.</p>
-
-  <h2>Fonts and offline files</h2>
-  <p>The app ships its own Figtree and Literata font files and can cache its
-  pages with a service worker for offline use. It does not load fonts or
-  scripts from a third-party CDN, so ordinary use does not phone home to other
-  companies for those assets.</p>
-
-  <h2>Children</h2>
-  <p>MindfulFast is not intended for anyone under 18 and is not directed at
-  children. It does not knowingly collect information from anyone, of any age,
-  because the default product does not collect information at all.</p>
-
-  <h2>Health information</h2>
-  <p>The app is a self-help tool, not medical advice, diagnosis, or treatment.
-  Cortisol figures are an estimate from a published population model of the
-  daily rhythm, calculated from your wake time on this device. Nothing is
-  measured from your body, and the estimate is not a clinical reading.</p>
-
-  <h2>Changes</h2>
-  <p>If this policy changes, the date at the top changes with it. The version
-  published with the app is the current one.</p>
+  <h2>Wellness disclaimer</h2>
+  <p>MindfulFast is a wellness and self-help tool. It is <b>not</b> medical
+  advice, diagnosis, or treatment, and it does not replace care from a
+  clinician. Cortisol figures are a population-model estimate from your wake
+  time on this device, not a body measurement or clinical reading.</p>
+  <p>Fasting is not right for everyone. Speak with a doctor before use if you
+  are pregnant or breastfeeding, under 18, diabetic, take medication with
+  food, or have a history of disordered eating. If eating feels out of
+  control, get help from a qualified professional.</p>
 
   <h2>Contact</h2>
-  <p>Questions about this policy can be raised at the project's
-  <a href="https://github.com/WaywardNebulae/MindFulFast">source repository</a>.</p>
+  <p>Questions:
+  <a href="https://github.com/WaywardNebulae/MindFulFast">github.com/WaywardNebulae/MindFulFast</a></p>
 </main>
 </body>
 </html>

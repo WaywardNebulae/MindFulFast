@@ -101,15 +101,20 @@ creating the problem the log is measuring.
 
 YOUR DATA STAYS ON YOUR PHONE
 
-No account, no sign-in, no analytics, ads, or tracking. Everything you log
-lives in storage on your device and is deleted when you uninstall. There is no
-copy anywhere else, because nothing is ever sent anywhere.
+No account, no sign-in, no analytics, ads, crash SDKs, tracking, or cloud sync.
+Everything you log lives in storage on your device and is deleted when you
+uninstall. There is no copy anywhere else, because nothing is ever sent
+anywhere.
 
 Works fully offline.
 
-WHAT THIS IS NOT
+WELLNESS DISCLAIMER
 
-MindfulFast is a self-help tool, not medical advice, diagnosis, or treatment.
+MindfulFast is a wellness and self-help tool. It is not medical advice,
+diagnosis, or treatment, and it does not replace a clinician. Cortisol figures
+are an estimate from a population model and your wake time, not a reading from
+your body.
+
 Fasting does not suit everyone. Speak to a doctor first if you are pregnant or
 breastfeeding, under 18, diabetic, take medication with food, or have a
 history of disordered eating.
@@ -117,7 +122,7 @@ history of disordered eating.
 If eating feels out of control, or thoughts about food and weight are taking
 over, a clinician trained in CBT-E can help more than any app can.
 ```
-About 2,900 characters.
+About 3,000 characters.
 
 ---
 
@@ -149,22 +154,43 @@ both say 18+.
 
 ---
 
-## Data safety form
+## Data safety form (Play Console)
 
-The strongest position an app can have here, so fill it in exactly:
+Fill this so the listing shows **no data collected** and **no data shared**.
 
-- **Does your app collect or share any of the required user data types?**
-  **No.**
-- **Is all of the user data collected by your app encrypted in transit?**
-  Not applicable, no data is transmitted.
-- **Do you provide a way for users to request that their data is deleted?**
-  Yes: uninstalling, or clearing app storage, deletes everything. There is no
-  server copy.
+### Data collection and sharing
 
-If, and only if, you ship the optional push server enabled by default, this
-changes: you would then be transmitting a push endpoint and alarm times, and
-would have to declare it. Shipping it off by default, as it is now, keeps the
-answer a clean No.
+| Question | Answer |
+|---|---|
+| Does your app collect or share any of the required user data types? | **No** |
+| Data shared with third parties | **No** (none collected) |
+| Data processed ephemerally | Not applicable |
+| Users can request deletion | Yes: uninstall or clear app storage. There is no server copy. |
+
+### Security practices
+
+| Question | Answer |
+|---|---|
+| Data encrypted in transit | **Not applicable** — no user data is transmitted |
+| Users can request that data is deleted | **Yes** (local wipe via uninstall / clear storage) |
+
+### Explicit “no” checklist (confirm each)
+
+- No analytics / advertising ID collection
+- No crash or diagnostics SDKs
+- No cloud sync or account systems
+- No location collection for ads or analytics
+- No sale of user data
+
+### Ads
+
+- **Contains ads:** No
+
+### Optional push helper (must stay off by default)
+
+The in-app optional push server is **disabled unless the user pastes a URL**.
+With that default, Data safety stays **No data collected / No data shared**.
+If you ever ship it on by default, revisit this form before release.
 
 ---
 
