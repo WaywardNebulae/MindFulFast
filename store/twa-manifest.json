@@ -1,6 +1,6 @@
 {
   "packageId": "io.github.waywardnebulae.mindfulfast",
-  "host": "waywardnebulae.github.io",
+  "host": "nebulaelabs.dev",
   "name": "MindfulFast: Cortisol-Aware Fasting",
   "launcherName": "MindfulFast",
   "display": "standalone",
@@ -13,9 +13,9 @@
   "navigationDividerColorDark": "#27363F",
   "backgroundColor": "#EDF1EF",
   "enableNotifications": true,
-  "startUrl": "/MindFulFast/index.html",
-  "iconUrl": "https://waywardnebulae.github.io/MindFulFast/icons/icon-512.png",
-  "maskableIconUrl": "https://waywardnebulae.github.io/MindFulFast/icons/icon-maskable-512.png",
+  "startUrl": "/index.html",
+  "iconUrl": "https://nebulaelabs.dev/icons/icon-512.png",
+  "maskableIconUrl": "https://nebulaelabs.dev/icons/icon-maskable-512.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
     "path": "./android.keystore",
@@ -27,12 +27,12 @@
     {
       "name": "I have an urge",
       "shortName": "Urge",
-      "url": "/MindFulFast/index.html?go=urge",
-      "chosenIconUrl": "https://waywardnebulae.github.io/MindFulFast/icons/icon-192.png"
+      "url": "/index.html?go=urge",
+      "chosenIconUrl": "https://nebulaelabs.dev/icons/icon-192.png"
     }
   ],
   "generatorApp": "bubblewrap-cli",
-  "webManifestUrl": "https://waywardnebulae.github.io/MindFulFast/manifest.json",
+  "webManifestUrl": "https://nebulaelabs.dev/manifest.json",
   "fallbackType": "customtabs",
   "features": {},
   "alphaDependencies": {
@@ -41,7 +41,7 @@
   "enableSiteSettingsShortcut": true,
   "isChromeOSOnly": false,
   "isMetaQuest": false,
-  "fullScopeUrl": "https://waywardnebulae.github.io/MindFulFast/",
+  "fullScopeUrl": "https://nebulaelabs.dev/",
   "minSdkVersion": 23,
   "orientationLockEnabled": true
 }

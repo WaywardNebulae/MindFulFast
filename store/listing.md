@@ -199,7 +199,7 @@ If you ever ship it on by default, revisit this form before release.
 Required for every Health app.
 
 ```
-https://waywardnebulae.github.io/MindFulFast/privacy.html
+https://nebulaelabs.dev/privacy.html
 ```
 
 Published automatically by the Pages workflow.

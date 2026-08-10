@@ -3,16 +3,13 @@
 A Trusted Web Activity only runs without a browser address bar if the website
 proves it authorises the Android app. That proof is a file served at:
 
-    https://waywardnebulae.github.io/.well-known/assetlinks.json
+    https://nebulaelabs.dev/.well-known/assetlinks.json
 
-**Note the host.** Asset links are verified at the domain root, not under
-`/MindFulFast/`. On `github.io` the root belongs to your user Pages site, not this
-project repo, so the file has to be published from a repository named
-`waywardnebulae.github.io`. If you do not have one, create it with a
-`.well-known/assetlinks.json` at its root.
+With the custom domain, put the file in this repo at:
 
-If that is inconvenient, use a custom domain for the app instead. Then the
-root is yours and the file goes in `MindfulFast/.well-known/assetlinks.json`.
+    .well-known/assetlinks.json
+
+GitHub Pages will serve it from the domain root.
 
 ## Generating it
 
