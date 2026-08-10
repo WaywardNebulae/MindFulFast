@@ -400,6 +400,33 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 .wake-in:focus { border-bottom-color: var(--accent); }
 .wake-in::-webkit-calendar-picker-indicator { opacity: 0.55; cursor: pointer; }
 
+.sleep-q {
+  display: flex; gap: 4px; justify-content: flex-end; flex-wrap: wrap;
+}
+.sleep-q button {
+  font-family: var(--sans); font-size: 15px; color: var(--ink-2);
+  padding: 8px 10px 6px; border-bottom: 2px solid transparent; cursor: pointer;
+}
+.sleep-q button.active {
+  color: var(--accent); border-bottom-color: var(--accent); font-weight: 600;
+}
+.sleep-log-go {
+  display: block; width: 100%; text-align: left;
+  margin-top: 14px; padding: 12px 0;
+  font-size: 16px; font-weight: 600; color: var(--accent);
+  border-bottom: 2px solid var(--accent); cursor: pointer;
+}
+.sleep-log-go:active { color: var(--accent-press); }
+.sleep-list { margin-top: 8px; }
+.sleep-row {
+  display: flex; justify-content: space-between; gap: 12px;
+  padding: 12px 0; border-bottom: 1px solid var(--line);
+  font-size: 15px;
+}
+.sleep-row:last-child { border-bottom: none; }
+.sleep-row-main { color: var(--ink); font-variant-numeric: tabular-nums; }
+.sleep-row-meta { color: var(--ink-3); font-size: 14px; text-align: right; }
+
 /* ============================ CORTISOL ============================ */
 .gauge-band { padding: 30px var(--gutter) 26px; }
 .gauge-val {
@@ -1171,16 +1198,57 @@ window.__mfBootShown = false;
         model of the daily rhythm. Nothing is measured from your body.</p>
     </div>
 
-    <section class="band tight">
-      <div class="band-label">Wake time</div>
+    <section class="band">
+      <div class="band-label">Sleep and wake</div>
       <div class="ctl">
         <div>
-          <div class="ctl-name">You usually wake at</div>
+          <div class="ctl-name">Usual bedtime</div>
+          <div class="ctl-note">When you typically try to sleep</div>
+        </div>
+        <input class="wake-in" id="bedIn" type="time" value="23:00"
+               aria-label="Usual bedtime" onchange="setBed(this.value)">
+      </div>
+      <div class="ctl">
+        <div>
+          <div class="ctl-name">Usual wake time</div>
           <div class="ctl-note" id="wakeNote"></div>
         </div>
         <input class="wake-in" id="wakeIn" type="time" value="07:00"
                aria-label="Usual wake time" onchange="setWake(this.value)">
       </div>
+      <p class="gauge-note" id="sleepUsualNote"></p>
+    </section>
+
+    <section class="band tight">
+      <div class="band-label">Log last night</div>
+      <div class="ctl">
+        <div class="ctl-name">Went to bed</div>
+        <input class="wake-in" id="sleepBedIn" type="time" value="23:00"
+               aria-label="Last night bedtime">
+      </div>
+      <div class="ctl">
+        <div class="ctl-name">Woke up</div>
+        <input class="wake-in" id="sleepWakeIn" type="time" value="07:00"
+               aria-label="This morning wake time">
+      </div>
+      <div class="ctl">
+        <div class="ctl-name">How it felt</div>
+        <div class="sleep-q" id="sleepQuality">
+          <button type="button" data-q="poor" onclick="setSleepQuality('poor')">Poor</button>
+          <button type="button" data-q="ok" class="active" onclick="setSleepQuality('ok')">OK</button>
+          <button type="button" data-q="good" onclick="setSleepQuality('good')">Good</button>
+        </div>
+      </div>
+      <button type="button" class="sleep-log-go" onclick="logSleep()">Log night</button>
+      <p class="gauge-note" id="sleepLogNote">Logging also updates your usual wake time, which slides the cortisol day model.</p>
+    </section>
+
+    <section class="band">
+      <div class="band-label">Recent nights</div>
+      <div class="sleep-list" id="sleepList">
+        <div class="empty">No nights logged yet.</div>
+      </div>
+      <p class="gauge-note">Short sleep often makes next-day urges harder. This is a wellness note, not a diagnosis.</p>
     </section>
 
     <section class="band">
@@ -1209,7 +1277,7 @@ window.__mfBootShown = false;
   <!-- ======================= URGE ======================= -->
   <main class="screen" id="screenUrge">
     <div class="urge-band">
-      <p class="urge-lead">Most urges peak within 15 to 20 minutes and then fade, so start by working out what is causing this one.</p>
+      <p class="urge-lead">Urges often peak within 15 to 20 minutes and then fade. Food is a common stress response, so start by working out what is causing this one, then use a timed practice rather than only grit.</p>
       <button class="urge-btn" onclick="startUrgeFlow()">
         <span class="urge-btn-l">I have<br>an urge</span>
         <span class="urge-btn-s">Start here</span>
@@ -1413,6 +1481,8 @@ const SCREENS = ['Timer','Cortisol','Urge','Log','Patterns'];
 let state = {
   protocol: '16:8',
   wake: '07:00',            // the cortisol curve is anchored to this, not to midnight
+  bed: '23:00',             // usual bedtime (sleep tracker)
+  sleepLog: [],             // [{ id, nightOf, bed, wake, quality, mins }]
   phase: 'idle',            // idle | fasting | eating
   fastStart: null, fastEnd: null, eatEnd: null,
   completedFasts: [], urgeLog: [], weightLog: [],
@@ -1423,6 +1493,7 @@ let state = {
   fastLogged: false,                      // this cycle already went into completedFasts
   alarms: { open: true, close: true, hourly: false }
 };
+let sleepQualityPick = 'ok';
 
 /* Older builds stored a thin urgeLog. Keep those rows rather than drop them. */
 function migrate() {
@@ -1452,6 +1523,8 @@ function loadState() {
     state = { ...state, ...p };
     ['fastStart','fastEnd','eatEnd'].forEach(k => { if (state[k]) state[k] = new Date(state[k]); });
   } catch (e) {}
+  if (!state.bed) state.bed = '23:00';
+  if (!Array.isArray(state.sleepLog)) state.sleepLog = [];
 }
 function saveState() {
   try { localStorage.setItem('mindfulfast', JSON.stringify(state)); } catch (e) {}
@@ -2213,6 +2286,7 @@ function renderCortisol() {
   if (wn) wn.textContent = 'The curve is anchored here. Your peak lands around '
     + clockAtRef(8) + '.';
 
+  renderSleep();
   renderMeals();
 }
 
@@ -2226,6 +2300,120 @@ function setWake(v) {
   renderCortisol();
   renderDial();
   if (document.getElementById('screenCortisol').classList.contains('active')) drawCurve();
+}
+
+function setBed(v) {
+  if (!/^\d{1,2}:\d{2}$/.test(v || '')) return;
+  state.bed = v;
+  saveState();
+  renderSleep();
+}
+
+function hmToMinutes(hm) {
+  const [h, m] = String(hm || '0:0').split(':').map(Number);
+  return (isFinite(h) ? h : 0) * 60 + (isFinite(m) ? m : 0);
+}
+
+/* Bed after midnight wrap: 23:00 → 07:00 is 8h, not negative. */
+function sleepDurationMins(bed, wake) {
+  let d = hmToMinutes(wake) - hmToMinutes(bed);
+  if (d <= 0) d += 24 * 60;
+  return d;
+}
+
+function formatSleepMins(mins) {
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  if (!m) return h + 'h';
+  return h + 'h ' + m + 'm';
+}
+
+function setSleepQuality(q) {
+  sleepQualityPick = q;
+  document.querySelectorAll('#sleepQuality button').forEach(b => {
+    b.classList.toggle('active', b.dataset.q === q);
+  });
+}
+
+function nightOfKey(d) {
+  const x = d instanceof Date ? d : new Date();
+  return x.getFullYear() + '-' +
+    String(x.getMonth() + 1).padStart(2, '0') + '-' +
+    String(x.getDate()).padStart(2, '0');
+}
+
+function logSleep() {
+  const bedEl = document.getElementById('sleepBedIn');
+  const wakeEl = document.getElementById('sleepWakeIn');
+  const bed = bedEl && bedEl.value;
+  const wake = wakeEl && wakeEl.value;
+  if (!/^\d{1,2}:\d{2}$/.test(bed || '') || !/^\d{1,2}:\d{2}$/.test(wake || '')) return;
+  const mins = sleepDurationMins(bed, wake);
+  const nightOf = nightOfKey(new Date());
+  const row = {
+    id: 'sleep-' + Date.now(),
+    nightOf,
+    bed,
+    wake,
+    quality: sleepQualityPick || 'ok',
+    mins
+  };
+  state.sleepLog = (state.sleepLog || []).filter(s => s.nightOf !== nightOf);
+  state.sleepLog.push(row);
+  state.sleepLog.sort((a, b) => (a.nightOf < b.nightOf ? 1 : -1));
+  if (state.sleepLog.length > 60) state.sleepLog.length = 60;
+  state.bed = bed;
+  state.wake = wake;
+  saveState();
+  const bedIn = document.getElementById('bedIn');
+  const wakeIn = document.getElementById('wakeIn');
+  if (bedIn) bedIn.value = bed;
+  if (wakeIn) wakeIn.value = wake;
+  buildDialStatic();
+  renderCortisol();
+  renderDial();
+  if (document.getElementById('screenCortisol').classList.contains('active')) drawCurve();
+  showToast('Night logged · ' + formatSleepMins(mins));
+}
+
+function renderSleep() {
+  const bedIn = document.getElementById('bedIn');
+  const wakeIn = document.getElementById('wakeIn');
+  const sleepBed = document.getElementById('sleepBedIn');
+  const sleepWake = document.getElementById('sleepWakeIn');
+  const usualNote = document.getElementById('sleepUsualNote');
+  const list = document.getElementById('sleepList');
+  if (bedIn) bedIn.value = state.bed || '23:00';
+  if (wakeIn) wakeIn.value = state.wake || '07:00';
+  if (sleepBed && document.activeElement !== sleepBed) sleepBed.value = state.bed || '23:00';
+  if (sleepWake && document.activeElement !== sleepWake) sleepWake.value = state.wake || '07:00';
+  if (usualNote) {
+    const mins = sleepDurationMins(state.bed || '23:00', state.wake || '07:00');
+    usualNote.textContent = 'Usual night length about ' + formatSleepMins(mins) +
+      '. Wake time slides the cortisol curve.';
+  }
+  if (!list) return;
+  const rows = (state.sleepLog || []).slice(0, 14);
+  if (!rows.length) {
+    list.innerHTML = '<div class="empty">No nights logged yet.</div>';
+    return;
+  }
+  const qLabel = { poor: 'Poor', ok: 'OK', good: 'Good' };
+  list.innerHTML = rows.map(s => {
+    const [y, mo, d] = String(s.nightOf).split('-');
+    const label = (+mo) + '/' + (+d) + (y ? '/' + String(y).slice(2) : '');
+    return '<div class="sleep-row">' +
+      '<div class="sleep-row-main">' + label + ' · ' + formatSleepMins(s.mins) + '</div>' +
+      '<div class="sleep-row-meta">' + clockFromHm(s.bed) + ' – ' + clockFromHm(s.wake) +
+      ' · ' + (qLabel[s.quality] || 'OK') + '</div></div>';
+  }).join('');
+}
+
+function clockFromHm(hm) {
+  const [h0, m0] = String(hm || '0:0').split(':').map(Number);
+  const h = isFinite(h0) ? h0 : 0;
+  const m = isFinite(m0) ? m0 : 0;
+  return (h % 12 || 12) + ':' + String(m).padStart(2, '0') + (h >= 12 ? ' pm' : ' am');
 }
 
 const ADVICE = {
@@ -3603,6 +3791,8 @@ migrate();
 maybeShowIntro();
 buildDialStatic();
 document.getElementById('wakeIn').value = state.wake || '07:00';
+const bedInInit = document.getElementById('bedIn');
+if (bedInInit) bedInInit.value = state.bed || '23:00';
 document.querySelectorAll('.proto').forEach(c => c.classList.toggle('active', c.dataset.p === state.protocol));
 ['open','close','hourly'].forEach(k =>
   document.getElementById('alarm' + k[0].toUpperCase() + k.slice(1)).classList.toggle('on', state.alarms[k]));
@@ -3680,6 +3870,12 @@ window.addEventListener('resize', () => {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
+      const native = !!(
+        window.Capacitor &&
+        typeof window.Capacitor.isNativePlatform === 'function' &&
+        window.Capacitor.isNativePlatform()
+      );
+      if (native) return;
       await navigator.serviceWorker.register('sw.js');
       await navigator.serviceWorker.ready;
       if (Notification.permission === 'granted') await enableBackgroundDelivery();

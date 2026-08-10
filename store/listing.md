@@ -23,7 +23,7 @@ MindfulFast Cortisol Timer
 ## Short description (80 max)
 
 ```
-A fasting timer built on your cortisol rhythm, with help for eating urges.
+Cortisol-aware fasting with sleep tracking and help when food is a stress urge.
 ```
 73 characters.
 
@@ -32,9 +32,12 @@ A fasting timer built on your cortisol rhythm, with help for eating urges.
 ## Full description (4000 max)
 
 ```
-MindfulFast is an intermittent fasting timer built around two things most
-fasting apps ignore: the daily cortisol rhythm that shapes when eating feels
-easy or hard, and what to do when the urge to eat arrives.
+MindfulFast is an intermittent fasting timer for people whose hard days are
+not only about willpower. Stress response, sleep, and food-as-coping shape
+when fasting fails. The app tracks sleep and wake, slides a cortisol-day
+model to your wake time, and runs a guided urge protocol with timed practices
+drawn from common behavioral approaches (paced breathing, changing context,
+riding out a short urge peak) when food is the coping habit.
 
 THE TIMER
 

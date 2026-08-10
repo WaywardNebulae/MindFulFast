@@ -20,6 +20,8 @@ Related docs:
 - [x] In-app links to privacy policy
 - [x] Play listing draft + Data safety “no data collected/shared” answers in `store/listing.md`
 - [x] Public-facing git branch naming (`mindfulfast`)
+- [x] Sleep / wake tracker (usual bed + wake, log night, recent list)
+- [x] Pitch problem reframed: stress, sleep, food-as-coping (not only willpower)
 
 ---
 
