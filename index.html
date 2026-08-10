@@ -10,10 +10,17 @@
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="fonts.css">
 <script type="module">
-import { SESSION_KEY } from './boot-gate.js';
+import { readSessionFlag, writeSessionFlag, shouldShowBootOverlay } from './boot-gate.js';
 
-function writeSessionFlag() {
-  try { sessionStorage.setItem(SESSION_KEY, '1'); } catch (e) {}
+function appEl() {
+  return document.getElementById('app');
+}
+
+function setAppInert(on) {
+  const app = appEl();
+  if (!app) return;
+  if (on) app.setAttribute('inert', '');
+  else app.removeAttribute('inert');
 }
 
 function hideBoot() {
@@ -23,12 +30,16 @@ function hideBoot() {
   el.classList.remove('on');
   el.hidden = true;
   el.setAttribute('aria-hidden', 'true');
+  document.documentElement.classList.remove('booting');
   window.__mfBootShown = false;
+  setAppInert(false);
   if (wasShown) writeSessionFlag();
 }
 
 window.addEventListener('pageshow', (e) => {
-  if (e.persisted) hideBoot();
+  if (!shouldShowBootOverlay({ hasSessionFlag: readSessionFlag(), persisted: e.persisted })) {
+    hideBoot();
+  }
 });
 
 window.__mindfulFastHideBoot = hideBoot;
@@ -908,6 +919,14 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 }
 
 /* ---------- cold-start boot ---------- */
+html.booting,
+html.booting body {
+  overflow: hidden;
+}
+html.booting #app {
+  pointer-events: none;
+  user-select: none;
+}
 .boot {
   position: fixed; inset: 0; z-index: 300;
   background: var(--ground);
@@ -916,20 +935,27 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
   align-items: center;
   justify-content: center;
   gap: 18px;
+  padding:
+    max(24px, env(safe-area-inset-top, 0px))
+    max(24px, env(safe-area-inset-right, 0px))
+    max(24px, env(safe-area-inset-bottom, 0px))
+    max(24px, env(safe-area-inset-left, 0px));
 }
 .boot.on { display: flex; }
 .boot-wrap {
   position: relative;
-  width: 96px; height: 96px;
+  width: 112px; height: 112px;
   display: flex; align-items: center; justify-content: center;
 }
 .boot-pulse {
   position: absolute;
-  inset: 8px;
+  inset: 10px;
   border-radius: 50%;
   border: 1.5px solid var(--accent);
+  opacity: 0.4;
   animation: boot-pulse 2.2s var(--ease) infinite;
   pointer-events: none;
+  will-change: transform, opacity;
 }
 .boot-leaf { width: 72px; height: 72px; display: block; }
 .boot-name {
@@ -940,9 +966,9 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
   letter-spacing: -0.01em;
 }
 @keyframes boot-pulse {
-  0%   { transform: scale(0.85); opacity: 0.55; }
-  70%  { transform: scale(1.15); opacity: 0; }
-  100% { transform: scale(1.15); opacity: 0; }
+  0%   { transform: scale(0.88); opacity: 0.45; }
+  65%  { transform: scale(1.18); opacity: 0; }
+  100% { transform: scale(1.18); opacity: 0; }
 }
 
 .toast {
@@ -986,7 +1012,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
   <div class="boot-name">MindfulFast</div>
 </div>
 <script>
-/* Immediate show: classic script so the overlay is up before deferred modules run. */
+/* Immediate show: classic script so the overlay paints before deferred modules run. */
 window.__mfBootShown = false;
 (function () {
   var hasFlag = false;
@@ -994,10 +1020,16 @@ window.__mfBootShown = false;
   if (hasFlag) return;
   var el = document.getElementById('boot');
   if (!el) return;
+  document.documentElement.classList.add('booting');
   el.hidden = false;
   el.classList.add('on');
   el.setAttribute('aria-hidden', 'false');
   window.__mfBootShown = true;
+  // #app is parsed after this script; mark it inert on the next frame.
+  requestAnimationFrame(function () {
+    var app = document.getElementById('app');
+    if (window.__mfBootShown && app) app.setAttribute('inert', '');
+  });
 })();
 </script>
 
@@ -3569,7 +3601,7 @@ initScrub();
 setInterval(tick, 1000);
 
 function dismissBootWhenReady() {
-  const run = () => {
+  const finish = () => {
     if (typeof window.__mindfulFastHideBoot === 'function') {
       window.__mindfulFastHideBoot();
       return;
@@ -3580,13 +3612,24 @@ function dismissBootWhenReady() {
     boot.classList.remove('on');
     boot.hidden = true;
     boot.setAttribute('aria-hidden', 'true');
+    document.documentElement.classList.remove('booting');
     window.__mfBootShown = false;
+    const app = document.getElementById('app');
+    if (app) app.removeAttribute('inert');
     if (wasShown) {
       try { sessionStorage.setItem('mindfulfast-session', '1'); } catch (e) {}
     }
   };
-  run();
-  requestAnimationFrame(run);
+  // If boot never showed, clear any leftover state immediately.
+  if (!window.__mfBootShown) {
+    finish();
+    return;
+  }
+  // Init is sync and can finish before the first paint. Wait two frames so the
+  // pulse overlay actually appears, without adding an artificial minimum time.
+  requestAnimationFrame(() => {
+    requestAnimationFrame(finish);
+  });
 }
 dismissBootWhenReady();
 

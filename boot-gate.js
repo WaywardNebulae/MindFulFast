@@ -5,3 +5,19 @@ export function shouldShowBootOverlay({ hasSessionFlag, persisted }) {
   if (hasSessionFlag) return false;
   return true;
 }
+
+export function readSessionFlag(storage) {
+  try {
+    const store = storage || globalThis.sessionStorage;
+    return store.getItem(SESSION_KEY) === '1';
+  } catch (e) {
+    return false;
+  }
+}
+
+export function writeSessionFlag(storage) {
+  try {
+    const store = storage || globalThis.sessionStorage;
+    store.setItem(SESSION_KEY, '1');
+  } catch (e) {}
+}
