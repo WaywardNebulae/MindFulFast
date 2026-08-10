@@ -9,6 +9,30 @@
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="fonts.css">
+<script type="module">
+import { SESSION_KEY } from './boot-gate.js';
+
+function writeSessionFlag() {
+  try { sessionStorage.setItem(SESSION_KEY, '1'); } catch (e) {}
+}
+
+function hideBoot() {
+  const el = document.getElementById('boot');
+  if (!el) return;
+  const wasShown = el.classList.contains('on') || window.__mfBootShown;
+  el.classList.remove('on');
+  el.hidden = true;
+  el.setAttribute('aria-hidden', 'true');
+  window.__mfBootShown = false;
+  if (wasShown) writeSessionFlag();
+}
+
+window.addEventListener('pageshow', (e) => {
+  if (e.persisted) hideBoot();
+});
+
+window.__mindfulFastHideBoot = hideBoot;
+</script>
 <style>
 /* ============================================================
    MindfulFast, direction: quiet daylight.
@@ -961,6 +985,21 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
   </div>
   <div class="boot-name">MindfulFast</div>
 </div>
+<script>
+/* Immediate show: classic script so the overlay is up before deferred modules run. */
+window.__mfBootShown = false;
+(function () {
+  var hasFlag = false;
+  try { hasFlag = sessionStorage.getItem('mindfulfast-session') === '1'; } catch (e) {}
+  if (hasFlag) return;
+  var el = document.getElementById('boot');
+  if (!el) return;
+  el.hidden = false;
+  el.classList.add('on');
+  el.setAttribute('aria-hidden', 'false');
+  window.__mfBootShown = true;
+})();
+</script>
 
 <div id="app">
   <header class="head">
@@ -3528,6 +3567,28 @@ renderAlarmStatus();
 tick();
 initScrub();
 setInterval(tick, 1000);
+
+function dismissBootWhenReady() {
+  const run = () => {
+    if (typeof window.__mindfulFastHideBoot === 'function') {
+      window.__mindfulFastHideBoot();
+      return;
+    }
+    const boot = document.getElementById('boot');
+    if (!boot) return;
+    const wasShown = boot.classList.contains('on') || window.__mfBootShown;
+    boot.classList.remove('on');
+    boot.hidden = true;
+    boot.setAttribute('aria-hidden', 'true');
+    window.__mfBootShown = false;
+    if (wasShown) {
+      try { sessionStorage.setItem('mindfulfast-session', '1'); } catch (e) {}
+    }
+  };
+  run();
+  requestAnimationFrame(run);
+}
+dismissBootWhenReady();
 
 // launcher shortcut: ?go=urge opens straight into the protocol
 try {
