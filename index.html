@@ -3801,7 +3801,7 @@ const DISTRACTIONS = [
     tip: 'Breathe in for four. Breathe out for six. Keep the out-breath longer.' },
   { id: 'tinker', name: 'Busy your hands / tinker', mins: 8,
     tip: 'One drawer, a puzzle, or anything small that keeps your hands busy.' },
-  { id: 'read-in', name: 'Read something that isn\'t boring to you', mins: 10,
+  { id: 'read-in', name: 'Read something that isnt boring to you.', mins: 10,
     tip: 'A drama, novel, or anything that needs your attention. Not passive scrolling.' }
 ];
 
@@ -4879,7 +4879,7 @@ function showUrgeFollowup(reason) {
         '<button type="button" class="act" style="margin-top:16px" onclick="openMealSheet()">Log a meal</button>' +
         '<div class="band-label" style="margin-top:22px">Or wait it out</div>';
     }
-    renderDistractionActions(actions, DISTRACTIONS);
+    renderDistractionActions(actions, DISTRACTIONS.slice(0, 6));
     return;
   }
 
@@ -4892,15 +4892,31 @@ function showUrgeFollowup(reason) {
   } else if (lead) {
     lead.textContent = '';
   }
-  renderDistractionActions(actions, DISTRACTIONS);
+  renderDistractionActions(actions, DISTRACTIONS.slice(0, 6));
+}
+
+function distractionActButton(a) {
+  return '<button type="button" class="urge-act" onclick="quickTool(\'' + a.id + '\')">' +
+    '<div class="urge-act-h">' + esc(a.name) + '</div></button>';
 }
 
 function renderDistractionActions(host, list) {
   if (!host) return;
-  host.innerHTML = list.map(a =>
-    '<button type="button" class="urge-act" onclick="quickTool(\'' + a.id + '\')">' +
-    '<div class="urge-act-h">' + esc(a.name) + '</div></button>'
-  ).join('');
+  const primary = list || DISTRACTIONS.slice(0, 6);
+  const rest = DISTRACTIONS.slice(primary.length);
+  host.innerHTML = primary.map(distractionActButton).join('') +
+    (rest.length
+      ? '<button type="button" class="urge-why" id="urgeMoreDistractions" onclick="expandUrgeDistractions()">More</button>'
+      : '');
+}
+
+function expandUrgeDistractions() {
+  const btn = document.getElementById('urgeMoreDistractions');
+  const host = document.getElementById('urgePathwayActions');
+  if (!btn || !host) return;
+  const rest = DISTRACTIONS.slice(6);
+  btn.insertAdjacentHTML('beforebegin', rest.map(distractionActButton).join(''));
+  btn.remove();
 }
 
 function backToReasons() {
