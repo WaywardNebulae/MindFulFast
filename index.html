@@ -1474,6 +1474,10 @@ window.__mfBootShown = false;
   </nav>
 </div>
 
+<script type="module">
+  import { MEAL_GATE_MS, lastSubstantiveMealAt, isMealGateClosed, mealAgoLabel } from './meal-gate.js';
+  window.MFMealGate = { MEAL_GATE_MS, lastSubstantiveMealAt, isMealGateClosed, mealAgoLabel };
+</script>
 <script>
 const PROTOCOLS = { '16:8': [16,8], '18:6': [18,6], '20:4': [20,4], '23:1': [23,1] };
 const SCREENS = ['Timer','Cortisol','Urge','Log','Patterns'];
@@ -3015,6 +3019,25 @@ const BUCKETS = {
   }
 };
 
+const DISTRACTIONS = [
+  { id: 'water', name: 'Drink water', mins: 3,
+    tip: 'Water or tea. Give it a few minutes before you decide about food.' },
+  { id: 'ice-cup', name: 'Cup of ice', mins: 5,
+    tip: 'A cup of ice. Cold and something to do with your hands.' },
+  { id: 'brush', name: 'Brush teeth / rinse', mins: 3,
+    tip: 'Brush or rinse. It resets your mouth and keeps you out of the kitchen.' },
+  { id: 'walk', name: 'Brisk walk', mins: 10,
+    tip: 'Go outside if you can. Walk fast enough that you breathe a little harder.' },
+  { id: 'leave', name: 'Change of scenery', mins: 10,
+    tip: 'Leave the room you are in. Another room or the front step is enough.' },
+  { id: 'breathe', name: 'Slow breathing', mins: 2,
+    tip: 'Breathe in for four. Breathe out for six. Keep the out-breath longer.' },
+  { id: 'tinker', name: 'Busy your hands / tinker', mins: 8,
+    tip: 'One drawer, a puzzle, or anything small that keeps your hands busy.' },
+  { id: 'read-in', name: 'Read something that isn\'t boring to you', mins: 10,
+    tip: 'A drama, novel, or anything that needs your attention. Not passive scrolling.' }
+];
+
 let flow = null;
 
 function startUrgeFlow(manual) {
@@ -3251,6 +3274,7 @@ function scale(field) {
 /* Every action reachable by id, so the views only ever emit an id. */
 const ALL_ACTIONS = {};
 Object.values(BUCKETS).forEach(b => b.actions.forEach(a => { ALL_ACTIONS[a.id] = a; }));
+DISTRACTIONS.forEach(a => { ALL_ACTIONS[a.id] = a; });
 Object.assign(ALL_ACTIONS, {
   pause:     { id: 'pause',   name: 'Two minute pause, then eat', mins: 2,
                tip: 'Serve the amount you planned, then start.' },
