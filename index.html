@@ -170,19 +170,35 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 
 /* ---------- header: instrument label, not an app-store banner ---------- */
 .head {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 12px;
   padding: 12px var(--gutter) 16px;
   padding-top: max(12px, env(safe-area-inset-top));
   flex-shrink: 0;
 }
-.head-mark { flex: 0 0 56px; }
+.head-settings {
+  justify-self: start;
+  font-size: 15px; font-weight: 500; color: var(--ink-2);
+  cursor: pointer; padding: 10px 0;
+  background: none; border: none;
+  font-family: var(--sans);
+}
+.head-settings:active { color: var(--accent); }
+.head-mark { flex: 0 0 auto; }
 .head-mark svg { width: 34px; height: 34px; fill: none; stroke: var(--ink-2); stroke-width: 1.2; }
-.head-mid { flex: 1; text-align: center; }
+.head-mid {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-self: center;
+  text-align: center;
+}
 .head-name { font-family: var(--serif); font-size: 25px; font-weight: 500; letter-spacing: -0.2px; }
 .head-clock {
-  flex: 0 0 56px; text-align: right;
+  justify-self: end;
+  text-align: right;
   white-space: nowrap;
   font-family: var(--sans);
   font-size: 14px;
@@ -752,15 +768,6 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 }
 .mini-card.status { cursor: default; }
 .mini-card.status .mini-card-go { cursor: pointer; background: none; border: 0; border-bottom: 2px solid var(--accent); padding: 0 0 2px; }
-.timer-tools {
-  padding: 8px var(--gutter) 28px;
-  display: flex; gap: 18px; flex-wrap: wrap;
-}
-.timer-tools button {
-  font-size: 15px; font-weight: 500; color: var(--ink-2);
-  cursor: pointer; padding: 10px 0;
-}
-.timer-tools button:active { color: var(--accent); }
 .review-head { padding: 28px var(--gutter) 22px; }
 .review-hub-pad { padding-top: 18px; }
 .review-hub-stats { padding-top: 8px; padding-bottom: 4px; }
@@ -1558,13 +1565,14 @@ window.__mfBootShownAt = 0;
 
 <div id="app">
   <header class="head">
-    <span class="head-mark" aria-hidden="true">
-      <svg viewBox="0 0 34 34"><circle cx="17" cy="17" r="15.5"/>
-        <path d="M17 24c0-4 2.2-7 5.6-8.2C22.6 20 20.4 23 17 24z"/>
-        <path d="M17 24c0-4-2.2-7-5.6-8.2C11.4 20 13.6 23 17 24z"/>
-        <path d="M17 24v-6"/></svg>
-    </span>
+    <button type="button" class="head-settings" onclick="goReview('More')">Settings</button>
     <div class="head-mid">
+      <span class="head-mark" aria-hidden="true">
+        <svg viewBox="0 0 34 34"><circle cx="17" cy="17" r="15.5"/>
+          <path d="M17 24c0-4 2.2-7 5.6-8.2C22.6 20 20.4 23 17 24z"/>
+          <path d="M17 24c0-4-2.2-7-5.6-8.2C11.4 20 13.6 23 17 24z"/>
+          <path d="M17 24v-6"/></svg>
+      </span>
       <h1 class="head-name">MindfulFast</h1>
     </div>
     <span class="head-clock" id="wallClock">--:--</span>
@@ -1616,9 +1624,6 @@ window.__mfBootShownAt = 0;
       <div class="dial-hint" id="dialHint"></div>
     </div>
 
-    <div class="timer-tools">
-      <button type="button" onclick="openTimerSettings()">Timer settings</button>
-    </div>
   </main>
 
   <!-- ======================= URGE ======================= -->
