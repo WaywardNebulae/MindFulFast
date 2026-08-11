@@ -218,10 +218,10 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 .prose { font-size: 16px; line-height: 1.6; color: var(--ink-2); }
 
 /* ============================ DIAL ============================ */
-.dial-band { padding: 8px var(--gutter) 4px; }
+.dial-band { padding: 4px var(--gutter) 2px; }
 .dial-wrap {
   position: relative;
-  width: 100%; max-width: 300px;
+  width: 100%; max-width: 340px;
   margin: 0 auto;
   aspect-ratio: 1;
 }
@@ -339,7 +339,7 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 .dial-state:empty + .dial-phase { margin-bottom: 12px; }
 .dial-digits {
   font-family: var(--serif);
-  font-size: clamp(30px, 11vw, 44px);
+  font-size: clamp(34px, 11vw, 48px);
   font-weight: 500;
   letter-spacing: -1px;
   font-variant-numeric: tabular-nums;
@@ -387,18 +387,23 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
   width: 100%;
   padding: 15px 18px;
   font-family: var(--sans);
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
-  color: var(--ground);
-  background: var(--accent);
-  border: 0;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid var(--accent);
   border-radius: 12px;
   text-align: center;
   cursor: pointer;
+  transition: transform .18s var(--ease), filter .18s var(--ease);
 }
-.act:active { background: var(--accent-press); }
-.act.stop { background: var(--crit); color: var(--ground); }
-.act.stop:active { opacity: 0.9; }
+.act:active { transform: scale(1.02); filter: brightness(1.08); }
+.act.stop {
+  color: var(--crit);
+  border-color: var(--crit);
+  background: transparent;
+}
+.act.stop:active { transform: scale(1.02); filter: brightness(1.08); }
 .act-secondary { padding: 0 0 18px; text-align: center; }
 
 /* ---------- cortisol readout strip: dense, one line ---------- */
@@ -642,26 +647,29 @@ button, input { font: inherit; color: inherit; background: none; border: none; }
 }
 .urge-btn {
   position: relative; z-index: 1;
-  width: 168px; height: 168px; border-radius: 50%;
-  border: 1px solid var(--line-strong);
+  width: 200px; height: 200px; border-radius: 50%;
+  border: 0;
   margin: 0;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center; gap: 6px;
-  background: var(--ground); cursor: pointer;
-  transition: border-color .28s var(--ease), transform .18s var(--ease);
+  background: var(--accent); cursor: pointer;
+  box-shadow: 0 0 0 8px color-mix(in srgb, var(--accent) 14%, transparent);
+  transition: transform .18s var(--ease), filter .18s var(--ease);
 }
-.urge-btn:hover, .urge-btn:active { border-color: var(--accent); }
-.urge-btn:active { transform: scale(0.97); }
+.urge-btn:hover, .urge-btn:active {
+  filter: brightness(1.06);
+  transform: scale(1.02);
+}
 .urge-btn-l {
-  font-size: 19px; font-weight: 600; line-height: 1.25; color: var(--ink);
+  font-size: 22px; font-weight: 600; line-height: 1.25; color: var(--ground);
 }
-.urge-btn-s { font-size: 13px; font-weight: 500; color: var(--accent); }
+.urge-btn-s { font-size: 13px; font-weight: 500; color: var(--ground); opacity: 0.85; }
 .urge-sub {
   margin-top: 18px; font-size: 14px; color: var(--ink-3);
 }
 .urge-btn-wrap {
   position: relative;
-  width: 168px; height: 168px;
+  width: 200px; height: 200px;
   margin: 0 auto;
   display: flex; align-items: center; justify-content: center;
 }
