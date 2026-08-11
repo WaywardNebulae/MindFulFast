@@ -1625,7 +1625,7 @@ window.__mfBootShownAt = 0;
             <span class="urge-btn-s">Start here</span>
           </button>
         </div>
-        <p class="urge-sub">Tap it. We'll walk you through.</p>
+        <p class="urge-sub">Tap to begin.</p>
       </div>
     </div>
 
@@ -4787,13 +4787,6 @@ function reopenIntro() {
 }
 
 /* ---------------- IA helpers: urge, settings, quick log ---------------- */
-const QUICK_URGE = {
-  leave: { id: 'leave', name: 'Leave the kitchen', mins: 10, tip: 'Go somewhere food is not nearby.' },
-  walk:  { id: 'walk',  name: 'Take a short walk', mins: 10, tip: 'Move for 5 to 10 minutes.' },
-  delay: { id: 'delay', name: 'Wait 10 minutes', mins: 10, tip: 'When the timer ends, you can still decide to eat.' },
-  task:  { id: 'task',  name: 'Pick another task', mins: 10, tip: 'Do something with your hands or your attention.' }
-};
-
 function resetUrgeHome() {
   const commit = document.getElementById('urgeCommit');
   const choices = document.getElementById('urgeChoices');
@@ -4904,6 +4897,7 @@ function renderDistractionActions(host, list) {
   if (!host) return;
   const primary = list || DISTRACTIONS.slice(0, 6);
   const rest = DISTRACTIONS.slice(primary.length);
+  host.dataset.primary = String(primary.length);
   host.innerHTML = primary.map(distractionActButton).join('') +
     (rest.length
       ? '<button type="button" class="urge-why" id="urgeMoreDistractions" onclick="expandUrgeDistractions()">More</button>'
@@ -4914,7 +4908,8 @@ function expandUrgeDistractions() {
   const btn = document.getElementById('urgeMoreDistractions');
   const host = document.getElementById('urgePathwayActions');
   if (!btn || !host) return;
-  const rest = DISTRACTIONS.slice(6);
+  const n = host.querySelectorAll('.urge-act').length;
+  const rest = DISTRACTIONS.slice(n);
   btn.insertAdjacentHTML('beforebegin', rest.map(distractionActButton).join(''));
   btn.remove();
 }
@@ -4940,29 +4935,6 @@ function showAboutLog() {
     '<p>This is a self-help log, not treatment. Nothing here grades you.</p>' +
     '<p>If eating feels completely out of control, a CBT-E clinician can help more than any app can.</p>';
   openSheetPanel();
-}
-
-function startQuickUrge(kind) {
-  const a = QUICK_URGE[kind] || QUICK_URGE.delay;
-  flow = {
-    step: 0,
-    quick: true,
-    manual: false,
-    draft: {
-      id: 'e' + Date.now(),
-      at: Date.now(), endedAt: null,
-      where: '', situation: 'Urge', mood: '',
-      urge0: null, urge1: null, control: null,
-      stress: null, keyedUp: null,
-      bucket: 'context', action: a.id, actionName: a.name, actionTip: a.tip, actionMins: a.mins,
-      outcome: '', help: '', next: '', setback: null
-    },
-    holdUntil: Date.now() + a.mins * 60000,
-    holdTimer: null,
-    actionMins: a.mins
-  };
-  document.getElementById('flow').classList.add('on');
-  renderQuickUrge();
 }
 
 function renderQuickUrge() {
