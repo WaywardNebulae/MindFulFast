@@ -1,12 +1,19 @@
 {
   "name": "mindfulfast",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "scripts": {
-    "test": "node --test boot-gate.test.js",
-    "icons": "node tools/render-icons.mjs"
+    "test": "node --test boot-gate.test.js tools/sync-www.test.js capacitor-env.test.js meal-gate.test.js",
+    "icons": "node tools/render-icons.mjs",
+    "sync:www": "node tools/sync-www.mjs",
+    "cap:sync": "npm run sync:www && npx cap sync android",
+    "cap:open": "npx cap open android"
   },
   "devDependencies": {
+    "@capacitor/android": "^7.6.8",
+    "@capacitor/cli": "^7.6.8",
+    "@capacitor/core": "^7.6.8",
     "sharp": "^0.35.3"
   }
 }
