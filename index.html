@@ -4894,7 +4894,7 @@ function showUrgeFollowup(reason) {
   if (reason === 'hungry' && gate) {
     const at = window.MFMealGate.lastSubstantiveMealAt(state.meals);
     const ago = window.MFMealGate.mealAgoLabel(Date.now() - at);
-    if (lead) lead.textContent = 'You ate about ' + ago + ' ago. This may be an urge, not hunger.';
+    if (lead) lead.textContent = 'You ate ' + ago + ' ago. This may be an urge, not hunger.';
   } else if (lead) {
     lead.textContent = '';
   }

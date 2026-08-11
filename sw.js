@@ -16,12 +16,13 @@
    The schedule lives in IndexedDB because it must outlive the page.
    ============================================================ */
 
-const CACHE_NAME = 'mindfulfast-v8';
+const CACHE_NAME = 'mindfulfast-v9';
 const ASSETS = [
   './',
   './index.html',
   './privacy.html',
   './boot-gate.js',
+  './meal-gate.js',
   './manifest.json',
   './fonts.css',
   './fonts/figtree-400.woff2',
