@@ -3,8 +3,6 @@
 An intermittent fasting timer that uses the daily cortisol rhythm, with a
 guided routine for handling the urge to eat.
 
-**[Open the app](https://waywardnebulae.github.io/MindFulFast/)**
-
 Installable as a phone app. Works offline. Everything you log stays in storage
 on your device.
 
@@ -134,7 +132,7 @@ No account, no sign-in, no analytics, no ads, no tracking. Nothing is sent
 anywhere. Uninstalling or clearing site data deletes everything, and there is no
 copy elsewhere to recover.
 
-Full detail in [privacy.html](https://waywardnebulae.github.io/MindFulFast/privacy.html).
+Full detail in `privacy.html`.
 
 ---
 
@@ -176,8 +174,6 @@ python3 -m http.server 8000
 
 Then open `http://localhost:8000`. A service worker needs `localhost` or HTTPS,
 so opening `index.html` as a file will not exercise offline behaviour.
-
-The site publishes from the `gh-pages` branch.
 
 ---
 
